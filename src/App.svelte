@@ -3,8 +3,13 @@
   import "leaflet/dist/leaflet.css";
   import places from "./results.json"
 
-  let map, info;
+  let map, info, messages = [];
   const initialView = [40.463667, -3.74922];
+
+  const MESSAGES = {
+    doZoom: "Haz zoom para poder editar",
+    fetchError: "Se ha producido un error al obtener el zoning.geojson",
+  }
 
   const layerUrl = (id, label) => `http://localhost:8111/import?new_layer=true&url=https://catastro.openstreetmap.es/results/${id}/tasks/${label}.osm.gz`
   const geojsonUrl = (id) => `https://visor-catastro.cartobase.es/results/${id}/zoning.geojson`
@@ -15,12 +20,14 @@
       initialView,
       9
     );
+
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: `&copy;<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>,
-          &copy;<a href="https://carto.com/attributions" target="_blank">CARTO</a>`,
+      attribution: `&copy;<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>`,
       maxZoom: 20,
       minZoom: 5,
     }).addTo(m);
+
+    addMessage(MESSAGES.doZoom)
 
     return m;
   }
@@ -41,7 +48,7 @@
   }
 
   async function requestGeoJSON(ids){
-    const responses = await Promise.all(ids.map(id => fetch(geojsonUrl(id)).then(r => r.json())))
+    const responses = await Promise.all(ids.map(id => fetch(geojsonUrl(id)).then(r => r.json()).catch(() => addMessage(MESSAGES.fetchError))))
     responses.map((res, ix) => {
       const feature = L.geoJSON(res, { onEachFeature })
 
@@ -71,6 +78,10 @@
       if (notCached.length) {
         requestGeoJSON(notCached)
       }
+
+      removeMessage(MESSAGES.doZoom)
+    } else {
+      addMessage(MESSAGES.doZoom)
     }
   }
 
@@ -91,8 +102,26 @@
     this._div.innerHTML = `Zoom: ${value || map.getZoom()}`;
   };
 
+  function addMessage(item) {
+    !messages.includes(item) && messages.push(item)
+    messages = messages
+  }
+  
+  function removeMessage(item) {
+    messages.includes(item) && messages.splice(messages.indexOf(item), 1)
+    messages = messages
+  }
+
 </script>
 
 <svelte:window on:resize={resizeMap} />
 
 <div class="map" style="height:100%;width:100%" use:mapAction />
+
+{#if messages.length > 0}
+  <div class="overlay">
+    {#each messages as msg}
+      <div class="message">{msg}</div>
+    {/each}
+  </div>
+{/if}
