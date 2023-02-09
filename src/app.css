@@ -43,6 +43,23 @@ body {
   pointer-events: none;
 }
 
+.overlay-close {
+  position: absolute;
+  z-index: 9999;
+  top: 3rem;
+  right: 3rem;
+  font-size: 3rem;
+  font-weight: 700;
+  pointer-events: auto;
+  cursor: pointer;
+  background-color: transparent;
+  border: 0;
+}
+
+.overlay-close:hover{
+  color: rgba(0,0,0,0.5);
+}
+
 .message {
   color: white;
   font-size: 30px;

@@ -112,6 +112,10 @@
     messages = messages
   }
 
+  function closeOverlay() {
+    messages = []
+  }
+
 </script>
 
 <svelte:window on:resize={resizeMap} />
@@ -123,5 +127,6 @@
     {#each messages as msg}
       <div class="message">{msg}</div>
     {/each}
+    <button class="overlay-close" on:click={closeOverlay}>X</button>
   </div>
 {/if}
