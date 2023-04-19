@@ -1,0 +1,10 @@
+version: '3.7'
+services:
+  updater:
+    restart: always
+    build:
+      context: ./updater
+    volumes:
+      - ./updater:/app
+      - ${CATASTRO_DATA}/update:/catastro
+    command: ["python3", "-u", "/app/update.py"]
