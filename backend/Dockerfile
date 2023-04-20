@@ -1,11 +1,11 @@
-FROM egofer/catatom2osm:latest
+FROM python:3.9.16
 LABEL maintainer="Javier Sánchez <javiersanp@gmail.com>"
-USER root
+RUN apt-get update
 WORKDIR /app
-COPY . .
+COPY requirements.txt /app
 RUN pip install \
     --no-cache-dir \
     --disable-pip-version-check \
     -r requirements.txt
-USER catastro
-WORKDIR /catastro
+COPY . /app
+HEALTHCHECK CMD curl --fail http://localhost/status || exit 1

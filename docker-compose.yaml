@@ -7,4 +7,17 @@ services:
     volumes:
       - ./updater:/app
       - ${CATASTRO_DATA}/update:/catastro
+    depends_on: 
+      - uploader
     command: ["python3", "-u", "/app/update.py"]
+
+  uploader:
+    restart: always
+    build:
+      context: ./backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+      - ${CATASTRO_DATA}:/data
+    entrypoint: ["flask", "run", "--host=0.0.0.0"]

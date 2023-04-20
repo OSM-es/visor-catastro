@@ -7,6 +7,7 @@ import argparse
 import json
 import logging
 import os
+import requests
 import shutil
 import schedule
 import time
@@ -147,6 +148,7 @@ def update(municipios):
             fo.write(src_date)
         with open('updates.log', 'a') as fo:
             fo.write(f"{src_date} {start_len_mun}\n")
+        requests.get('http://uploader:5000/upload')
     qgs.exitQgis()
 
 def process(mun_code):
