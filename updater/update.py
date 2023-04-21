@@ -139,7 +139,11 @@ def update(municipios):
                 print("Reintento nro", retries)
             for mun_code in pool.imap(process, municipios):
                 if mun_code is not None:
-                    municipios.remove(mun_code)
+                    req = requests.get(config.uploader_url + mun_code)
+                    if req.status_code == requests.codes.ok:
+                        if mun_code in req.text:
+                            print(req.text)
+                            municipios.remove(mun_code)
             if len(municipios) == len_mun:
                 retries += 1
             else:
@@ -151,7 +155,6 @@ def update(municipios):
         print(f"Actualización {src_date} completados {start_len_mun} municipios")
         with open('src_date.txt', 'w') as fo:
             fo.write(src_date)
-        requests.get('http://uploader:5000/upload')
     qgs.exitQgis()
 
 def process(mun_code):

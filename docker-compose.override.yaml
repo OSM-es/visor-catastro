@@ -1,6 +1,15 @@
-version: '3.7'
+version: '3.8'
 services:
   updater:
     volumes:
       - ./updater:/app
-      - ${CATASTRO_DATA}/update:/catastro
+
+  uploader:
+    volumes:
+      - ./backend:/app
+    command: ["flask", "--app", "app:create_uploader", "run", "--port", "5001", "--host=0.0.0.0"]
+
+  backend:
+    volumes:
+      - ./backend:/app
+    entrypoint: ["flask", "run", "--host=0.0.0.0"]

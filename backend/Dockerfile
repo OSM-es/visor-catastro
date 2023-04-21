@@ -8,4 +8,3 @@ RUN pip install \
     --disable-pip-version-check \
     -r requirements.txt
 COPY . /app
-HEALTHCHECK CMD curl --fail http://localhost/status || exit 1

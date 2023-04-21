@@ -11,3 +11,4 @@ check_time: '00:13' # Hora de comprobación diaria de actualizaciones
 workers: 4 # Número de procesos para paralelizar la conversión
 max_retries: 10 # Reintentos en caso de fallo de comunicaciones
 retray_delay: 3 # Espara en segundos para reintentos
+uploader_url: 'http://uploader:5001/'

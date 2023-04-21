@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.8'
 services:
   updater:
     container_name: updater
@@ -7,6 +7,8 @@ services:
       context: ./updater
     depends_on: 
       - uploader
+    volumes:
+      - ${CATASTRO_DATA}/update:/catastro
     command: ["python3", "-u", "/app/update.py"]
 
   uploader:
@@ -15,8 +17,16 @@ services:
     build:
       context: ./backend
     ports:
+      - "5001:5001"
+    volumes:
+      - ${CATASTRO_DATA}:/data
+
+  backend:
+    container_name: backend
+    restart: always
+    build:
+      context: ./backend
+    ports:
       - "5000:5000"
     volumes:
-      - ./backend:/app
       - ${CATASTRO_DATA}:/data
-    entrypoint: ["flask", "run", "--host=0.0.0.0"]

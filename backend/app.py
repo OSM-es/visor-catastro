@@ -1,14 +1,17 @@
-
 from flask import Flask
-app = Flask(__name__)
 
-@app.route("/status")
-def status():
-    return "ok"
+def create_uploader():
+    uploader_app = Flask('uploader')
 
-@app.route("/upload")
-def upload():
-    return "uploading!"
+    from uploader import uploader
+    uploader_app.register_blueprint(uploader)
 
-if __name__ == "__main__":
-    app.run()
+    return uploader_app
+
+def create_app():
+    app = Flask(__name__)
+
+    from api import api
+    app.register_blueprint(api)
+
+    return app
