@@ -1,7 +1,13 @@
 """
 Servicio para convertir archivos de Catastro a OSM.
-Realiza la descarga inicial y la actualiza con las
-publicaciones períodicas.
+Realiza la descarga inicial y la actualiza con las publicaciones períodicas.
+
+Sube los datos a $CATASTRO_DATA/update
+
+Registra la fecha origen de los datos de Catastro en src_date.txt
+Los municipios procesados en municipios.json
+
+Configuración: config.yaml
 """
 import argparse
 import json
@@ -99,8 +105,8 @@ def check_prov(prov_code, municipios):
 
 def check_mun_diff(municipios):
     "Compara la lista de municipios con de la anterior actualización."
-    if os.path.exists('municipios.prev.json'):
-        with open('municipios.prev.json', 'r') as fo:
+    if os.path.exists('municipios.json'):
+        with open('municipios.json', 'r') as fo:
             mun_prev = json.load(fo)
         #TODO: enviar por correo electrónico
         for mun_code, mun_name in municipios.items():
@@ -111,7 +117,6 @@ def check_mun_diff(municipios):
         for mun_code, mun_name in mun_prev.items():
             if mun_code not in municipios:
                 print(f"{mun_code} {mun_name} ha dejado de existir")
-    if os.path.exists('municipios.json'):
         shutil.move('municipios.json', 'municipios.prev.json')
     with open('municipios.json', 'w') as fo:
         json.dump(municipios, fo, indent=2)
@@ -141,13 +146,11 @@ def update(municipios):
                 len_mun = len(municipios)
                 retries = 0
     if (municipios):
-        print(f"{len_mun} municipios pendientes")
+        print(f"Actualización {src_date} pendientes {len_mun} municipios de {start_len_mun}")
     else:
-        print("Conversión de actualización completada")
+        print(f"Actualización {src_date} completados {start_len_mun} municipios")
         with open('src_date.txt', 'w') as fo:
             fo.write(src_date)
-        with open('updates.log', 'a') as fo:
-            fo.write(f"{src_date} {start_len_mun}\n")
         requests.get('http://uploader:5000/upload')
     qgs.exitQgis()
 

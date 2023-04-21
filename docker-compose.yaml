@@ -1,17 +1,16 @@
 version: '3.7'
 services:
   updater:
+    container_name: updater
     restart: always
     build:
       context: ./updater
-    volumes:
-      - ./updater:/app
-      - ${CATASTRO_DATA}/update:/catastro
     depends_on: 
       - uploader
     command: ["python3", "-u", "/app/update.py"]
 
   uploader:
+    container_name: uploader
     restart: always
     build:
       context: ./backend

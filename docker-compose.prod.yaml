@@ -1,0 +1,5 @@
+version: '3.7'
+services:
+  updater:
+    volumes:
+      - ${CATASTRO_DATA}/update:/catastro
