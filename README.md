@@ -18,6 +18,13 @@ Construir la imagen:
     docker pull egofer/catatom2osm
     docker-compose build
 
+Preparar la base de datos:
+
+    docker-compose up -d
+    docker-compose exec postgres psql -U admin gis -c "DROP EXTENSION postgis_tiger_geocoder;"
+    docker-compose exec backend flask db upgrade
+    docker-compose down
+
 ## Desarrollo
 
 Ventana 1:
