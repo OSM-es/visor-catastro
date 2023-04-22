@@ -2,7 +2,7 @@ import logging
 from logging.config import fileConfig
 
 from flask import current_app
-
+from geoalchemy2 import alembic_helpers
 from alembic import context
 
 # this is the Alembic Config object, which provides
@@ -44,6 +44,14 @@ target_db = current_app.extensions['migrate'].db
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
+exclude_tables = config.get_section("alembic:exclude").get("tables", "").split(",")
+
+def include_object(object, name, type_, reflected, compare_to):
+    if type_ == "table" and name in exclude_tables:
+        return False
+    else:
+        return True
+
 
 def get_metadata():
     if hasattr(target_db, 'metadatas'):
@@ -65,8 +73,12 @@ def run_migrations_offline():
     """
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=url, target_metadata=get_metadata(), literal_binds=True
-    )
+        url=url,
+        target_metadata=get_metadata(),
+        literal_binds=True,
+        render_item=alembic_helpers.render_item,
+        include_object=include_object,
+)
 
     with context.begin_transaction():
         context.run_migrations()
@@ -97,6 +109,8 @@ def run_migrations_online():
             connection=connection,
             target_metadata=get_metadata(),
             process_revision_directives=process_revision_directives,
+            render_item=alembic_helpers.render_item,
+            include_object=include_object,
             **current_app.extensions['migrate'].configure_args
         )
 
