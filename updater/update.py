@@ -145,8 +145,8 @@ def update(municipios):
                     req = requests.get(config.uploader_url + mun_code)
                     if req.status_code == requests.codes.ok:
                         if mun_code in req.text:
-                            print(req.text)
                             municipios.remove(mun_code)
+                            #TODO: Eliminar la carpeta
             if len(municipios) == len_mun:
                 retries += 1
             else:
