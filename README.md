@@ -20,10 +20,14 @@ Construir la imagen:
 
 Preparar la base de datos:
 
-    docker-compose up -d
+    docker-compose up -d postgres
     docker-compose exec postgres psql -U admin gis -c "DROP EXTENSION postgis_tiger_geocoder;"
-    docker-compose exec backend flask db upgrade
+    docker-compose run --rm backend flask db upgrade
     docker-compose down
+
+Instalar las dependencias del frontend:
+
+    npm install --prefix frontend
 
 ## Desarrollo
 
