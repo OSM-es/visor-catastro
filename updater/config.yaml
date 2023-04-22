@@ -1,9 +1,9 @@
 # Provincias y municipios a incluir o excluir durante desarrollo
 # En producción borrar o vaciar.
-include_provs: ['02', '03', '28']
-exclude_provs: ['28']
-include_muns: ['02001', '02002', '02004', '03001']
-exclude_muns: ['02004']
+include_provs: []
+exclude_provs: []
+include_muns: ['02001', '02002', '03001']
+exclude_muns: []
 # Asignación de idiomas según provincias
 ca_provs: ['03', '07', '08', '12', '17', '25', '43', '46']
 gl_provs: ['15', '27', '32', '36']

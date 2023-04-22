@@ -18,7 +18,7 @@ import shutil
 import schedule
 import time
 import yaml
-from multiprocessing import Pool
+from multiprocessing import Pool, current_process
 from requests.exceptions import RequestException
 from zipfile import BadZipfile
 
@@ -65,6 +65,9 @@ def daily_check():
     "Proceso de recogida de municipios con periodicidad diaria."
     municipios = {}
     provincias = list(config.include_provs)
+    for mun in config.include_muns + config.exclude_muns:
+        if mun[0:2] not in provincias:
+            provincias.append(mun[0:2])
     retries = 0
     need_update = True
     while need_update and provincias and retries < config.max_retries:
@@ -164,7 +167,9 @@ def process(mun_code):
     if not os.path.exists(mun_code):
         os.mkdir(mun_code)
     log = catconfig.setup_logger(log_path=mun_code)
-    catconfig.set_log_level(log, logging.INFO)
+    pname = current_process().name.replace('ForkPool', '')
+    format = f"[{pname}] [%(levelname)s] %(message)s"
+    catconfig.set_log_level(log, logging.INFO, format)
     catconfig.set_config({'language': get_lang(mun_code)})
     options.path = [mun_code]
     options.args = mun_code

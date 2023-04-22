@@ -36,6 +36,11 @@ Ventana 2:
     cd frontend
     npm run dev
 
+Si se modifica el modelo de la base de datos, hay que registrarlo en otra ventana:
+
+    docker-compose exec backend flask db migrate -m "Comentario migración"
+    docker-compose exec backend flask db upgrade
+
 ## Producción
 
 Crear y configurar el archivo .env.local a partir de env.tpl.

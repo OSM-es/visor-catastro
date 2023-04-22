@@ -1,5 +1,24 @@
 import os
+from logging.config import dictConfig
 
+dictConfig(
+    {
+        "version": 1,
+        "formatters": {
+            "default": {
+                "format": "[%(levelname)s] %(message)s",
+            }
+        },
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "stream": "ext://sys.stdout",
+                "formatter": "default",
+            }
+        },
+        "root": {"level": "INFO", "handlers": ["console"]},
+    }
+)
 
 class Config:
     SECRET_KEY = os.getenv("FLASK_SECRET_KEY", "flask secret key")
