@@ -18,6 +18,9 @@ Construir la imagen:
     docker pull egofer/catatom2osm
     docker-compose build
 
+Crear la red
+    docker network create proxy
+
 Preparar la base de datos:
 
     docker-compose up -d postgres

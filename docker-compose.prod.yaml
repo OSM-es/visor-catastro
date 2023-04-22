@@ -3,10 +3,32 @@ services:
   uploader:
     volumes:
       - ${CATASTRO_DATA}:/data
-    command: ["gunicorn", "-w", "4", "-b", "0.0.0.0:5001", "app:create_uploader()"]
+    command: ["gunicorn", "-w", "4", "-b", "0.0.0.0:5002", "app:create_uploader()"]
 
   backend:
     volumes:
       - ./backend:/app
       - ${CATASTRO_DATA}:/data
-    command: ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:create_app()"]
+    command: ["gunicorn", "-w", "4", "-b", "0.0.0.0:5001", "app:create_app()"]
+    labels:
+      - traefik.http.routers.backend.rule=PathPrefix(`/api/`)
+      - traefik.http.services.backend.loadbalancer.server.port=5001
+
+  frontend:
+    ports:
+      - 5000:80
+    depends_on:
+      - backend
+    labels:
+      - traefik.http.routers.frontend.rule=PathPrefix(`/`)
+      - traefik.http.services.frontend.loadbalancer.server.port=80
+
+  traefik:
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command:
+      - --entrypoints.web.address=:80
+      - --providers.docker=true
+

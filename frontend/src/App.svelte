@@ -1,18 +1,20 @@
 <script>
-  import L from "leaflet";
-  import "leaflet/dist/leaflet.css";
+  import L from "leaflet"
+  import "leaflet/dist/leaflet.css"
   import places from "./results.json"
 
-  let map, info, messages = [];
-  const initialView = [40.463667, -3.74922];
+  let map, info, myLayer, messages = []
+  const initialView = [40.463667, -3.74922]
+  const zoomThreshold = 16
 
   const MESSAGES = {
     doZoom: "Haz zoom para poder editar",
+    doTask: (muncode, localId) => `Borrador edición ${muncode} ${localId}`,
     fetchError: "Se ha producido un error al obtener el zoning.geojson",
   }
 
   const layerUrl = (id, label) => `http://localhost:8111/import?new_layer=true&url=https://catastro.openstreetmap.es/results/${id}/tasks/${label}.osm.gz`
-  const geojsonUrl = (id) => `https://visor-catastro.cartobase.es/results/${id}/zoning.geojson`
+  const geojsonUrl = (bounds) => `http://localhost/api/${bounds}`
   const cachedFeatures = new Map()
 
   function createMap(container) {
@@ -27,17 +29,18 @@
       minZoom: 5,
     }).addTo(m);
 
+    new L.Control.Zoom({ position: 'topright' }).addTo(m);
     addMessage(MESSAGES.doZoom)
 
     return m;
   }
 
   function mapAction(container) {
-    map = createMap(container);
+    map = createMap(container)
 
     map.on("moveend", handleMoveEnd)
 
-    info.addTo(map);
+    info.addTo(map)
 
     return {
       destroy: () => {
@@ -47,18 +50,20 @@
     };
   }
 
-  async function requestGeoJSON(ids){
-    const responses = await Promise.all(ids.map(id => fetch(geojsonUrl(id)).then(r => r.json()).catch(() => addMessage(MESSAGES.fetchError))))
-    responses.map((res, ix) => {
-      const feature = L.geoJSON(res, { onEachFeature })
+  async function requestGeoJSON(bounds){
+    const response = await fetch(geojsonUrl(bounds)).then(r => r.json())
+    const notCached = response.features.filter(x => !cachedFeatures.has(x.properties.localId))
 
-      feature.addTo(map)
-      cachedFeatures.set(ids[ix], feature)
-    })
+    if (myLayer !== undefined) {
+      map.removeLayer(myLayer)
+    }
+    myLayer = L.geoJSON(notCached, { onEachFeature })
+    myLayer.addTo(map)
   }
 
   function onEachFeature({ properties: { muncode, localId } }, layer){
-    layer.on("click", () => window.open(layerUrl(muncode, localId)))
+    // layer.on("click", () => window.open(layerUrl(muncode, localId)))
+    layer.on("click", () => addMessage(MESSAGES.doTask(muncode, localId)))
     layer.on("mouseover", () => layer.setStyle({ fillColor: "orange", dashArray: "5,5" }))
     layer.on("mouseout", () => cachedFeatures.get(muncode).resetStyle())
   }
@@ -68,17 +73,10 @@
 
     info.update(currentZoom)
 
-    if (currentZoom > 12) {
-      const currentBounds = map.getBounds()
-      // get the items in the bounding box
-      const zonings = Object.entries(places).filter(([, coords]) => currentBounds.contains(L.latLng(...coords))).map(([key]) => key)
-      // request only new items
-      const notCached = zonings.filter(x => !cachedFeatures.has(x))
-      
-      if (notCached.length) {
-        requestGeoJSON(notCached)
-      }
+    if (currentZoom >= zoomThreshold) {
+      const currentBounds = map.getBounds().toBBoxString()
 
+      requestGeoJSON(currentBounds)
       removeMessage(MESSAGES.doZoom)
     } else {
       addMessage(MESSAGES.doZoom)
@@ -87,15 +85,15 @@
 
   function resizeMap() {
     if (map) {
-      map.invalidateSize();
+      map.invalidateSize()
     }
   }
 
   info = L.control({position: 'topleft'})
   info.onAdd = function () {
-    this._div = L.DomUtil.create('div', "control");
+    this._div = L.DomUtil.create('div', "control")
     this.update()
-    return this._div;
+    return this._div
   };
 
   info.update = function (value) {

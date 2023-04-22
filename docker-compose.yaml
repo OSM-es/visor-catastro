@@ -21,6 +21,8 @@ services:
     volumes:
       - ${CATASTRO_DATA}/update:/catastro
     command: ["python3", "-u", "/app/update.py"]
+    labels:
+      traefik.enable: "false"
 
   uploader:
     container_name: uploader
@@ -28,7 +30,7 @@ services:
     build:
       context: ./backend
     ports:
-      - "5001:5001"
+      - "5002:5002"
     volumes:
       - ${CATASTRO_DATA}:/data
 
@@ -38,6 +40,16 @@ services:
     build:
       context: ./backend
     ports:
-      - "5000:5000"
+      - "5001:5001"
     volumes:
       - ${CATASTRO_DATA}:/data
+
+  frontend:
+    container_name: frontend
+    restart: always
+    build: ./frontend
+
+  traefik:
+    container_name: traefik
+    image: traefik:v3.0
+    restart: always
