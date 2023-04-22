@@ -31,6 +31,7 @@ Ventana 2:
 
 ## Producción
 
+Crear y configurar el archivo .env.local a partir de env.tpl.
 ...
 
     docker-compose --env-file .env.local -f docker-compose.yaml -f docker-compose.prod.yaml up -d

@@ -1,5 +1,16 @@
 version: '3.8'
 services:
+  postgres:
+    container_name: postgres
+    restart: always
+    image: postgis/postgis:15-3.3
+    env_file:
+    - .env.local
+    volumes:
+      - ${CATASTRO_DATA}/postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
   updater:
     container_name: updater
     restart: always

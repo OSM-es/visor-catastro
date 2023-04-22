@@ -1,5 +1,5 @@
 CATASTRO_DATA=/var/catastro/
-CLIENT_URL="http://visor-catastro.cartobase.es"
+CLIENT_URL="https://visor-catastro.cartobase.es"
 FLASK_SECRET_KEY="una clave secreta"
 POSTGRES_USER=admin
 POSTGRES_DB=gis
