@@ -13,6 +13,7 @@ import argparse
 import json
 import logging
 import os
+import re
 import requests
 import shutil
 import schedule
@@ -30,16 +31,30 @@ from catatom2osm.exceptions import CatException
 
 
 class Config:
-    def __init__(self, config_file):
-        with open(config_file, 'r') as fo:
-            config_dict = yaml.safe_load(fo)
-        self.include_provs = catconfig.prov_codes.keys()
-        self.exclude_provs = []
-        self.include_muns = []
-        self.exclude_muns = []
-        self.__dict__.update(config_dict)
+    def __init__(self):
+        self.read_list('INCLUDE_PROVS', catconfig.prov_codes.keys())
+        self.read_list('EXCLUDE_PROVS')
+        self.read_list('INCLUDE_MUNS')
+        self.read_list('EXCLUDE_MUNS')
+        self.read_value('UPLOADER_URL', 'http://uploader:5002/')
+        self.read_list('CA_PROVS', '03, 07, 08, 12, 17, 25, 43, 46')
+        self.read_list('GL_PROVS', '15, 27, 32, 36')
+        self.read_value('CHECK_TIME', '00:13')
+        self.read_int('WORKERS', 4)
+        self.read_int('MAX_RETRIES', 10)
+        self.read_int('RETRAY_DELAY', 3)
 
-config = Config(os.path.dirname(__file__) + '/config.yaml')
+    def read_int(self, key, default):
+        self.__dict__[key.lower()] = int(os.getenv(key, default))
+
+    def read_value(self, key, default):
+        self.__dict__[key.lower()] = os.getenv(key, default)
+ 
+    def read_list(self, key, default=''):
+        value = re.split(r', *', os.getenv(key, default))
+        self.__dict__[key.lower()] = value
+
+config = Config()
 
 options = argparse.Namespace(
     path = [],

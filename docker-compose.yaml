@@ -14,10 +14,12 @@ services:
   updater:
     container_name: updater
     restart: always
-    build:
-      context: ./updater
     depends_on: 
       - uploader
+    build:
+      context: ./updater
+    env_file:
+    - .env.local
     volumes:
       - ${CATASTRO_DATA}/update:/catastro
     command: ["python3", "-u", "/app/update.py"]
@@ -27,29 +29,52 @@ services:
   uploader:
     container_name: uploader
     restart: always
+    depends_on: 
+      - postgres
     build:
       context: ./backend
     ports:
-      - "5002:5002"
+      - 5002:5002
     volumes:
       - ${CATASTRO_DATA}:/data
 
   backend:
     container_name: backend
     restart: always
+    depends_on: 
+      - postgres
     build:
       context: ./backend
     ports:
-      - "5001:5001"
+      - 5001:5001
     volumes:
       - ${CATASTRO_DATA}:/data
+    labels:
+      - traefik.http.routers.backend.rule=PathPrefix(`/api/`)
+      - traefik.http.services.backend.loadbalancer.server.port=5001
 
   frontend:
     container_name: frontend
+    profiles:
+      - prod
+    depends_on:
+      - backend
     restart: always
     build: ./frontend
+    ports:
+      - 5000:80
+    labels:
+      - traefik.http.routers.frontend.rule=PathPrefix(`/`)
+      - traefik.http.services.frontend.loadbalancer.server.port=80
 
   traefik:
     container_name: traefik
     image: traefik:v3.0
     restart: always
+    ports:
+      - 80:80
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command:
+      - --entrypoints.web.address=:80
+      - --providers.docker=true

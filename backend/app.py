@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from flask_migrate import Migrate
 
 from config import Config
@@ -19,6 +20,8 @@ def create_uploader():
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+    origins = app.config['CLIENT_URL']
+    cors = CORS(app, resources={r"/*": {"origins": origins}}, supports_credentials=True)
     db.init_app(app)
     Migrate(app, db)
 
