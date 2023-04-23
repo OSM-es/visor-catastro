@@ -70,6 +70,10 @@ def daily_check():
             provincias.append(mun[0:2])
     retries = 0
     need_update = True
+    catconfig.set_config({
+        'show_progress_bars': False,
+        'report_system_info': False,
+    })
     while need_update and provincias and retries < config.max_retries:
         try:
             prov = provincias[0]
@@ -126,10 +130,6 @@ def check_mun_diff(municipios):
 
 def update(municipios):
     "Aplica multiproceso a la lista de municipios."
-    catconfig.set_config({
-        'show_progress_bars': False,
-        'report_system_info': False,
-    })
     src_date = get_date(municipios[0])
     len_mun = len(municipios)
     start_len_mun = len_mun
