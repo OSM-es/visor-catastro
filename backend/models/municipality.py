@@ -6,5 +6,9 @@ class Municipality(db.Model):
     muncode = db.Column(db.String, index=True)
     name = db.Column(db.String)
 
+    @staticmethod
+    def get_by_code(mun_code):
+        return Municipality.query.filter(Municipality.muncode == mun_code).one_or_none()
+
     def __str__(self):
         return f"{self.muncode} {self.name}"

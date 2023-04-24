@@ -15,5 +15,9 @@ class Task(db.Model):
     geom = db.Column(Geometry("MULTIPOLYGON", srid=4326))
     __table_args__ = (Index('codes_index', 'localid', 'muncode'), )
 
+    @staticmethod
+    def get_by_code(mun_code, local_id):
+        return Task.query.filter(Task.muncode == mun_code, Task.localId == local_id).one_or_none()
+
     def __str__(self):
         return f"{self.muncode} {self.localId} {self.type} {self.parts}"

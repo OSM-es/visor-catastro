@@ -19,12 +19,11 @@ UPDATE = '/data/update/'
 uploader = Blueprint('uploader', __name__, url_prefix='/')
 
 
-def merge_tasks(mun_code):
+def merge_tasks(zoning):
     """Lee la zonificación de tareas.
     Agrega geometrías de tareas formada por geometrías múltiples.
     """
-    filename = UPDATE + mun_code + '/' + 'zoning.geojson'
-    with open(filename) as fo:
+    with open(zoning) as fo:
         data = geojson.load(fo)
     tasks = {}
     for feat in data['features']:
@@ -42,24 +41,19 @@ def merge_tasks(mun_code):
     return tasks
 
 
-def load_tasks(tasks):
+def load_tasks(mun_code, tasks):
     """Registra las tareas.
-    Por ahora sólo sirve para la carga inicial.
+    Por ahora no contempla estado, reemplaza todas las tareas.
     TODO: Como pueden cambiar entre actualizaciones, 
     TODO: debe buscar si existe por la forma de la tarea, no
     TODO: por códigos. Falta el código para comprobar si hay diferencias.
     """
-    new_tasks = 0
+    Task.query.filter(Task.muncode == mun_code).delete()
     for local_id, feat in tasks.items():
-        mun_code = feat['properties']['muncode']
-        task = Task.query.get((mun_code, local_id))
-        if task is None:
-            task = Task(**feat['properties'])
-            task.geom = from_shape(feat['geometry'])
-            db.session.add(task)
-            new_tasks += 1
+        task = Task(**feat['properties'])
+        task.geom = from_shape(feat['geometry'])
+        db.session.add(task)
     db.session.commit()
-    return new_tasks
 
 @uploader.route("/<mun_code>")
 def upload(mun_code):
@@ -68,15 +62,16 @@ def upload(mun_code):
     with open(filename, 'r') as fo:
         report = json.load(fo)
     mun_name = report['mun_name']
-    mun = Municipality.query.get(mun_code)
+    mun = Municipality.get_by_code(mun_code)
     if mun is None:
         mun = Municipality(muncode=mun_code, name=mun_name)
     elif mun.name != mun_name:
         mun.name = mun_name
     db.session.add(mun)
     db.session.commit()
-    tasks = merge_tasks(mun_code)
-    new_tasks = load_tasks(tasks)
-    msg = f"Registradas {new_tasks} tareas nuevas de {len(tasks)} en {mun_code} {mun_name}"
+    zoning = UPDATE + mun_code + '/' + 'zoning.geojson'
+    tasks = merge_tasks(zoning)
+    load_tasks(mun_code, tasks)
+    msg = f"Registradas {len(tasks)} tareas en {mun_code} {mun_name}"
     log.info(msg)
     return msg
