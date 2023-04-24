@@ -15,7 +15,7 @@ from geoalchemy2.shape import from_shape
 
 from models import db, Municipality, Task
 
-UPLOAD = '/data/update/'
+UPDATE = '/data/update/'
 uploader = Blueprint('uploader', __name__, url_prefix='/')
 
 
@@ -23,7 +23,7 @@ def merge_tasks(mun_code):
     """Lee la zonificación de tareas.
     Agrega geometrías de tareas formada por geometrías múltiples.
     """
-    filename = UPLOAD + mun_code + '/' + 'zoning.geojson'
+    filename = UPDATE + mun_code + '/' + 'zoning.geojson'
     with open(filename) as fo:
         data = geojson.load(fo)
     tasks = {}
@@ -64,7 +64,7 @@ def load_tasks(tasks):
 @uploader.route("/<mun_code>")
 def upload(mun_code):
     log = current_app.logger
-    filename = UPLOAD + mun_code + '/' + 'report.json'
+    filename = UPDATE + mun_code + '/' + 'report.json'
     with open(filename, 'r') as fo:
         report = json.load(fo)
     mun_name = report['mun_name']
