@@ -1,17 +1,19 @@
-from geoalchemy2 import Geometry
+from geoalchemy2 import Geometry, Index
 
 from models import db
 from models.status import TaskStatus
 
 
 class Task(db.Model):
-    muncode = db.Column(db.String, primary_key=True)
-    localId = db.Column(db.String, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    muncode = db.Column(db.String)
+    localId = db.Column('localid', db.String)
     zone = db.Column(db.String)
     type = db.Column(db.String)
     parts = db.Column(db.Integer)
-    task_status = db.Column(db.Integer, default=TaskStatus.READY.value)
+    status = db.Column(db.Integer, default=TaskStatus.READY.value)
     geom = db.Column(Geometry("MULTIPOLYGON", srid=4326))
+    __table_args__ = (Index('codes_index', 'localid', 'muncode'), )
 
     def __str__(self):
         return f"{self.muncode} {self.localId} {self.type} {self.parts}"

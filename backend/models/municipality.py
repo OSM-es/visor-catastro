@@ -2,7 +2,8 @@ from models import db
 
 
 class Municipality(db.Model):
-    muncode = db.Column(db.String, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    muncode = db.Column(db.String, index=True)
     name = db.Column(db.String)
 
     def __str__(self):
