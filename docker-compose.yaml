@@ -6,6 +6,8 @@ services:
     image: postgis/postgis:15-3.3
     env_file:
     - .env.local
+    environment:
+      - CATASTRO_DATA=${CATASTRO_DATA}
     volumes:
       - ${CATASTRO_DATA}/postgres:/var/lib/postgresql/data
     ports:
