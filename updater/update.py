@@ -32,7 +32,8 @@ from catatom2osm.exceptions import CatException
 
 class Config:
     def __init__(self):
-        self.read_list('INCLUDE_PROVS', catconfig.prov_codes.keys())
+        self.read_list('INCLUDE_PROVS')
+        self.include_provs = self.include_provs or catconfig.prov_codes.keys()
         self.read_list('EXCLUDE_PROVS')
         self.read_list('INCLUDE_MUNS')
         self.read_list('EXCLUDE_MUNS')
