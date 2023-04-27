@@ -15,7 +15,6 @@
 
   const layerUrl = (id, label) => `http://localhost:8111/import?new_layer=true&url=https://catastro.openstreetmap.es/results/${id}/tasks/${label}.osm.gz`
   const geojsonUrl = (bounds) => `http://localhost/api/${bounds}`
-  const cachedFeatures = new Map()
 
   function createMap(container) {
     let m = L.map(container, { preferCanvas: true }).setView(
@@ -52,20 +51,18 @@
 
   async function requestGeoJSON(bounds){
     const response = await fetch(geojsonUrl(bounds)).then(r => r.json())
-    const notCached = response.features.filter(x => !cachedFeatures.has(x.properties.localId))
 
     if (myLayer !== undefined) {
       map.removeLayer(myLayer)
     }
-    myLayer = L.geoJSON(notCached, { onEachFeature })
+    myLayer = L.geoJSON(response.features, { onEachFeature })
     myLayer.addTo(map)
   }
 
   function onEachFeature({ properties: { muncode, localId } }, layer){
-    // layer.on("click", () => window.open(layerUrl(muncode, localId)))
     layer.on("click", () => addMessage(MESSAGES.doTask(muncode, localId)))
     layer.on("mouseover", () => layer.setStyle({ fillColor: "orange", dashArray: "5,5" }))
-    layer.on("mouseout", () => cachedFeatures.get(muncode).resetStyle())
+    layer.on("mouseout", () => myLayer.resetStyle())
   }
 
   function handleMoveEnd({ target }) {
