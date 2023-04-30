@@ -125,13 +125,14 @@
 {/if}
 
 <style>
-.control {
+:global(.control) {
   padding: 6px 8px;
   background: white;
   border: 2px solid rgba(0,0,0,0.2);
   background-clip: padding-box;
   border-radius: 5px;
   color: black;
+  z-index: 9990 !important;
 }
 
 .overlay {
