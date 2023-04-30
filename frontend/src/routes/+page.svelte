@@ -114,7 +114,13 @@
 
 <svelte:window on:resize={resizeMap} />
 
-<div class="map" style="height:100%;width:100%" use:mapAction />
+<div class="flex flex-col md:flex-row flex-grow">
+  <div class="md:max-w-md w-full flex-grow">
+    Bienvenid@ a la herramienta de gestión de la importación del
+    Catastro Español a OpenStreetMap. 
+  </div>
+  <div class="map w-full flex-grow z-0" use:mapAction />
+</div>
 
 {#if messages.length > 0}
   <div class="overlay">

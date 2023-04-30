@@ -1,41 +1,74 @@
 <script>
-  import "../app.postcss";
-  import { Navbar, NavBrand, NavLi, NavUl, NavHamburger } from 'flowbite-svelte'
+  import '../app.postcss';
+  import { page } from '$app/stores';
+  import {
+    Avatar,
+    Button,
+    Chevron,
+    DarkMode,
+    Dropdown,
+    DropdownItem,
+    Navbar,
+    NavBrand,
+    NavLi,
+    NavUl,
+    NavHamburger,
+  } from 'flowbite-svelte'
+  import logo from '$lib/images/Logo-spain-geo.png'
+  let avatar = 'https://upload.wikimedia.org/wikipedia/commons/8/8b/Creative-Tail-People-man-2.svg'
+  let signup = 'https://www.openstreetmap.org/user/new'
+  let ulClass = 'flex flex-col md:flex-row md:space-x-8 items-center order-1 font-medium'
+  let logged = false
+  $: activeUrl = $page.url.pathname
+  $: isHomePage = $page.route.id === '/'
+
+  function login() {
+    logged = !logged
+  }
 </script>
 
-<Navbar let:hidden let:toggle>
-  <NavHamburger on:click={toggle} />
-  <NavUl {hidden}>
-    <NavLi href="/">Explora</NavLi>
-    <NavLi href="/learn">Aprende</NavLi>
-  </NavUl>
-</Navbar>
+<div class="min-h-screen flex flex-col">
+  <header
+    class="sticky top-0 z-40 w-full bg-white border-b border-gray-200 dark:border-gray-600 dark:bg-gray-800"
+  >
+    <Navbar let:hidden let:toggle fluid="true" navClass="px-2 py-1 sm:px-4 w-full" >
+      <NavBrand id="avatar-menu" href="/">
+        <img
+        src="{logo}"
+        class="mr-3 pt-1 h-12"
+        alt="openstreetmap.es"
+        />
+        <span class="whitespace-nowrap text-2xl font-semibold dark:text-white">
+          visor-catastro
+        </span>
+      </NavBrand>
+      <NavUl {hidden} {ulClass} class="order-1">
+        <NavLi href="/" active={isHomePage}>Explora</NavLi>
+        <NavLi href="/learn" active={activeUrl.startsWith('/learn')}>Aprende</NavLi>
+      </NavUl>
+      <div class="flex md:order-2">
+        {#if logged}
+          <Button pill color="light" id="avatar-menu" class="!p-0">
+            <Chevron>
+              <Avatar src="{avatar}" class="mr-2"/>
+              <span class="sm:max-md:hidden">Cuenta OSM</span>
+            </Chevron>
+          </Button>
+          <Dropdown placement="bottom" triggeredBy="#avatar-menu">
+            <DropdownItem>
+              Tema:
+              <DarkMode/>
+            </DropdownItem>
+            <DropdownItem>Ajustes</DropdownItem>
+            <DropdownItem on:click={login}>Cerrar sesión</DropdownItem>
+          </Dropdown>
+        {:else}
+          <Button outline size="sm" on:click={login}>Iniciar sesión</Button>
+        {/if}
+        <NavHamburger on:click={toggle} />
+      </div>
+    </Navbar>
+  </header>
 
-<main>
   <slot />
-</main>
-
-<style>
-  :root {
-    font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-    font-size: 16px;
-    line-height: 24px;
-    font-weight: 400;
-
-    color-scheme: light dark;
-    color: rgba(255, 255, 255, 0.87);
-    background-color: #242424;
-
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    -webkit-text-size-adjust: 100%;
-  }
-
-  main {
-    height: 100vh !important;
-    width: 100vw;
-    margin: 0;
-  }
-</style>
+</div>
