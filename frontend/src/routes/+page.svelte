@@ -57,8 +57,8 @@
     myLayer.addTo(map)
   }
 
-  function onEachFeature({ properties: { muncode, localId } }, layer){
-    layer.on("click", () => addMessage(MESSAGES.doTask(muncode, localId)))
+  function onEachFeature({ properties: { muncode, localid } }, layer){
+    layer.on("click", () => addMessage(MESSAGES.doTask(muncode, localid)))
     layer.on("mouseover", () => layer.setStyle({ fillColor: "orange", dashArray: "5,5" }))
     layer.on("mouseout", () => myLayer.resetStyle())
   }
