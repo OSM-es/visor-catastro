@@ -1,7 +1,8 @@
 <script>
   import L from "leaflet"
   import "leaflet/dist/leaflet.css"
-
+	import { Alert } from 'flowbite-svelte';
+  
   let map, info, myLayer, messages = []
   const initialView = [[40.463667, -3.74922], 9]
   const zoomThreshold = 16
