@@ -4,7 +4,7 @@
   import places from "./results.json"
 
   let map, info, myLayer, messages = []
-  const initialView = [40.463667, -3.74922]
+  const initialView = [[40.463667, -3.74922], 9]
   const zoomThreshold = 16
 
   const MESSAGES = {
@@ -17,10 +17,7 @@
   const geojsonUrl = (bounds) => `http://localhost/api/${bounds}`
 
   function createMap(container) {
-    let m = L.map(container, { preferCanvas: true }).setView(
-      initialView,
-      9
-    );
+    let m = L.map(container, { preferCanvas: true }).setView(...initialView)
     let attribution = `&copy; <a href="https://www.openstreetmap.org/copyright"` +
       `target="_blank">OpenStreetMap</a>`
 
@@ -31,7 +28,6 @@
       minZoom: 5,
     }).addTo(m);
 
-    new L.Control.Zoom({ position: 'topright' }).addTo(m);
     addMessage(MESSAGES.doZoom)
 
     return m;
