@@ -21,9 +21,12 @@
       initialView,
       9
     );
+    let attribution = `&copy; <a href="https://www.openstreetmap.org/copyright"` +
+      `target="_blank">OpenStreetMap</a>`
 
+    m.attributionControl.setPrefix(false)
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: `&copy;<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>`,
+      attribution,
       maxZoom: 20,
       minZoom: 5,
     }).addTo(m);
