@@ -1,7 +1,7 @@
 <script>
   import L from "leaflet"
   import "leaflet/dist/leaflet.css"
-	import { Alert } from 'flowbite-svelte';
+  import { Alert } from 'flowbite-svelte';
   
   let map, info, myLayer, messages = []
   const initialView = [[40.463667, -3.74922], 9]
@@ -115,9 +115,11 @@
 <svelte:window on:resize={resizeMap} />
 
 <div class="flex flex-col md:flex-row flex-grow">
-  <div class="md:max-w-md w-full flex-grow">
-    Bienvenid@ a la herramienta de gestión de la importación del
-    Catastro Español a OpenStreetMap. 
+  <div class="md:max-w-md w-full flex-grow px-4 mt-8">
+    <div class="prose lg:prose-xl dark:prose-invert">
+      Bienvenid@ a la herramienta de gestión de la importación del
+      Catastro Español a OpenStreetMap. 
+    </div>
   </div>
   <div class="map w-full flex-grow z-0" use:mapAction />
 </div>
