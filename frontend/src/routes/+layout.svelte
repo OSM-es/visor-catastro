@@ -27,7 +27,7 @@
   }
 </script>
 
-<div class="min-h-screen flex flex-col">
+<div class="min-h-screen flex flex-col dark:bg-gray-900">
   <header
     class="sticky top-0 z-40 w-full bg-white border-b border-gray-200 dark:border-gray-600 dark:bg-gray-800"
   >
