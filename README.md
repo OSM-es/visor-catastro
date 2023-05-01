@@ -13,6 +13,8 @@ Demo: https://visor-catastro.cartobase.es/
 Crear el archivo .env.local a partir de env.tpl.
 Configurar municipios a descargar usando las variables INCLUDE_PROVS, EXCLUDE_PROVS,
 INCLUDE_MUNS, EXCLUDE_MUNS.
+La vista inicial del mapa se puede configurar en frontend/.env.local (usa como
+plantilla frontend/.env)
 
 Crear las carpetas de datos:
 

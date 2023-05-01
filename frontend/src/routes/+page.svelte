@@ -1,12 +1,15 @@
 <script>
   import L from "leaflet"
   import "leaflet/dist/leaflet.css"
-  import { Alert } from 'flowbite-svelte';
-  
-  let map, info, myLayer
-  const initialView = [[40.463667, -3.74922], 9]
+  import { PUBLIC_API_URL, PUBLIC_INITIAL_VIEW } from '$env/static/public'
+
+  const initialView = [
+    PUBLIC_INITIAL_VIEW.split(',', 2),
+    PUBLIC_INITIAL_VIEW.split(',')[2]
+  ]
   const zoomThreshold = 16
-  const geojsonUrl = (bounds) => `http://localhost/api/${bounds}`
+  const geojsonUrl = (bounds) => `${PUBLIC_API_URL}${bounds}`
+  let map, info, myLayer
 
   function createMap(container) {
     let m = L.map(container, { preferCanvas: true }).setView(...initialView)
