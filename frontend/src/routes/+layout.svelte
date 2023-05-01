@@ -30,9 +30,14 @@
 
 <div class="min-h-screen flex flex-col dark:bg-gray-900">
   <header
-    class="sticky top-0 z-40 w-full bg-white border-b border-gray-200 dark:border-gray-600 dark:bg-gray-800"
+    class="sticky top-0 z-40 w-full border-b border-gray-200 dark:border-gray-600"
   >
-    <Navbar let:hidden let:toggle fluid="true" navClass="px-2 py-1 sm:px-4 w-full" >
+    <Navbar
+      let:hidden
+      let:toggle
+      fluid="true"
+      navClass="py-1 mx-auto {isFullPage ? 'px-2 sm:px-4 w-full': 'max-w-7xl px-4'}"
+    >
       <NavBrand href="/">
         <img
         src="{logo}"
