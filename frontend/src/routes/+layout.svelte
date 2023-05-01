@@ -21,6 +21,7 @@
   let logged = false
   $: activeUrl = $page.url.pathname
   $: isHomePage = $page.route.id === '/'
+  $: isFullPage = $page.route.id === '/explore'
 
   function login() {
     logged = !logged
@@ -32,7 +33,7 @@
     class="sticky top-0 z-40 w-full bg-white border-b border-gray-200 dark:border-gray-600 dark:bg-gray-800"
   >
     <Navbar let:hidden let:toggle fluid="true" navClass="px-2 py-1 sm:px-4 w-full" >
-      <NavBrand id="avatar-menu" href="/">
+      <NavBrand href="/">
         <img
         src="{logo}"
         class="mr-3 pt-1 h-12"
@@ -43,8 +44,8 @@
         </span>
       </NavBrand>
       <NavUl {hidden} {ulClass} class="order-1">
-        <NavLi href="/" active={isHomePage}>Explora</NavLi>
         <NavLi href="/learn" active={activeUrl.startsWith('/learn')}>Aprende</NavLi>
+        <NavLi href="/explore" active={isHomePage}>Explora</NavLi>
       </NavUl>
       <div class="flex md:order-2">
         {#if logged}

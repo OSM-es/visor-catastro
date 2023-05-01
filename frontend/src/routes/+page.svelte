@@ -1,113 +1,29 @@
 <script>
-  import L from "leaflet"
-  import "leaflet/dist/leaflet.css"
-  import { PUBLIC_API_URL, PUBLIC_INITIAL_VIEW } from '$env/static/public'
-
-  const initialView = [
-    PUBLIC_INITIAL_VIEW.split(',', 2),
-    PUBLIC_INITIAL_VIEW.split(',')[2]
-  ]
-  const zoomThreshold = 16
-  const geojsonUrl = (bounds) => `${PUBLIC_API_URL}${bounds}`
-  let map, info, myLayer
-
-  function createMap(container) {
-    let m = L.map(container, { preferCanvas: true }).setView(...initialView)
-    let attribution = `&copy; <a href="https://www.openstreetmap.org/copyright"` +
-      `target="_blank">OpenStreetMap</a>`
-
-    m.attributionControl.setPrefix(false)
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution,
-      maxZoom: 20,
-      minZoom: 5,
-    }).addTo(m);
-
-    return m;
-  }
-
-  function mapAction(container) {
-    map = createMap(container)
-
-    map.on("moveend", handleMoveEnd)
-
-    info.addTo(map)
-
-    return {
-      destroy: () => {
-        map.remove();
-        map = null;
-      },
-    };
-  }
-
-  async function requestGeoJSON(bounds){
-    const response = await fetch(geojsonUrl(bounds)).then(r => r.json())
-
-    if (myLayer !== undefined) {
-      map.removeLayer(myLayer)
-    }
-    myLayer = L.geoJSON(response.features, { onEachFeature })
-    myLayer.addTo(map)
-  }
-
-  function onEachFeature({ properties: { muncode, localid } }, layer){
-    // TODO layer.on("click", () => addMessage(MESSAGES.doTask(muncode, localid)))
-    layer.on("mouseover", () => layer.setStyle({ fillColor: "orange", dashArray: "5,5" }))
-    layer.on("mouseout", () => myLayer.resetStyle())
-  }
-
-  function handleMoveEnd({ target }) {
-    const currentZoom = target.getZoom()
-
-    info.update(currentZoom)
-
-    if (currentZoom >= zoomThreshold) {
-      const currentBounds = map.getBounds().toBBoxString()
-
-      requestGeoJSON(currentBounds)
-    }
-  }
-
-  function resizeMap() {
-    if (map) {
-      map.invalidateSize()
-    }
-  }
-
-  info = L.control({position: 'topleft'})
-  info.onAdd = function () {
-    this._div = L.DomUtil.create('div', "control")
-    this.update()
-    return this._div
-  };
-
-  info.update = function (value) {
-    this._div.innerHTML = `Zoom: ${value || map.getZoom()}`;
-  };
-
+  import { Button, ButtonGroup } from 'flowbite-svelte';
+  import banner from '$lib/images/visor-catastro.svg'
 </script>
-
-<svelte:window on:resize={resizeMap} />
-
-<div class="flex flex-col md:flex-row flex-grow">
-  <div class="md:max-w-md w-full flex-grow px-4 mt-8">
-    <div class="prose lg:prose-xl dark:prose-invert">
-      Bienvenid@ a la herramienta de gestión de la importación del
-      Catastro Español a OpenStreetMap. 
-    </div>
+  
+<div class="flex flex-col flex-grow max-w-6xl lg:px-20 px-4 mx-auto mt-8">
+  <h2 class="mb-6 text-4xl font-bold leading-snug text-center text-primary-900 dark:text-white">
+    Herramienta de gestión de la importación del Catastro Español a OpenStreetMap
+  </h2>
+  <a href="/learn">
+    <img src="{banner}" alt="Visor Catastro"/>
+  </a>
+  <div class="my-16 mx-auto">
+    <Button shadow="blue" size="xl" class="mr-16" href="/learn">Aprender más</Button>
+    <Button shadow="blue" size="xl" outline href="/explore">Comenzar a mapear</Button>
   </div>
-  <div class="map w-full flex-grow z-0" use:mapAction />
+  <article class="prose lg:prose-xl dark:prose-invert">
+    <p>Prototipo para la importación directa de los archivos.</p> 
+    <p>
+      El objetivo es poder colaborar sin pasos intermedios: en
+      <a href="/explora">explora</a>, acercarse al sitio
+      que se desee importar, seleccionar una parcela y mapearla.
+    </p>
+    <p>
+      Por el momento esto es una simple maqueta con la parte de la interacción
+      del usuario. No almacena información ni guarda estados de las parcelas.
+    </p>
+  </article>
 </div>
-
-<style>
-:global(.control) {
-  padding: 6px 8px;
-  background: white;
-  border: 2px solid rgba(0,0,0,0.2);
-  background-clip: padding-box;
-  border-radius: 5px;
-  color: black;
-  z-index: 9990 !important;
-}
-</style>
