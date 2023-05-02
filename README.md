@@ -70,9 +70,9 @@ Eliminar o vaciar las variables INCLUDE_PROVS, EXCLUDE_PROVS, INCLUDE_MUNS, EXCL
 
 Crear las carpetas de datos:
 
-    sudo mkdir -p data/dist
-    sudo mkdir -p data/update
-    sudo chown 1000:1000 data/update
+    sudo mkdir -p /var/catastro/dist
+    sudo mkdir -p /var/catastro/update
+    sudo chown 1000:1000 /var/catastro/update
 
 Construir la imagen:
 

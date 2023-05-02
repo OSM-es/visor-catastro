@@ -25,6 +25,10 @@
         El objetivo es poder colaborar sin pasos intermedios: compruébalo en
         <a href="/explore">explora</a>.
       </p>
+      <p>
+        Se aceptan contribuciones en <a href="https://github.com/OSM-es/visor-catastro/">GitHub</a>.
+        Contacta en <a href="https://telegram.me/OSMes_Catastro">Telegram</a>.
+      </p>
     </article>
   </div>
 </div>
