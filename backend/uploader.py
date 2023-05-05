@@ -9,8 +9,7 @@ import json
 from flask import Blueprint, current_app
 import geojson
 from shapely.geometry import shape
-from shapely.geometry.polygon import Polygon
-from shapely.geometry.multipolygon import MultiPolygon
+from shapely import MultiPolygon, Polygon, GeometryCollection
 from geoalchemy2.shape import from_shape
 
 from models import db, Municipality, Task
@@ -35,7 +34,10 @@ def merge_tasks(zoning):
         else:
             shp = tasks[local_id]['geometry'].union(shp)
             if isinstance(shp, Polygon):
-               shp = MultiPolygon([shp])
+                shp = MultiPolygon([shp])
+            elif isinstance(shp, GeometryCollection):
+                geoms = [g for g in shp.geoms if isinstance(shp, Polygon)]
+                shp = MultiPolygon(geoms)
             tasks[local_id]['geometry'] = shp
             tasks[local_id]['properties']['parts'] += feat['properties']['parts']
     return tasks
@@ -49,7 +51,7 @@ def load_tasks(mun_code, tasks):
     TODO: por códigos. Falta el código para comprobar si hay diferencias.
     """
     Task.query.filter(Task.muncode == mun_code).delete()
-    for local_id, feat in tasks.items():
+    for feat in tasks.values():
         task = Task(**feat['properties'])
         task.geom = from_shape(feat['geometry'])
         db.session.add(task)
