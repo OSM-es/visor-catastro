@@ -32,13 +32,15 @@ from catatom2osm.exceptions import CatException
 
 class Config:
     def __init__(self):
-        self.read_list('INCLUDE_PROVS')
-        if self.include_provs == ['']:
-            self.include_provs = catconfig.prov_codes.keys()
-        print(catconfig.prov_codes.keys())
-        self.read_list('EXCLUDE_PROVS')
         self.read_list('INCLUDE_MUNS')
         self.read_list('EXCLUDE_MUNS')
+        self.read_list('INCLUDE_PROVS')
+        for mun in self.include_muns + self.exclude_muns:
+            if mun[0:2] not in self.include_provs:
+                self.include_provs.append(mun[0:2])
+        if not self.include_provs:
+            self.include_provs = list(catconfig.prov_codes.keys())
+        self.read_list('EXCLUDE_PROVS')
         self.read_value('UPLOADER_URL', 'http://uploader:5002/')
         self.read_list('CA_PROVS', '03, 07, 08, 12, 17, 25, 43, 46')
         self.read_list('GL_PROVS', '15, 27, 32, 36')
@@ -55,6 +57,7 @@ class Config:
  
     def read_list(self, key, default=''):
         value = re.split(r', *', os.getenv(key, default))
+        value = [] if value == [''] else value
         self.__dict__[key.lower()] = value
 
 config = Config()
@@ -82,10 +85,7 @@ options = argparse.Namespace(
 def daily_check():
     "Proceso de recogida de municipios con periodicidad diaria."
     municipios = {}
-    provincias = list(config.include_provs)
-    for mun in config.include_muns + config.exclude_muns:
-        if mun[0:2] not in provincias:
-            provincias.append(mun[0:2])
+    provincias = config.include_provs
     retries = 0
     need_update = True
     catconfig.set_config({
