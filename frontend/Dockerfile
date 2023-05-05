@@ -2,13 +2,19 @@ FROM node:20 AS build
 
 WORKDIR /app
 
+RUN rm -rf ./*
 COPY package.json ./
 COPY package-lock.json ./
-RUN npm install
+RUN npm ci
 COPY . ./
 RUN npm run build
 
-FROM nginx:1.23.2-alpine
-COPY --from=build /app/dist /usr/share/nginx/html
+FROM node:20.1.0-alpine3.17
 
-CMD ["nginx", "-g", "daemon off;"]
+WORKDIR /app
+
+COPY --from=build /app/build .
+COPY --from=build /app/package.json .
+COPY --from=build /app/node_modules ./node_modules
+
+CMD ["node", "index.js"]

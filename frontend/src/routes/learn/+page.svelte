@@ -1,7 +1,3 @@
-<script>
-  import banner from '$lib/images/banner.png'
-</script>
-
 <article class="prose lg:prose-xl dark:prose-invert">
   <h1>Tutorial</h1>
   <p>
