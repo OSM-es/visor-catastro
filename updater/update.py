@@ -197,6 +197,8 @@ def process(mun_code):
         CatAtom2Osm.create_and_run(mun_code, options)
         log.info('Procesado ' + mun_code)
     except (BadZipfile, CatException, RequestException) as e:
+        if os.path.exists(mun_code):
+            shutil.rmtree(mun_code)
         msg = e.message if getattr(e, "message", "") else str(e)
         log.error(msg)
         return None
