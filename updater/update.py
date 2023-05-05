@@ -186,8 +186,9 @@ def process(mun_code):
         os.mkdir(mun_code)
     log = catconfig.setup_logger(log_path=mun_code)
     pname = current_process().name.replace('ForkPool', '')
-    format = f"[{pname}] [%(levelname)s] %(message)s"
-    catconfig.set_log_level(log, logging.INFO, format)
+    if len(log.handlers) < 2:
+        format = f"[{pname}] [%(levelname)s] %(message)s"
+        catconfig.set_log_level(log, logging.INFO, format)
     catconfig.set_config({'language': get_lang(mun_code)})
     options.path = [mun_code]
     options.args = mun_code
