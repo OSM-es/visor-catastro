@@ -63,6 +63,7 @@ def upload(mun_code):
         report = json.load(fo)
     mun_name = report['mun_name']
     mun = Municipality.get_by_code(mun_code)
+    #TODO: probablemente se pase a borrar todos y meter los nuevos directamente
     if mun is None:
         mun = Municipality(muncode=mun_code, name=mun_name)
     elif mun.name != mun_name:

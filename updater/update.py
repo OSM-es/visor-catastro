@@ -158,13 +158,13 @@ def update(municipios):
         with Pool(config.workers) as pool:
             if retries > 0:
                 print("Reintento nro", retries)
-            for mun_code in pool.imap(process, municipios):
+            for mun_code in pool.imap_unordered(process, municipios):
                 if mun_code is not None:
                     req = requests.get(config.uploader_url + mun_code)
                     if req.status_code == requests.codes.ok:
                         if mun_code in req.text:
                             municipios.remove(mun_code)
-                            #TODO: Eliminar la carpeta
+                            #TODO: Mover la carpeta a dist
             if len(municipios) == len_mun:
                 retries += 1
             else:
@@ -195,6 +195,7 @@ def process(mun_code):
     try:
         CatAtom2Osm.create_and_run(mun_code, options)
         CatAtom2Osm.create_and_run(mun_code, options)
+        log.info('Procesado ' + mun_code)
     except (BadZipfile, CatException, RequestException) as e:
         msg = e.message if getattr(e, "message", "") else str(e)
         log.error(msg)
