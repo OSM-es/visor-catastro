@@ -7,9 +7,9 @@ services:
   uploader:
     volumes:
       - ./backend:/app
-    command: ["flask", "--app", "app:create_uploader", "run", "--port", "5002", "--host=0.0.0.0"]
+    command: ["flask", "--app", "app:create_uploader", "run", "--port", "5001", "--host=0.0.0.0"]
 
   backend:
     volumes:
       - ./backend:/app
-    command: ["flask", "run", "--port", "5001", "--host=0.0.0.0"]
+    command: ["flask", "run", "--port", "5000", "--host=0.0.0.0"]

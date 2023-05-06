@@ -36,7 +36,7 @@ services:
     build:
       context: ./backend
     ports:
-      - 5002:5002
+      - 5001:5001
     volumes:
       - ${CATASTRO_DATA}:/data
 
@@ -48,12 +48,12 @@ services:
     build:
       context: ./backend
     ports:
-      - 5001:5001
+      - 5000:5000
     volumes:
       - ${CATASTRO_DATA}:/data
     labels:
       - traefik.http.routers.backend.rule=PathPrefix(`/api/`)
-      - traefik.http.services.backend.loadbalancer.server.port=5001
+      - traefik.http.services.backend.loadbalancer.server.port=5000
 
   frontend:
     container_name: frontend

@@ -41,7 +41,7 @@ class Config:
         if not self.include_provs:
             self.include_provs = list(catconfig.prov_codes.keys())
         self.read_list('EXCLUDE_PROVS')
-        self.read_value('UPLOADER_URL', 'http://uploader:5002/')
+        self.read_value('UPLOADER_URL', 'http://uploader:5001/')
         self.read_list('CA_PROVS', '03, 07, 08, 12, 17, 25, 43, 46')
         self.read_list('GL_PROVS', '15, 27, 32, 36')
         self.read_value('CHECK_TIME', '00:13')
