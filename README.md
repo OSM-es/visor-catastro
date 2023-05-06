@@ -29,7 +29,6 @@ Construir la imagen:
 Preparar la base de datos:
 
     docker-compose up -d postgres
-    docker-compose exec postgres psql -U admin gis -c "DROP EXTENSION postgis_tiger_geocoder;"
     docker-compose run --rm backend flask db upgrade
     docker-compose down
 
@@ -82,7 +81,6 @@ Construir la imagen:
 Preparar la base de datos:
 
     docker-compose --env-file .env.local up -d postgres
-    docker-compose exec postgres psql -U admin gis -c "DROP EXTENSION postgis_tiger_geocoder;"
     docker-compose  --env-file .env.local run --rm backend flask db upgrade
     docker-compose down
 
