@@ -73,7 +73,7 @@ Crear las carpetas de datos:
 Construir la imagen:
 
     docker pull egofer/catatom2osm
-    docker-compose --profile prod build
+    COMPOSE_PROFILES=production docker-compose build
 
 Poner en marcha los servicios
 
