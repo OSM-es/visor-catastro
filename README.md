@@ -1,34 +1,27 @@
 # visor-catastro
 
-Prototipo para la importación directa de los archivos del [catastro de españa](https://www1.sedecatastro.gob.es/). El objetivo es poder colaborar sin pasos intermedios: acercarse al sitio que se desee importar, seleccionar una parcela y mapearla.
+Prototipo para la importación directa de los archivos del 
+[Catastro de España](https://www1.sedecatastro.gob.es/). 
+El objetivo es poder colaborar sin pasos intermedios: 
+acercarse al sitio que se desee importar, seleccionar una parcela y mapearla.
 
 Demo: https://visor-catastro.cartobase.es/
 
-**NOTA**: No utilizarse para mapear catastro. Por el momento esto es una simple maqueta con la parte de la interacción del usuario. No almacena información ni guarda estados de las parcelas.
+**NOTA**: No utilizarse para mapear catastro. Por el momento esto es una simple 
+maqueta con la parte de la interacción del usuario. No almacena información ni 
+guarda estados de las parcelas.
 
 ## Desarrollo
 
 ### Instalación
 
-Crear el archivo .env.development.local a partir de env.development.local.tpl.
-Configurar municipios a descargar usando las variables INCLUDE_PROVS, EXCLUDE_PROVS,
-INCLUDE_MUNS, EXCLUDE_MUNS.
-La vista inicial del mapa se puede configurar en frontend/.env.local (usa como
-plantilla frontend/.env)
+    make install
 
-Crear las carpetas de datos:
+Configurar .env.development.local los municipios a descargar usando las 
+variables INCLUDE_PROVS, EXCLUDE_PROVS, INCLUDE_MUNS, EXCLUDE_MUNS.
+La vista inicial del mapa se puede configurar en frontend/.env.local
 
-    mkdir -p data/update
-    mkdir -p data/dist
-
-Construir la imagen:
-
-    docker pull egofer/catatom2osm
-    docker-compose build
-
-Instalar las dependencias del frontend:
-
-    npm install --prefix frontend
+    make build
 
 ### Ejecución
 
@@ -58,32 +51,27 @@ Por ejemplo, en backend:
 
 ### Instalación
 
-Añade /etc/environment esta variables de entorno
+Añade a /etc/environment estas variables de entorno
 
 CATASTRO_DATA=/var/catastro/
+COMPOSE_PROFILES=production
 
-Copiar env.development.local.tpl en .env.development.local
-Crear y configurar el archivo .env.production.local a partir de env.production.local.tpl.
+Reabre la sesión
+    
+    sudo make install
 
-Crear las carpetas de datos:
+Configurar el archivo .env.production.local
 
-    sudo mkdir -p /var/catastro/dist
-    sudo mkdir -p /var/catastro/update
-    sudo chown 1000:1000 /var/catastro/update
-
-Construir la imagen:
-
-    docker pull egofer/catatom2osm
-    COMPOSE_PROFILES=production docker-compose build
+    make build
 
 Poner en marcha los servicios
 
-    COMPOSE_PROFILES=production docker-compose -f docker-compose.yaml up -d
+    make up
 
 Visualización de registro
 
-    docker-compose logs -f
+    make logs
 
 Parar los servicios
 
-    docker-compose down --remove-orphans
+    make down
