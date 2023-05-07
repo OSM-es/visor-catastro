@@ -4,7 +4,8 @@ from models import db
 class Municipality(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     muncode = db.Column(db.String, index=True)
-    name = db.Column(db.String)
+    name = db.Column(db.String, nullable=False)
+    date = db.Column(db.Date, nullable=False)
 
     @staticmethod
     def get_by_code(mun_code):

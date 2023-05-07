@@ -166,7 +166,8 @@ def update(municipios):
                 print("Reintento nro", retries)
             for mun_code in pool.imap_unordered(process, municipios):
                 if mun_code is not None:
-                    req = requests.put(config.uploader_url + 'municipality/' + mun_code)
+                    url = config.uploader_url + 'municipality/' + mun_code
+                    req = requests.put(url)
                     if req.status_code == requests.codes.ok:
                         if mun_code in req.text:
                             municipios.remove(mun_code)

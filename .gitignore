@@ -4,11 +4,8 @@
 .env.production.local
 .env.local
 
-# Database
-postgres-data/
-
 # dev data
-data/
+data
 
 # Backup files # 
 *.bak 

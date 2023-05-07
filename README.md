@@ -45,8 +45,8 @@ Ventana 2:
 
 Si se modifica el modelo de la base de datos, hay que registrarlo:
 
-    docker-compose exec backend flask db migrate -m "Comentario migración"
-    docker-compose exec backend flask db upgrade
+    docker-compose run --rm backend flask db migrate -m "Comentario migración"
+    docker-compose run --rm backend flask db upgrade
 
 Si se modifican dependencias Python, hay que reflejarlo en los archivos requirements.txt.
 Por ejemplo, en backend:
@@ -62,6 +62,7 @@ Añade /etc/environment esta variables de entorno
 
 CATASTRO_DATA=/var/catastro/
 
+Copiar env.development.local.tpl en .env.development.local
 Crear y configurar el archivo .env.production.local a partir de env.production.local.tpl.
 
 Crear las carpetas de datos:

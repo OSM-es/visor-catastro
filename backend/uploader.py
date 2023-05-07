@@ -4,6 +4,7 @@ Microservicio de carga de actualización a la base de datos.
 Registra los municipios creados en /data/update y sus tareas.
 Transfiere a /data/dist.
 """
+import datetime
 import json
 
 from flask import Blueprint, current_app
@@ -55,7 +56,6 @@ def load_tasks(mun_code, tasks):
         task = Task(**feat['properties'])
         task.geom = from_shape(feat['geometry'])
         db.session.add(task)
-    db.session.commit()
 
 @uploader.route("/")
 def status():
@@ -68,17 +68,21 @@ def upload(mun_code):
     with open(filename, 'r') as fo:
         report = json.load(fo)
     mun_name = report['mun_name']
+    src_date = datetime.date.fromisoformat(report['building_date'].replace('/', '-'))
     mun = Municipality.get_by_code(mun_code)
-    #TODO: probablemente se pase a borrar todos y meter los nuevos directamente
     if mun is None:
-        mun = Municipality(muncode=mun_code, name=mun_name)
-    elif mun.name != mun_name:
-        mun.name = mun_name
+        mun = Municipality(muncode=mun_code, name=mun_name, date=src_date)
+    elif mun.date == src_date:
+        msg = f"{mun_code} ya está registrado"
+        log.info(msg)
+        return msg
     db.session.add(mun)
-    db.session.commit()
     zoning = UPDATE + mun_code + '/' + 'zoning.geojson'
     tasks = merge_tasks(zoning)
     load_tasks(mun_code, tasks)
+    mun.name = mun_name
+    mun.date = src_date
+    db.session.commit()
     msg = f"Registradas {len(tasks)} tareas en {mun_code} {mun_name}"
     log.info(msg)
     return msg
