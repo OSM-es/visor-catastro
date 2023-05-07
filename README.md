@@ -10,7 +10,7 @@ Demo: https://visor-catastro.cartobase.es/
 
 ### Instalación
 
-Crear el archivo .env.local a partir de env.tpl.
+Crear el archivo .env.development.local a partir de env.development.local.tpl.
 Configurar municipios a descargar usando las variables INCLUDE_PROVS, EXCLUDE_PROVS,
 INCLUDE_MUNS, EXCLUDE_MUNS.
 La vista inicial del mapa se puede configurar en frontend/.env.local (usa como
@@ -25,12 +25,6 @@ Construir la imagen:
 
     docker pull egofer/catatom2osm
     docker-compose build
-
-Preparar la base de datos:
-
-    docker-compose up -d postgres
-    docker-compose run --rm backend flask db upgrade
-    docker-compose down
 
 Instalar las dependencias del frontend:
 
@@ -64,8 +58,11 @@ Por ejemplo, en backend:
 
 ### Instalación
 
-Crear y configurar el archivo .env.local a partir de env.tpl.
-Eliminar o vaciar las variables INCLUDE_PROVS, EXCLUDE_PROVS, INCLUDE_MUNS, EXCLUDE_MUNS.
+Añade /etc/environment esta variables de entorno
+
+CATASTRO_DATA=/var/catastro/
+
+Crear y configurar el archivo .env.production.local a partir de env.production.local.tpl.
 
 Crear las carpetas de datos:
 
@@ -78,15 +75,9 @@ Construir la imagen:
     docker pull egofer/catatom2osm
     docker-compose --profile prod build
 
-Preparar la base de datos:
-
-    docker-compose --env-file .env.local up -d postgres
-    docker-compose  --env-file .env.local run --rm backend flask db upgrade
-    docker-compose down
-
 Poner en marcha los servicios
 
-    docker-compose --profile prod --env-file .env.local -f docker-compose.yaml -f docker-compose.prod.yaml up -d
+    COMPOSE_PROFILES=production docker-compose -f docker-compose.yaml up -d
 
 Visualización de registro
 

@@ -84,6 +84,7 @@ options = argparse.Namespace(
 @schedule.repeat(schedule.every().day.at(config.check_time))
 def daily_check():
     "Proceso de recogida de municipios con periodicidad diaria."
+    print("Comienza comprobación de actualización")
     municipios = {}
     provincias = config.include_provs
     retries = 0
@@ -103,6 +104,8 @@ def daily_check():
             print(str(e))
             time.sleep(config.retray_delay)
             retries += 1
+    if not need_update:
+        print("No es necesario actualizar")
     if not provincias and municipios:
         check_mun_diff(municipios)
         update(list(municipios.keys()))
@@ -113,6 +116,7 @@ def check_prov(prov_code, municipios):
     Devuelve False si tras recoger el primero con su fecha comprueba
     que no es necesario actualizar.
     """
+    len_mun = len(municipios)
     for mun_code, mun_name in get_municipalities(prov_code):
         if mun_code not in config.exclude_muns:
             full_mun = mun_code[0:2] not in [m[0:2] for m in config.include_muns]
@@ -126,6 +130,8 @@ def check_prov(prov_code, municipios):
                         if src_date == last_src_date:
                             return False
                 municipios[mun_code] = mun_name
+    if len(municipios) > len_mun:
+        print(f"La provincia {prov_code} aporta {len(municipios)} municipios")
     return True
 
 def check_mun_diff(municipios):
@@ -160,7 +166,7 @@ def update(municipios):
                 print("Reintento nro", retries)
             for mun_code in pool.imap_unordered(process, municipios):
                 if mun_code is not None:
-                    req = requests.get(config.uploader_url + mun_code)
+                    req = requests.put(config.uploader_url + 'municipality/' + mun_code)
                     if req.status_code == requests.codes.ok:
                         if mun_code in req.text:
                             municipios.remove(mun_code)

@@ -57,7 +57,11 @@ def load_tasks(mun_code, tasks):
         db.session.add(task)
     db.session.commit()
 
-@uploader.route("/<mun_code>")
+@uploader.route("/")
+def status():
+    return "ok"
+
+@uploader.route("/municipality/<mun_code>", methods=["PUT"])
 def upload(mun_code):
     log = current_app.logger
     filename = UPDATE + mun_code + '/' + 'report.json'
