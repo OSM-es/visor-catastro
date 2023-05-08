@@ -12,7 +12,7 @@ class Task(db.Model):
     type = db.Column(db.String)
     parts = db.Column(db.Integer)
     status = db.Column(db.Integer, default=TaskStatus.READY.value)
-    geom = db.Column(Geometry("MULTIPOLYGON", srid=4326))
+    geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
     __table_args__ = (Index('codes_index', 'localid', 'muncode'), )
 
     @staticmethod

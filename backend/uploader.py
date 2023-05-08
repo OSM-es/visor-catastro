@@ -10,7 +10,7 @@ import json
 from flask import Blueprint, current_app
 import geojson
 from shapely.geometry import shape
-from shapely import MultiPolygon, Polygon, GeometryCollection
+from shapely import GeometryCollection
 from geoalchemy2.shape import from_shape
 
 from models import db, Municipality, Task
@@ -31,15 +31,11 @@ def merge_tasks(zoning):
         local_id = feat['properties']['localId']
         if local_id not in tasks:
             tasks[local_id] = feat
-            tasks[local_id]['geometry'] = shp
+            tasks[local_id]['geometry'] = GeometryCollection(shp)
         else:
-            shp = tasks[local_id]['geometry'].union(shp)
-            if isinstance(shp, Polygon):
-                shp = MultiPolygon([shp])
-            elif isinstance(shp, GeometryCollection):
-                geoms = [g for g in shp.geoms if isinstance(shp, Polygon)]
-                shp = MultiPolygon(geoms)
-            tasks[local_id]['geometry'] = shp
+            geoms = list(tasks[local_id]['geometry'].geoms)
+            geoms.append(shp)
+            tasks[local_id]['geometry'] = GeometryCollection(geoms)
             tasks[local_id]['properties']['parts'] += feat['properties']['parts']
     return tasks
 
