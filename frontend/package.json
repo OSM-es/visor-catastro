@@ -15,6 +15,7 @@
     "postcss": "^8.4.14",
     "postcss-load-config": "^4.0.1",
     "svelte": "^3.54.0",
+    "svelte-leafletjs": "^0.10.0",
     "svelte-preprocess": "^5.0.3",
     "tailwindcss": "^3.3.2",
     "vite": "^4.3.0"

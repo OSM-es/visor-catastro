@@ -1,101 +1,68 @@
 <script>
-  import L from "leaflet"
-  import "leaflet/dist/leaflet.css"
-  import { PUBLIC_API_URL, PUBLIC_INITIAL_VIEW } from '$env/static/public'
+  import { onMount } from 'svelte'
+  import { GeoJSON, LeafletMap, ScaleControl, TileLayer } from 'svelte-leafletjs'
+  import { 
+    PUBLIC_API_URL,
+    PUBLIC_INITIAL_VIEW,
+    PUBLIC_INITIAL_ZOOM,
+  } from '$env/static/public'
 
-  const initialView = [
-    PUBLIC_INITIAL_VIEW.split(',', 2),
-    PUBLIC_INITIAL_VIEW.split(',')[2]
-  ]
+  const center = PUBLIC_INITIAL_VIEW.split(',')
   const zoomThreshold = 16
   const geojsonUrl = (bounds) => `${PUBLIC_API_URL}${bounds}`
 
-  let map, info, myLayer, selectedTask
-  let currentZoom = initialView[1]
+  let map, geoJsonData, selectedFeature
+  let zoom = PUBLIC_INITIAL_ZOOM
 
-  function createMap(container) {
-    let m = L.map(container, { preferCanvas: true }).setView(...initialView)
-    let attribution = `&copy; <a href="https://www.openstreetmap.org/copyright"` +
-      `target="_blank">OpenStreetMap</a>`
+  const attribution = `&copy; <a href="https://www.openstreetmap.org/copyright"` +
+        `target="_blank">OpenStreetMap</a>`
+  const mapOptions = { center, zoom }
+  const tileUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+  const tileLayerOptions = { minZoom: 5, maxZoom: 20, attribution }
 
-    m.attributionControl.setPrefix(false)
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution,
-      maxZoom: 20,
-      minZoom: 5,
-    }).addTo(m);
-
-    return m;
-  }
-
-  function mapAction(container) {
-    map = createMap(container)
-
-    map.on("moveend", handleMoveEnd)
-
-    info.addTo(map)
-
-    return {
-      destroy: () => {
-        map.remove();
-        map = null;
-      },
-    };
-  }
-
-  async function requestGeoJSON(bounds){
-    const response = await fetch(geojsonUrl(bounds)).then(r => r.json())
-
-    if (myLayer !== undefined) {
-      map.removeLayer(myLayer)
-    }
-    myLayer = L.geoJSON(response.features, { onEachFeature })
-    myLayer.addTo(map)
-  }
-
-  function onEachFeature({ properties }, layer){
-    layer.on("click", () => selectedTask = properties)
-    layer.on("mouseover", () => layer.setStyle({ fillColor: "orange", dashArray: "5,5" }))
-    layer.on("mouseout", () => myLayer.resetStyle())
-  }
-
-  function handleMoveEnd({ target }) {
-    currentZoom = target.getZoom()
-
-    info.update(currentZoom)
-
-    if (currentZoom >= zoomThreshold) {
-      const currentBounds = map.getBounds().toBBoxString()
-
-      requestGeoJSON(currentBounds)
+  async function handleMoveEnd() {
+    zoom = map.getMap().getZoom()
+    if (zoom >= zoomThreshold) {
+      const bounds = map.getMap().getBounds().toBBoxString()
+      const response = await fetch(geojsonUrl(bounds))
+      geoJsonData = await response.json()
     }
   }
 
-  function resizeMap() {
-    if (map) {
-      map.invalidateSize()
-    }
+  const scaleControlOptions = { maxWidth: 200, imperial: false }
+
+  onMount(() => {
+    map.getMap().zoomControl.setPosition('topright')
+  })
+
+  function setStyle(feature) {
+    const colors = ['green', 'blue']
+    return { fillColor: colors[feature.id % 2] }
   }
 
-  info = L.control({position: 'topleft'})
-  info.onAdd = function () {
-    this._div = L.DomUtil.create('div', "control")
-    this.update()
-    return this._div
+  const geoJsonOptions = {
+    style: setStyle,
+    onEachFeature: function(feature, layer) {
+      layer.on("click", () => {
+        console.info(feature)
+        selectedFeature = feature
+    })
+      layer.on("mouseover", () => {
+        layer.setStyle({ fillColor: "red", dashArray: "5,5" })
+        selectedFeature = feature
+      })
+      layer.on("mouseout", () => {
+        selectedFeature = null
+        layer.setStyle(setStyle(feature))
+      })
+    },
   };
-
-  info.update = function (value) {
-    this._div.innerHTML = `Zoom: ${value || map.getZoom()}`;
-  };
-
 </script>
-
-<svelte:window on:resize={resizeMap} />
 
 <div class="flex flex-col md:flex-row flex-grow">
   <div class="md:max-w-md w-full flex-grow px-4 mt-8">
     <div class="prose lg:prose-xl dark:prose-invert">
-      {#if currentZoom < zoomThreshold}
+      {#if zoom < zoomThreshold}
       <p>
         Aquí se visalizará información de los proyectos de importación visibles
         en el mapa.
@@ -104,12 +71,12 @@
         Haz zoom para ver las tareas.
       </p>
       {:else}
-        {#if selectedTask}
+        {#if selectedFeature}
         <ul>
-          <li>Código de municipio: {selectedTask.muncode}</li>
-          <li>Referencia: {selectedTask.localid}</li>
-          <li>Partes de edificio: {selectedTask.parts}</li>
-          <li>Estado: {selectedTask.status}</li>
+          <li>Código de municipio: {selectedFeature.properties.muncode}</li>
+          <li>Referencia: {selectedFeature.properties.localid}</li>
+          <li>Partes de edificio: {selectedFeature.properties.parts}</li>
+          <li>Estado: {selectedFeature.properties.status}</li>
         </ul>
         {:else}
         <p>
@@ -122,7 +89,18 @@
       {/if}
     </div>
   </div>
-  <div class="map w-full flex-grow z-0" use:mapAction />
+  <div class="w-full flex-grow z-0">
+    <LeafletMap
+      bind:this={map}
+      options={mapOptions}
+      events={['moveend']}
+      on:moveend={handleMoveEnd}
+    >
+      <TileLayer url={tileUrl} options={tileLayerOptions}/>
+      <ScaleControl position="bottomleft" options={scaleControlOptions}/>
+      <GeoJSON data={geoJsonData} options={geoJsonOptions}/>
+    </LeafletMap>
+  </div>
 </div>
 
 <style>

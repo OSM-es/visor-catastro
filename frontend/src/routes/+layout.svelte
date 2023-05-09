@@ -1,5 +1,6 @@
 <script>
   import '../app.postcss';
+  import "leaflet/dist/leaflet.css"
   import { page } from '$app/stores';
   import {
     Avatar,
