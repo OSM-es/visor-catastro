@@ -50,7 +50,7 @@ services:
       test: curl --fail http://localhost:5001/ || exit 1
     ports:
       - 5001:5001
-    command: ["./run.sh"]
+    command: ["./run_uploader.sh"]
     volumes:
       - ${CATASTRO_DATA:-./data}:/data
 
