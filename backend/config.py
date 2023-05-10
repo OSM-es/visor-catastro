@@ -22,7 +22,7 @@ dictConfig(
 
 class Config:
     SECRET_KEY = os.getenv("FLASK_SECRET_KEY", "flask secret key")
-    CLIENT_URL = os.getenv("CLIENT_URL", "http://localhost:5173")
+    CLIENT_URL = os.getenv("CLIENT_URL", "*")
     POSTGRES_USER = os.getenv("POSTGRES_USER", "admin")
     POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "admin")
     POSTGRES_DB = os.getenv("POSTGRES_DB", "gis")
@@ -30,3 +30,5 @@ class Config:
         f"postgresql://{POSTGRES_USER}:"
         f"{POSTGRES_PASSWORD}@postgres/{POSTGRES_DB}"
     )
+    OSM_ID = os.getenv("OSM_ID", "")
+    OSM_SECRET = os.getenv("OSM_SECRET", "")

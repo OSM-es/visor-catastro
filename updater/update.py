@@ -131,7 +131,7 @@ def check_prov(prov_code, municipios):
                             return False
                 municipios[mun_code] = mun_name
     if len(municipios) > len_mun:
-        print(f"La provincia {prov_code} aporta {len(municipios)} municipios")
+        print(f"Comprueba provincia {prov_code} {len(municipios)} municipios")
     return True
 
 def check_mun_diff(municipios):
