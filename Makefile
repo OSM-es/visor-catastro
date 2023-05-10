@@ -23,7 +23,7 @@ install:  ## Crea las carpetas de datos
 build:  ## Construir imágenes
 	@docker pull egofer/catatom2osm
 	@docker-compose build
-	@npm install --prefix frontend
+	@if [ "$(COMPOSE_PROFILES)" != "production" ]; then npm install --prefix frontend; fi
 
 .PHONY: up
 up: build  ## Inicia servicios
