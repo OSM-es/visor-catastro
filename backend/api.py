@@ -1,15 +1,10 @@
-from flask import Blueprint, Response
-import geopandas
+from flask import Blueprint
+from flask_restful import Api
 
-from models import db, Task
-
-api = Blueprint('api', __name__, url_prefix='/api')
+from resources import Status, Tasks
 
 
-@api.route("/<bounds>")
-def upload(bounds):
-    bounds = bounds.split(",")
-    bb = f"LINESTRING({bounds[0]} {bounds[1]}, {bounds[2]} {bounds[3]})"
-    sql = Task.query.filter(Task.geom.intersects(bb)).statement
-    df = geopandas.GeoDataFrame.from_postgis(sql=sql, con=db.get_engine())
-    return Response(df.to_json(), mimetype='application/json')
+api_bp = Blueprint('api', __name__, url_prefix='/api')
+api = Api(api_bp)
+api.add_resource(Status, '/')
+api.add_resource(Tasks, '/tasks')

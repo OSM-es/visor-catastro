@@ -9,7 +9,7 @@
 
   const center = PUBLIC_INITIAL_VIEW.split(',')
   const zoomThreshold = 16
-  const geojsonUrl = (bounds) => `${PUBLIC_API_URL}${bounds}`
+  const geojsonUrl = (bounds) => `${PUBLIC_API_URL}tasks?bounds=${bounds}`
 
   let map, geoJsonData, selectedFeature
   let zoom = PUBLIC_INITIAL_ZOOM

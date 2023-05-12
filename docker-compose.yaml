@@ -74,7 +74,7 @@ services:
       - ${CATASTRO_DATA:-./data}:/data
     command: ["./run.sh"]
     labels:
-      - traefik.http.routers.backend.rule=PathPrefix(`/api/`)
+      - traefik.http.routers.backend.rule=PathPrefix(`/api`)
       - traefik.http.services.backend.loadbalancer.server.port=5000
 
   frontend:

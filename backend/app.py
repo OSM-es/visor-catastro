@@ -25,7 +25,7 @@ def create_app():
     db.init_app(app)
     Migrate(app, db)
 
-    from api import api
-    app.register_blueprint(api)
+    from api import api_bp
+    app.register_blueprint(api_bp)
 
     return app
