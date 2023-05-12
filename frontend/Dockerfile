@@ -17,4 +17,4 @@ COPY --from=build /app/build .
 COPY --from=build /app/package.json .
 COPY --from=build /app/node_modules ./node_modules
 
-CMD ["node", "index.js"]
+CMD ["NODE_ENV", "production", "node", "index.js"]
