@@ -68,7 +68,7 @@ Reabre la sesión
 
     sudo make install
 
-Configura en .env.local
+Configura en frontend/.env.local
 
 PUBLIC_API_URL=http://visor-catastro.cartobase.es/api
 

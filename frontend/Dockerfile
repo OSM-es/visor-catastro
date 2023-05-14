@@ -13,8 +13,9 @@ FROM node:20.1.0-alpine3.17
 
 WORKDIR /app
 
+ENV NODE_ENV=production
 COPY --from=build /app/build .
 COPY --from=build /app/package.json .
 COPY --from=build /app/node_modules ./node_modules
 
-CMD ["NODE_ENV", "production", "node", "index.js"]
+CMD ["node", "index.js"]
