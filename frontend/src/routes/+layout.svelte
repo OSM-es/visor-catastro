@@ -1,7 +1,8 @@
 <script>
-  import '../app.postcss';
-  import "leaflet/dist/leaflet.css"
-  import { page } from '$app/stores';
+  import '../app.postcss'
+  import { page } from '$app/stores'
+	import { invalidateAll } from '$app/navigation'
+  import { PUBLIC_API_URL } from '$env/static/public'
   import {
     Avatar,
     Button,
@@ -16,16 +17,32 @@
     NavHamburger,
   } from 'flowbite-svelte'
   import logo from '$lib/images/Logo-spain-geo.png'
-  let avatar = 'https://upload.wikimedia.org/wikipedia/commons/8/8b/Creative-Tail-People-man-2.svg'
+
+  export let data
+
+  let user = data.user
   let signup = 'https://www.openstreetmap.org/user/new'
   let ulClass = 'flex flex-col md:flex-row md:space-x-8 items-center order-1 font-medium'
-  let logged = false
+  
   $: activeUrl = $page.url.pathname
-  $: isHomePage = $page.route.id === '/'
-  $: isFullPage = $page.route.id === '/explore'
+  $: isMapPage = $page.route.id === '/explore'
+  $: logged = Object.hasOwn(user || {}, 'display_name')
 
+  function auth() {
+    invalidateAll()
+    user = data.user
+  }
+  
   function login() {
-    logged = !logged
+    const options = 'location=yes,height=620,width=550,scrollbars=yes,status=yes'
+    window.open(PUBLIC_API_URL + '/login', '_blank', options)
+  }
+
+  async function logout() {
+    const resp = await fetch(PUBLIC_API_URL + '/logout', { credentials: 'include'})
+    if (resp.ok) {
+      user = {}
+    }
   }
 </script>
 
@@ -37,7 +54,7 @@
       let:hidden
       let:toggle
       fluid="true"
-      navClass="py-1 mx-auto {isFullPage ? 'px-2 sm:px-4 w-full': 'max-w-7xl px-4'}"
+      navClass="py-1 mx-auto {isMapPage ? 'px-2 sm:px-4 w-full': 'max-w-7xl px-4'}"
     >
       <NavBrand href="/">
         <img
@@ -51,14 +68,15 @@
       </NavBrand>
       <NavUl {hidden} {ulClass} class="order-1">
         <NavLi href="/learn" active={activeUrl.startsWith('/learn')}>Aprende</NavLi>
-        <NavLi href="/explore" active={isHomePage}>Explora</NavLi>
+        <NavLi href="/explore" active={isMapPage}>Explora</NavLi>
+        <NavLi id="auth" on:click={auth}>Auth</NavLi>
       </NavUl>
       <div class="flex md:order-2">
         {#if logged}
-          <Button pill color="light" id="avatar-menu" class="!p-0">
+          <Button pill color="light" id="avatar-menu" class="!p-0.5">
             <Chevron>
-              <Avatar src="{avatar}" class="mr-2"/>
-              <span class="sm:max-md:hidden">Cuenta OSM</span>
+              <Avatar src="{user.img.href}" class="mr-2"/>
+              <span class="sm:max-md:hidden">{user.display_name}</span>
             </Chevron>
           </Button>
           <Dropdown placement="bottom" triggeredBy="#avatar-menu">
@@ -67,7 +85,7 @@
               <DarkMode/>
             </DropdownItem>
             <DropdownItem>Ajustes</DropdownItem>
-            <DropdownItem on:click={login}>Cerrar sesión</DropdownItem>
+            <DropdownItem on:click={logout}>Cerrar sesión</DropdownItem>
           </Dropdown>
         {:else}
           <Button outline size="sm" on:click={login}>Iniciar sesión</Button>

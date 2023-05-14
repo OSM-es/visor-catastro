@@ -17,9 +17,17 @@ guarda estados de las parcelas.
 
     make install
 
-Configurar .env.development.local los municipios a descargar usando las 
+Configurar en .env.development.local los municipios a descargar usando las 
 variables INCLUDE_PROVS, EXCLUDE_PROVS, INCLUDE_MUNS, EXCLUDE_MUNS.
 La vista inicial del mapa se puede configurar en frontend/.env.local
+
+Para poder autenticar hay que añadir OSM_CLIENT_ID, OSM_CLIENT_SECRET
+obtenidos de https://www.openstreetmap.org/oauth2/applications/new
+
+La URI de redirección es http://127.0.0.1/api/authorize
+
+Marcar 'Leer preferencias de usuario'
+Descmarcar '¿Solicitud confidencial?'
 
     make build
 
@@ -57,11 +65,20 @@ CATASTRO_DATA=/var/catastro/
 COMPOSE_PROFILES=production
 
 Reabre la sesión
-    
+
     sudo make install
 
-Configurar el archivo .env.production.local
+Configura en .env.local
 
+PUBLIC_API_URL=http://visor-catastro.cartobase.es/api
+
+Configura en .env.production.local las claves a usar.
+
+En https://www.openstreetmap.org/oauth2/applications/new
+hay que obtener OSM_CLIENT_ID, OSM_CLIENT_SECRET y registrar la redirección a
+
+http:s//visor-catastro.cartobase.es/api/authorize
+    
     make build
 
 Poner en marcha los servicios

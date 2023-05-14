@@ -107,7 +107,6 @@ services:
       - traefik.http.routers.dozzle.rule=PathPrefix(`/logs`)
       - traefik.http.services.dozzle.loadbalancer.server.port=8080
 
-
   traefik:
     container_name: traefik
     image: traefik:v3.0

@@ -1,4 +1,5 @@
 <script>
+  import "leaflet/dist/leaflet.css"
   import { onMount } from 'svelte'
   import { GeoJSON, LeafletMap, ScaleControl, TileLayer } from 'svelte-leafletjs'
   import { 
@@ -9,7 +10,7 @@
 
   const center = PUBLIC_INITIAL_VIEW.split(',')
   const zoomThreshold = 16
-  const geojsonUrl = (bounds) => `${PUBLIC_API_URL}tasks?bounds=${bounds}`
+  const geojsonUrl = (bounds) => `${PUBLIC_API_URL}/tasks?bounds=${bounds}`
 
   let map, geoJsonData, selectedFeature
   let zoom = PUBLIC_INITIAL_ZOOM

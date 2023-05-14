@@ -20,11 +20,13 @@ def create_uploader():
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
-    origins = app.config['CLIENT_URL']
-    cors = CORS(app, resources={r"/*": {"origins": origins}}, supports_credentials=True)
+    origins = '*' if app.config.get('DEBUG', False) else app.config['CLIENT_URL']
+    CORS(app, resources={r'/*': {'origins': origins}}, supports_credentials=True)
     db.init_app(app)
     Migrate(app, db)
 
+    from auth import auth_bp
+    app.register_blueprint(auth_bp)
     from api import api_bp
     app.register_blueprint(api_bp)
 

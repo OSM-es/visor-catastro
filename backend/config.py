@@ -22,7 +22,7 @@ dictConfig(
 
 class Config:
     SECRET_KEY = os.getenv("FLASK_SECRET_KEY", "flask secret key")
-    CLIENT_URL = os.getenv("CLIENT_URL", "*")
+    CLIENT_URL = os.getenv("CLIENT_URL", "http://127.0.0.1:5173")
     POSTGRES_USER = os.getenv("POSTGRES_USER", "admin")
     POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "admin")
     POSTGRES_DB = os.getenv("POSTGRES_DB", "gis")
@@ -30,5 +30,6 @@ class Config:
         f"postgresql://{POSTGRES_USER}:"
         f"{POSTGRES_PASSWORD}@postgres/{POSTGRES_DB}"
     )
-    OSM_ID = os.getenv("OSM_ID", "")
-    OSM_SECRET = os.getenv("OSM_SECRET", "")
+    OSM_CLIENT_ID = os.getenv("OSM_CLIENT_ID", "")
+    OSM_CLIENT_SECRET = os.getenv("OSM_CLIENT_SECRET", "")
+    OSM_URL = os.getenv("OSM_URL", "https://www.openstreetmap.org")
