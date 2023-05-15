@@ -70,7 +70,7 @@ Reabre la sesión
 
 Configura en frontend/.env.local
 
-PUBLIC_API_URL=http://visor-catastro.cartobase.es/api
+PUBLIC_API_URL=https://visor-catastro.cartobase.es/api
 
 Configura en .env.production.local las claves a usar.
 

@@ -1,7 +1,8 @@
 <script>
   import '../app.postcss'
+  import { tick } from 'svelte';
   import { page } from '$app/stores'
-	import { invalidateAll } from '$app/navigation'
+  import { invalidateAll } from '$app/navigation'
   import { PUBLIC_API_URL } from '$env/static/public'
   import {
     Avatar,
@@ -26,22 +27,22 @@
   
   $: activeUrl = $page.url.pathname
   $: isMapPage = $page.route.id === '/explore'
-  $: logged = Object.hasOwn(user || {}, 'display_name')
 
-  function auth() {
-    invalidateAll()
-    user = data.user
-  }
-  
-  function login() {
-    const options = 'location=yes,height=620,width=550,scrollbars=yes,status=yes'
-    window.open(PUBLIC_API_URL + '/login', '_blank', options)
+  async function login(event) {
+    if (event.detail === '/auth') {
+      invalidateAll()
+      await tick()
+      user = data.user
+    } else {
+      const options = 'location=yes,height=620,width=550,scrollbars=yes,status=yes'
+      window.open(PUBLIC_API_URL + '/login', '_blank', options)
+    }
   }
 
   async function logout() {
     const resp = await fetch(PUBLIC_API_URL + '/logout', { credentials: 'include'})
     if (resp.ok) {
-      user = {}
+      user = null
     }
   }
 </script>
@@ -69,10 +70,9 @@
       <NavUl {hidden} {ulClass} class="order-1">
         <NavLi href="/learn" active={activeUrl.startsWith('/learn')}>Aprende</NavLi>
         <NavLi href="/explore" active={isMapPage}>Explora</NavLi>
-        <NavLi id="auth" on:click={auth}>Auth</NavLi>
       </NavUl>
       <div class="flex md:order-2">
-        {#if logged}
+        {#if user}
           <Button pill color="light" id="avatar-menu" class="!p-0.5">
             <Chevron>
               <Avatar src="{user.img.href}" class="mr-2"/>
@@ -88,7 +88,7 @@
             <DropdownItem on:click={logout}>Cerrar sesión</DropdownItem>
           </Dropdown>
         {:else}
-          <Button outline size="sm" on:click={login}>Iniciar sesión</Button>
+          <Button id="login" outline size="sm" on:click={login}>Iniciar sesión</Button>
         {/if}
         <NavHamburger on:click={toggle} />
       </div>

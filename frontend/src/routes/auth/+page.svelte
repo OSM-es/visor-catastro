@@ -7,7 +7,8 @@
 
     onMount(() => {
         if (window.opener) {
-            window.opener.document.getElementById('auth').dispatchEvent(new Event('click'))
+            const login = window.opener.document.getElementById('login')
+            login.dispatchEvent(new CustomEvent('click', {detail: '/auth'}))
             window.close()
         } else {
             goto('/')

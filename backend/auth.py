@@ -28,12 +28,9 @@ def get_oauth():
 def verify_token(token):
     """Verificador utilizado por auth.login_required"""
     try:
-        print(token)
         s = jwt.decode(token, current_app.secret_key)
-        print(s)
         s.validate()
     except JoseError as e:
-        print(e)
         return False
     return True
 
@@ -59,17 +56,11 @@ def authorize():
     resp.raise_for_status()
     data = resp.json()
     session['user'] = data['user']
-    print(session['user'])
     session.modified = True
-    print(session)
-    print(dir(session))
-    print(session.items())
-    print(id(session))
     token['exp'] = time.time() + 864000
     s = jwt.encode({'alg': 'HS256'}, token, current_app.secret_key)
-    print(s)
     resp = redirect(current_app.config.get('CLIENT_URL', '') + '/auth')
-    resp.set_cookie('token', value=s) #, httponly=True)
+    resp.set_cookie('token', value=s, httponly=True)
     return resp
 
 @auth_bp.route('/logout')

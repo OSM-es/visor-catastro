@@ -7,4 +7,4 @@ from auth import auth
 class User(Resource):
     def get(self):
         user = session.get('user')
-        return user or {}
+        return user
