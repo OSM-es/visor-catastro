@@ -38,6 +38,8 @@ def verify_token(token):
 def login():
     """Redirige a la página de login de OSM."""
     redirect_uri = url_for('auth.authorize', _external=True)
+    if not current_app.debug:
+        redirect_uri = redirect_uri.replace('http:', 'https:')
     return get_oauth().authorize_redirect(redirect_uri)
 
 @auth_bp.route('/authorize')
