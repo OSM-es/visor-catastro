@@ -53,6 +53,8 @@ services:
     command: ["./run_uploader.sh"]
     volumes:
       - ${CATASTRO_DATA:-./data}:/data
+    labels:
+      traefik.enable: "false"
 
   backend:
     container_name: backend
