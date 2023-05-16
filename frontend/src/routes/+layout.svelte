@@ -22,11 +22,16 @@
   export let data
 
   let user = data.user
-  let signup = 'https://www.openstreetmap.org/user/new'
+  let signupUrl = 'https://www.openstreetmap.org/user/new'
   let ulClass = 'flex flex-col md:flex-row md:space-x-8 items-center order-1 font-medium'
   
   $: activeUrl = $page.url.pathname
   $: isMapPage = $page.route.id === '/explore'
+
+  function signup() {
+    const options = 'location=yes,height=950,width=800,scrollbars=yes,status=yes'
+    window.open(signupUrl, '_blank', options)
+  }
 
   async function login(event) {
     if (event.detail === '/auth') {
@@ -88,7 +93,8 @@
             <DropdownItem on:click={logout}>Cerrar sesión</DropdownItem>
           </Dropdown>
         {:else}
-          <Button id="login" outline size="sm" on:click={login}>Iniciar sesión</Button>
+        <Button outline size="sm" color="light" class="max-md:hidden mr-2" on:click={signup}>Registrarse</Button>
+        <Button id="login" outline size="sm" on:click={login}>Iniciar sesión</Button>
         {/if}
         <NavHamburger on:click={toggle} />
       </div>
