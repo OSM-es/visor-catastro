@@ -10,6 +10,10 @@ export async function handle({ event, resolve }) {
           cookie: 'session=' + event.cookies.get('session')
         }
       })
+      if (resp.ok) {
+        const user = await resp.json()
+        event.locals.user = user
+      }
     } catch (e) {
       console.log('Falla comunicación con backend')
       console.log(e)
