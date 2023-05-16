@@ -52,7 +52,7 @@
   }
 </script>
 
-<div class="min-h-screen flex flex-col dark:bg-gray-900">
+<div class="h-screen flex flex-col dark:bg-gray-900">
   <header
     class="sticky top-0 z-40 w-full border-b border-gray-200 dark:border-gray-600"
   >
@@ -68,7 +68,7 @@
         class="mr-3 pt-1 h-12"
         alt="openstreetmap.es"
         />
-        <span class="whitespace-nowrap text-2xl font-semibold dark:text-white max-md:hidden">
+        <span class=" text-base sm:text-2xl font-semibold dark:text-white">
           visor-catastro
         </span>
       </NavBrand>
