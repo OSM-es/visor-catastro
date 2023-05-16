@@ -63,7 +63,7 @@
         class="mr-3 pt-1 h-12"
         alt="openstreetmap.es"
         />
-        <span class="whitespace-nowrap text-2xl font-semibold dark:text-white">
+        <span class="whitespace-nowrap text-2xl font-semibold dark:text-white max-md:hidden">
           visor-catastro
         </span>
       </NavBrand>
@@ -76,7 +76,7 @@
           <Button pill color="light" id="avatar-menu" class="!p-0.5">
             <Chevron>
               <Avatar src="{user.img.href}" class="mr-2"/>
-              <span class="sm:max-md:hidden">{user.display_name}</span>
+              <span class="max-md:hidden">{user.display_name}</span>
             </Chevron>
           </Button>
           <Dropdown placement="bottom" triggeredBy="#avatar-menu">
