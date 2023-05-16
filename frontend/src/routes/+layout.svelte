@@ -47,7 +47,7 @@
   async function logout() {
     const resp = await fetch(PUBLIC_API_URL + '/logout', { credentials: 'include'})
     if (resp.ok) {
-      user = null
+      invalidateAll()
     }
   }
 </script>
@@ -89,11 +89,13 @@
               Tema:
               <DarkMode/>
             </DropdownItem>
-            <DropdownItem>Ajustes</DropdownItem>
+            <DropdownItem><a href="/settings">Ajustes</a></DropdownItem>
             <DropdownItem on:click={logout}>Cerrar sesión</DropdownItem>
           </Dropdown>
         {:else}
-        <Button outline size="sm" color="light" class="max-md:hidden mr-2" on:click={signup}>Registrarse</Button>
+        <Button outline size="sm" color="light" class="max-md:hidden mr-2" on:click={signup}>
+          Registrarse
+        </Button>
         <Button id="login" outline size="sm" on:click={login}>Iniciar sesión</Button>
         {/if}
         <NavHamburger on:click={toggle} />
