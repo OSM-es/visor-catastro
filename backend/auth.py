@@ -59,6 +59,7 @@ def authorize():
     data = resp.json()
     session['user'] = data['user']
     session.modified = True
+    session.permanent = True
     token['exp'] = time.time() + 864000
     s = jwt.encode({'alg': 'HS256'}, token, current_app.secret_key)
     resp = redirect(current_app.config.get('CLIENT_URL', '') + '/auth')
