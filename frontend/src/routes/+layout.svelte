@@ -21,10 +21,10 @@
 
   export let data
 
-  let user = data.user
   let signupUrl = 'https://www.openstreetmap.org/user/new'
   let ulClass = 'flex flex-col md:flex-row md:space-x-8 items-center order-1 font-medium'
   
+  $: user = data.user
   $: activeUrl = $page.url.pathname
   $: isMapPage = $page.route.id === '/explore'
 
@@ -36,8 +36,6 @@
   async function login(event) {
     if (event.detail === '/auth') {
       invalidateAll()
-      await tick()
-      user = data.user
     } else {
       const options = 'location=yes,height=620,width=550,scrollbars=yes,status=yes'
       window.open(PUBLIC_API_URL + '/login', '_blank', options)
