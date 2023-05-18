@@ -63,7 +63,7 @@ def authorize():
     token['exp'] = time.time() + 864000
     s = jwt.encode({'alg': 'HS256'}, token, current_app.secret_key)
     resp = redirect(current_app.config.get('CLIENT_URL', '') + '/auth')
-    resp.set_cookie('token', value=s, httponly=True)
+    resp.set_cookie('token', value=s, httponly=True, expires=token['exp'])
     return resp
 
 @auth_bp.route('/logout')
