@@ -35,7 +35,7 @@
 
   async function login(event) {
     if (event.detail === '/auth') {
-      invalidateAll()
+      await invalidateAll()
     } else {
       const options = 'location=yes,height=620,width=550,scrollbars=yes,status=yes'
       window.open(PUBLIC_API_URL + '/login', '_blank', options)
@@ -45,7 +45,7 @@
   async function logout() {
     const resp = await fetch(PUBLIC_API_URL + '/logout', { credentials: 'include'})
     if (resp.ok) {
-      invalidateAll()
+      await invalidateAll()
     }
   }
 </script>
@@ -101,5 +101,11 @@
     </Navbar>
   </header>
 
-  <slot />
+  {#if isMapPage}
+  <slot/>
+  {:else}
+  <main class="mx-4 mt-8 lg:mx-auto">
+    <slot />
+  </main>
+  {/if}
 </div>

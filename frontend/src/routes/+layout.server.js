@@ -1,6 +1,6 @@
 import { PUBLIC_API_URL } from '$env/static/public'
 
-export async function load({ fetch, locals, url }) {
+export async function load({ fetch, locals }) {
   if (!locals.user) {
     try {
       const resp = await fetch(PUBLIC_API_URL + '/user')
