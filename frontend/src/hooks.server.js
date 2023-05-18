@@ -3,9 +3,7 @@ import { redirect } from '@sveltejs/kit'
 
 export async function handle({ event, resolve }) {
   event.locals.token = event.cookies.get('token') || ''
-  console.info(event.url.href)
-  console.info(event.locals.token)
-  if (!event.locals.user) {
+  if (!event.url.pathname.startsWith('/api') && !event.locals.user) {
     try {
       const resp = await event.fetch(PUBLIC_API_URL + '/user')
       if (resp.ok) {
