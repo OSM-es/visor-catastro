@@ -33,3 +33,4 @@ class Config:
     OSM_CLIENT_ID = os.getenv("OSM_CLIENT_ID", "")
     OSM_CLIENT_SECRET = os.getenv("OSM_CLIENT_SECRET", "")
     OSM_URL = os.getenv("OSM_URL", "https://www.openstreetmap.org")
+    SESSION_COOKIE_SAMESITE = 'Lax'
