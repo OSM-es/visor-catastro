@@ -1,7 +1,7 @@
 <script>
   import '../app.postcss'
   import { page } from '$app/stores'
-  import { invalidateAll } from '$app/navigation'
+  import { invalidate } from '$app/navigation'
   import { PUBLIC_API_URL } from '$env/static/public'
   import {
     Avatar,
@@ -34,7 +34,7 @@
 
   async function login(event) {
     if (event.detail === '/auth') {
-      await invalidateAll()
+      await invalidate('data:user')
     } else {
       const options = 'location=yes,height=620,width=550,scrollbars=yes,status=yes'
       window.open(PUBLIC_API_URL + '/login', '_blank', options)
@@ -44,7 +44,7 @@
   async function logout() {
     const resp = await fetch(PUBLIC_API_URL + '/logout', { credentials: 'include'})
     if (resp.ok) {
-      await invalidateAll()
+      await invalidate('data:user')
     }
   }
 </script>

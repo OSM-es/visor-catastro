@@ -1,5 +1,4 @@
 import Api from '$lib/api'
-import { redirect } from '@sveltejs/kit'
 
 export async function handle({ event, resolve }) {
   event.locals.token = event.cookies.get('token') || ''
@@ -9,11 +8,5 @@ export async function handle({ event, resolve }) {
     event.locals.user = await event.locals.api.get('user')
   }
   
-  const response = await resolve(event)
-  
-  if (event.locals.loginRequired && !event.locals.user) {
-    throw redirect(302, '/')
-  }
-  
-  return response
+  return await resolve(event)
 }

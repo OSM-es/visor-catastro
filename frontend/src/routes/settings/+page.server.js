@@ -1,5 +1,9 @@
-export async function load({ locals }) {
-  locals.loginRequired = true
+import { redirect } from '@sveltejs/kit'
+
+export function load({ depends, locals }) {
+  depends('data:user')
+
+  if (!locals.user) throw redirect(302, '/')
 }
 
 export const actions = {
