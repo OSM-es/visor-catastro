@@ -1,6 +1,5 @@
 <script>
   import '../app.postcss'
-  import { tick } from 'svelte';
   import { page } from '$app/stores'
   import { invalidateAll } from '$app/navigation'
   import { PUBLIC_API_URL } from '$env/static/public'

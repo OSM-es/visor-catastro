@@ -12,4 +12,4 @@ class User(Resource):
     @auth.login_required
     def post(self):
         print(request.json)
-        return 'ok'
+        return {'status': 'ok'}

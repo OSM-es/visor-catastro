@@ -27,9 +27,12 @@ def get_oauth():
 @auth.verify_token
 def verify_token(token):
     """Verificador utilizado por auth.login_required"""
+    print('verify', token)
     try:
         s = jwt.decode(token, current_app.secret_key)
+        print(s)
         s.validate()
+        print('valid')
     except JoseError as e:
         return False
     return True
@@ -70,4 +73,4 @@ def authorize():
 def logout():
     """Libera los datos del usuario almacenados en la sessión."""
     session.pop('user', None)
-    return 'logged out'
+    return {'logged out'}
