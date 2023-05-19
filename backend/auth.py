@@ -73,4 +73,4 @@ def authorize():
 def logout():
     """Libera los datos del usuario almacenados en la sessión."""
     session.pop('user', None)
-    return {'logged out'}
+    return 'logged out'
