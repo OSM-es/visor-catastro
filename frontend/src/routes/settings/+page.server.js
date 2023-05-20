@@ -2,15 +2,18 @@ import { redirect } from '@sveltejs/kit'
 
 export function load({ depends, locals }) {
   depends('data:user')
+  depends('data:status')
 
   if (!locals.user) throw redirect(302, '/')
+
+  return { status: locals.status || '--' }
 }
 
 export const actions = {
-  default: async ({ locals, request }) => {
-    const token = locals.token
+  save: async ({ locals, request }) => {
     const formData = await request.formData()
     const data = Object.fromEntries(formData)
-    await locals.api.post('user', data, token)
+    const result = await locals.api.post('user', data, locals.user.token)
+    return result
   }
 }

@@ -27,12 +27,9 @@ def get_oauth():
 @auth.verify_token
 def verify_token(token):
     """Verificador utilizado por auth.login_required"""
-    print('verify', token)
     try:
         s = jwt.decode(token, current_app.secret_key)
-        print(s)
         s.validate()
-        print('valid')
     except JoseError as e:
         return False
     return True
@@ -57,16 +54,16 @@ def authorize():
         token = get_oauth().authorize_access_token(verify=True)
     except OAuthError:
         abort(404, description="Autorización denegada")
+    token['exp'] = time.time() + 864000
     resp = get_oauth().get('user/details.json')
     resp.raise_for_status()
     data = resp.json()
+    s = jwt.encode({'alg': 'HS256'}, token, current_app.secret_key)
+    data['user']['token'] = s.decode('utf-8')
     session['user'] = data['user']
     session.modified = True
     session.permanent = True
-    token['exp'] = time.time() + 864000
-    s = jwt.encode({'alg': 'HS256'}, token, current_app.secret_key)
     resp = redirect(current_app.config.get('CLIENT_URL', '') + '/auth')
-    resp.set_cookie('token', value=s, httponly=True, expires=token['exp'])
     return resp
 
 @auth_bp.route('/logout')
