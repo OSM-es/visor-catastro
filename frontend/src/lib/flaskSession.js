@@ -9,6 +9,7 @@ const doUnzip = promisify(unzip)
 export default async function decode(cookie) {
   let compressed = false
   let payload = cookie
+  if (!payload) return {}
 
   if (payload.startsWith('.')) {
     compressed = true
