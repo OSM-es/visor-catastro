@@ -3,17 +3,13 @@
   import { Button, Input } from 'flowbite-svelte'
 
   export let data
+	export let form
 
-  let status = ''
   $: user = data.user
 
-  const updateStatus = () => {
-    return ({ result, update }) => {
-      if (result.type === 'success') {
-        status = result.data.status
-      } else {
-        update()
-      }
+  const updateForm = () => {
+    return ({ update }) => {
+      update({ reset: false })
     }
   }
 </script>
@@ -27,12 +23,16 @@
     <li>Ediciones: {user.changesets.count}</li>
     <li>Mensajes sin leer: {user.messages.received.unread}</li>
 	</ul>
-	<form use:enhance={updateStatus} 
+	<form use:enhance={updateForm} 
     method="POST"
     action="?/save"
   >
-    <Input type="email" name="email" placeholder="email" />
+    <Input
+      type="email"
+      name="email"
+      value={form?.email ?? ''}
+    />
     <Button type="submit">Enviar</Button>
 	</form>
-  <p>{status}</p>
+  <p>{form?.status ?? ''}</p>
 </article>
