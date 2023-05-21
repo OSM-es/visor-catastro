@@ -1,0 +1,33 @@
+<script>
+	import { createEventDispatcher } from 'svelte'
+  
+  export let tasks
+
+  const dispatch = createEventDispatcher()
+</script>
+
+<div class="prose dark:prose-invert">
+{#if !tasks || tasks.length === 0}
+  <div>No hay tareas aquí.</div>
+{:else}
+  <p>Selecciona una tarea.</p>
+  <div>
+    {#each tasks as task (task.id)}
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+      <div
+        on:click={() => dispatch('click', { feature: task })}
+        on:mouseover={() => dispatch('mouseover', { feature: task })}
+        on:mouseout={() => dispatch('mouseout')}
+        class="hover:bg-amber-400"
+      >
+        {task.properties.muncode}
+        {task.properties.localid}
+        {task.properties.type}
+        {task.properties.parts}
+        {task.properties.status}
+      </div>
+    {/each}
+  </div>
+{/if}
+</div>

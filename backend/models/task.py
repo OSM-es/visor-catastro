@@ -1,7 +1,21 @@
+from enum import Enum
+
 from geoalchemy2 import Geometry, Index
 
 from models import db
-from models.status import TaskStatus
+
+
+class TaskStatus(Enum):
+    READY_FOR_ADDRESSES = 0
+    LOCKED_FOR_ADDRESSES = 1
+    READY_FOR_MAPPING = 2
+    LOCKED_FOR_MAPPING = 3
+    MAPPED = 4
+    LOCKED_FOR_VALIDATION = 5
+    VALIDATED = 6
+    INVALIDATED = 7
+    BLOCKED_BY_SYSTEM = 8
+    NEED_UPDATE = 9
 
 
 class Task(db.Model):
@@ -11,7 +25,7 @@ class Task(db.Model):
     zone = db.Column(db.String)
     type = db.Column(db.String)
     parts = db.Column(db.Integer)
-    status = db.Column(db.Integer, default=TaskStatus.READY.value)
+    status = db.Column(db.Integer, default=TaskStatus.READY_FOR_ADDRESSES.value)
     geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
     __table_args__ = (Index('codes_index', 'localid', 'muncode'), )
 
