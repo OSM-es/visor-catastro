@@ -29,6 +29,7 @@ Mako==1.2.4
 MarkupSafe==2.1.2
 munch==2.5.0
 numpy==1.24.2
+osm2geojson==0.2.4
 packaging==23.1
 pandas==2.0.0
 psycopg2==2.9.6

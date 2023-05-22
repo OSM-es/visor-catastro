@@ -25,7 +25,7 @@
   
   $: user = data.user
   $: activeUrl = $page.url.pathname
-  $: isMapPage = $page.route.id === '/explore'
+  $: isMapPage = $page.url.pathname.startsWith('/explore')
 
   function signup() {
     const options = 'location=yes,height=950,width=800,scrollbars=yes,status=yes'

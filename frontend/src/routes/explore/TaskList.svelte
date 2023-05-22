@@ -1,6 +1,7 @@
 <script>
 	import { createEventDispatcher } from 'svelte'
-  
+  import { goto } from '$app/navigation'
+
   export let tasks
 
   const dispatch = createEventDispatcher()
@@ -16,10 +17,10 @@
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       <!-- svelte-ignore a11y-mouse-events-have-key-events -->
       <div
-        on:click={() => dispatch('click', { feature: task })}
+        on:click={() => goto('/explore/task/' + task.id)}
         on:mouseover={() => dispatch('mouseover', { feature: task })}
         on:mouseout={() => dispatch('mouseout')}
-        class="hover:bg-amber-400"
+        class="hover:bg-amber-400 cursor-pointer"
       >
         {task.properties.muncode}
         {task.properties.localid}

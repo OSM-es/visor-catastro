@@ -35,3 +35,13 @@ class Task(db.Model):
 
     def __str__(self):
         return f"{self.muncode} {self.localId} {self.type} {self.parts}"
+
+    def asdict(self):
+        return {
+            'id': self.id,
+            'localId': self.localId,
+            'muncode': self.muncode,
+            'type': self.type,
+            'parts': self.parts,
+            'status': self.status,
+        }

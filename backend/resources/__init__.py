@@ -1,6 +1,6 @@
 from flask_restful import Resource
 
-from resources.tasks import Tasks
+from resources.tasks import Tasks, Task
 from resources.user import User
 
 

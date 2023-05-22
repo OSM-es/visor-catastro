@@ -10,6 +10,7 @@
   import { Spinner } from 'flowbite-svelte'
   import TaskList from './TaskList.svelte'
   import TaskInfo from './TaskInfo.svelte'
+  import { goto } from '$app/navigation'
 
   const zoomThreshold = 16
   const geojsonUrl = (bounds) => `${PUBLIC_API_URL}/tasks?bounds=${bounds}`
@@ -23,7 +24,7 @@
         `target="_blank">OpenStreetMap</a>`
   const mapOptions = { center, zoom }
   const tileUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-  const tileLayerOptions = { minZoom: 5, maxZoom: 20, attribution }
+  const tileLayerOptions = { minZoom: 5, maxZoom: 19, attribution }
   const scaleControlOptions = { maxWidth: 200, imperial: false }
 
 
@@ -52,13 +53,8 @@
     }
   }
 
-	function handleClick(feature, layer) {
-    if (!selectedFeature) {
-      selectedFeature = feature
-      hoveredFeature = null
-      previewFeature = null
-      updateStyle(feature, layer)
-    }
+	function handleClick(feature) {
+    goto('/explore/task/' + feature.properties.id)
 	}
 
   function handleMouseover(feature, layer) {
