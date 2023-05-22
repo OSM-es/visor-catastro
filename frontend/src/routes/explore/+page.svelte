@@ -15,26 +15,33 @@
   const geojsonUrl = (bounds) => `${PUBLIC_API_URL}/tasks?bounds=${bounds}`
 
   let map, geoJsonData, previewFeature, hoveredFeature, selectedFeature
+  let center = PUBLIC_INITIAL_VIEW
   let zoom = PUBLIC_INITIAL_ZOOM
   let loading = false
 
   const attribution = `&copy; <a href="https://www.openstreetmap.org/copyright"` +
         `target="_blank">OpenStreetMap</a>`
-  const mapOptions = { center: PUBLIC_INITIAL_VIEW, zoom }
+  const mapOptions = { center, zoom }
   const tileUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
   const tileLayerOptions = { minZoom: 5, maxZoom: 20, attribution }
   const scaleControlOptions = { maxWidth: 200, imperial: false }
 
 
-  async function handleMoveEnd() {
-    zoom = map.getMap().getZoom()
+  async function fetchData(bounds, zoom) {
     if (zoom >= zoomThreshold) {
-      const bounds = map.getMap().getBounds().toBBoxString()
       loading = true
       const response = await fetch(geojsonUrl(bounds))
       geoJsonData = await response.json()
       loading = false
     }
+  }
+
+  fetchData(center, zoom)
+
+  function handleMoveEnd() {
+    zoom = map.getMap().getZoom()
+    const bounds = map.getMap().getBounds().toBBoxString()
+    fetchData(bounds, zoom)
   }
 
   function updateStyle(feature, layer) {
