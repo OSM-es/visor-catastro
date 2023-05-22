@@ -7,6 +7,7 @@
     PUBLIC_INITIAL_ZOOM,
     TASK_COLORS
   } from '$lib/config'
+  import { Spinner } from 'flowbite-svelte'
   import TaskList from './TaskList.svelte'
   import TaskInfo from './TaskInfo.svelte'
 
@@ -15,6 +16,7 @@
 
   let map, geoJsonData, previewFeature, hoveredFeature, selectedFeature
   let zoom = PUBLIC_INITIAL_ZOOM
+  let loading = false
 
   const attribution = `&copy; <a href="https://www.openstreetmap.org/copyright"` +
         `target="_blank">OpenStreetMap</a>`
@@ -28,8 +30,10 @@
     zoom = map.getMap().getZoom()
     if (zoom >= zoomThreshold) {
       const bounds = map.getMap().getBounds().toBBoxString()
+      loading = true
       const response = await fetch(geojsonUrl(bounds))
       geoJsonData = await response.json()
+      loading = false
     }
   }
 
@@ -112,7 +116,10 @@
   </div>
   <div class="md:max-w-md w-full flex-grow overflow-scroll px-4 pt-8 border-l-2 border-gray-200 dark:border-gray-600">
     <div class="h-full max-h-0">
-      {#if zoom < zoomThreshold}
+      {#if loading}
+        <span>Cargando datos... </span>
+        <Spinner size={4} />
+      {:else if zoom < zoomThreshold}
         <div class="prose lg:prose-xl dark:prose-invert">
           <p>
             Aquí se visalizará información de los proyectos de importación visibles
