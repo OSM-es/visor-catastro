@@ -20,8 +20,8 @@ class TaskStatus(Enum):
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    muncode = db.Column(db.String)
-    localId = db.Column('localid', db.String)
+    muncode = db.Column(db.String, index=True)
+    localId = db.Column('localid', db.String, index=True)
     zone = db.Column(db.String)
     type = db.Column(db.String)
     parts = db.Column(db.Integer)
