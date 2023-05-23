@@ -1,31 +1,17 @@
 <script>
-  import 'leaflet/dist/leaflet.css'
-  import { GeoJSON, LeafletMap, ScaleControl, TileLayer } from 'svelte-leafletjs'
-  import {
-    PUBLIC_API_URL,
-    PUBLIC_INITIAL_VIEW,
-    PUBLIC_INITIAL_ZOOM,
-    TASK_COLORS
-  } from '$lib/config'
   import { Spinner } from 'flowbite-svelte'
-  import TaskList from './TaskList.svelte'
   import TaskInfo from './TaskInfo.svelte'
+  import TaskList from './TaskList.svelte'
   import { goto } from '$app/navigation'
+
+  import { PUBLIC_API_URL, TASK_COLORS } from '$lib/config'
+  import Map from '$lib/Map.svelte'
+
+  let map, geoJsonData, hoveredFeature, previewFeature, center, zoom
+  let loading = false
 
   const zoomThreshold = 16
   const geojsonUrl = (bounds) => `${PUBLIC_API_URL}/tasks?bounds=${bounds}`
-
-  let map, geoJsonData, previewFeature, hoveredFeature, selectedFeature
-  let center = PUBLIC_INITIAL_VIEW
-  let zoom = PUBLIC_INITIAL_ZOOM
-  let loading = false
-
-  const attribution = `&copy; <a href="https://www.openstreetmap.org/copyright"` +
-        `target="_blank">OpenStreetMap</a>`
-  const mapOptions = { center, zoom }
-  const tileUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-  const tileLayerOptions = { minZoom: 5, maxZoom: 19, attribution }
-  const scaleControlOptions = { maxWidth: 200, imperial: false }
 
 
   async function fetchData(bounds, zoom) {
@@ -59,18 +45,14 @@
 
   function handleMouseover(feature, layer) {
     hoveredFeature = feature
-    if (!selectedFeature) {
-      previewFeature = layer ? feature : null
-      updateStyle(feature, layer)
-    }
+    previewFeature = layer ? feature : null
+    updateStyle(feature, layer)
   }
 
   function handleMouseout(feature, layer) {
-    if (!selectedFeature) {
-      hoveredFeature = null
-      previewFeature = null
-      updateStyle(feature, layer)
-    }
+    hoveredFeature = null
+    previewFeature = null
+    updateStyle(feature, layer)
   }
 
   function setStyle(feature) {
@@ -81,10 +63,6 @@
       dashArray: null,
       weight: 1,
       color: '#3388ff', 
-    }
-    if (feature.properties.id === selectedFeature?.properties?.id) {
-      style.weight = 2
-      style.color = 'black'
     }
     if (feature.properties.id === hoveredFeature?.properties?.id) {
       style.dashArray = '5,5'
@@ -106,16 +84,12 @@
 
 <div class="flex flex-col md:flex-row flex-grow">
   <div class="w-full flex-grow z-0">
-    <LeafletMap
-      bind:this={map}
-      options={mapOptions}
-      events={['moveend']}
+    <Map
+      bind:map
+      bind:geoJsonData
+      geoJsonOptions={geoJsonOptions}
       on:moveend={handleMoveEnd}
-    >
-      <TileLayer url={tileUrl} options={tileLayerOptions}/>
-      <ScaleControl position="bottomleft" options={scaleControlOptions}/>
-      <GeoJSON data={geoJsonData} options={geoJsonOptions}/>
-    </LeafletMap>
+    />
   </div>
   <div class="md:max-w-md w-full flex-grow overflow-scroll px-4 pt-8 border-l-2 border-gray-200 dark:border-gray-600">
     <div class="h-full max-h-0">
@@ -139,23 +113,15 @@
             Sed turpis tincidunt id aliquet risus. Id velit ut tortor pretium. Ipsum faucibus vitae aliquet nec ullamcorper sit amet risus. Fermentum iaculis eu non diam phasellus vestibulum lorem sed. Sagittis vitae et leo duis. Tempus quam pellentesque nec nam aliquam sem. Elit ut aliquam purus sit amet luctus venenatis. Rhoncus est pellentesque elit ullamcorper dignissim cras tincidunt. Eget nulla facilisi etiam dignissim diam quis enim. Eu feugiat pretium nibh ipsum consequat. Mauris commodo quis imperdiet massa tincidunt nunc pulvinar sapien. Arcu non odio euismod lacinia at quis risus.
           </p>
         </div>
+      {:else if previewFeature}
+        <TaskInfo task={hoveredFeature}/>
       {:else}
-        {#if previewFeature}
-          <TaskInfo task={hoveredFeature}/>
-        {:else if selectedFeature}
-          <TaskInfo 
-            task={selectedFeature}
-            edit={true}
-            on:update={() => selectedFeature = null}
-          />
-        {:else}
-          <TaskList
-            tasks={geoJsonData?.features}
-            on:click={(event) => handleClick(event.detail.feature)}
-            on:mouseover={(event) => handleMouseover(event.detail.feature)}
-            on:mouseout={(event) => handleMouseover()}
-          />
-        {/if}
+        <TaskList
+          tasks={geoJsonData?.features}
+          on:click={(event) => handleClick(event.detail.feature)}
+          on:mouseover={(event) => handleMouseover(event.detail.feature)}
+          on:mouseout={(event) => handleMouseover()}
+        />
       {/if}
     </div>
   </div>

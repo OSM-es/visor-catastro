@@ -1,12 +1,13 @@
-from flask import Response, request
+from flask import Response, abort, current_app, request
 from flask_restful import Resource
 import geopandas
 import gzip
 import osm2geojson
 
 import models
+from config import Config
 
-UPDATE = '/data/update/'  # TODO: const
+UPDATE = Config.UPDATE_PATH
 
 
 class Tasks(Resource):
@@ -24,6 +25,8 @@ class Tasks(Resource):
 class Task(Resource):
     def get(self, id):
         task = models.Task.query.get(id)
+        if not task:
+            abort(404)
         fn = UPDATE + task.muncode + '/tasks/' + task.localId + '.osm.gz'
         with gzip.open(fn) as fo:
             xml = fo.read()

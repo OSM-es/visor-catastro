@@ -1,8 +1,7 @@
 <script>
   import '../app.postcss'
   import { page } from '$app/stores'
-  import { invalidate } from '$app/navigation'
-  import { PUBLIC_API_URL } from '$lib/config'
+  import { login, logout } from '$lib/user'
   import {
     Avatar,
     Button,
@@ -30,22 +29,6 @@
   function signup() {
     const options = 'location=yes,height=950,width=800,scrollbars=yes,status=yes'
     window.open(signupUrl, '_blank', options)
-  }
-
-  async function login(event) {
-    if (event.detail === '/auth') {
-      await invalidate('data:user')
-    } else {
-      const options = 'location=yes,height=620,width=550,scrollbars=yes,status=yes'
-      window.open(PUBLIC_API_URL + '/login', '_blank', options)
-    }
-  }
-
-  async function logout() {
-    const resp = await fetch(PUBLIC_API_URL + '/logout', { credentials: 'include'})
-    if (resp.ok) {
-      await invalidate('data:user')
-    }
   }
 </script>
 

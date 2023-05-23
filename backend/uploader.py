@@ -14,8 +14,9 @@ from shapely import GeometryCollection
 from geoalchemy2.shape import from_shape
 
 from models import db, Municipality, Task
+from config import Config
 
-UPDATE = '/data/update/'
+UPDATE = Config.UPDATE_PATH
 uploader = Blueprint('uploader', __name__, url_prefix='/')
 
 
