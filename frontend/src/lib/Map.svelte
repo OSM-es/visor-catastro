@@ -7,10 +7,10 @@
   export let map
   export let geoJsonData
   export let geoJsonOptions = {}
+  export let center = PUBLIC_INITIAL_VIEW
+  export let zoom = PUBLIC_INITIAL_ZOOM
 
   let getGeoJSON
-  let center = PUBLIC_INITIAL_VIEW
-  let zoom = PUBLIC_INITIAL_ZOOM
 
   const dispatch = createEventDispatcher()
 

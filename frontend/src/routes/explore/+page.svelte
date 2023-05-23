@@ -3,32 +3,42 @@
   import TaskInfo from './TaskInfo.svelte'
   import TaskList from './TaskList.svelte'
   import { goto } from '$app/navigation'
+  import { onMount } from 'svelte'
 
   import { PUBLIC_API_URL, TASK_COLORS } from '$lib/config'
   import Map from '$lib/Map.svelte'
 
-  let map, geoJsonData, hoveredFeature, previewFeature, center, zoom
+  export let data
+
+  
+  let map, geoJsonData, hoveredFeature, previewFeature
   let loading = false
+  let center = data.center
+  let zoom = data.zoom
 
   const zoomThreshold = 16
   const geojsonUrl = (bounds) => `${PUBLIC_API_URL}/tasks?bounds=${bounds}`
 
 
-  async function fetchData(bounds, zoom) {
+  async function fetchData() {
     if (zoom >= zoomThreshold) {
       loading = true
+      const bounds = map.getMap().getBounds().toBBoxString()
       const response = await fetch(geojsonUrl(bounds))
       geoJsonData = await response.json()
       loading = false
     }
   }
 
-  fetchData(center, zoom)
+  onMount(handleMoveEnd)
 
   function handleMoveEnd() {
     zoom = map.getMap().getZoom()
-    const bounds = map.getMap().getBounds().toBBoxString()
-    fetchData(bounds, zoom)
+    center = map.getMap().getCenter()
+    const lat = center.lat.toFixed(4)
+    const lng = center.lng.toFixed(4)
+    fetchData()
+    goto(`/explore?map=${zoom}/${lat}/${lng}`)
   }
 
   function updateStyle(feature, layer) {
@@ -87,6 +97,8 @@
     <Map
       bind:map
       bind:geoJsonData
+      center={center}
+      zoom={zoom}
       geoJsonOptions={geoJsonOptions}
       on:moveend={handleMoveEnd}
     />
