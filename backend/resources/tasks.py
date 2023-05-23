@@ -30,7 +30,14 @@ class Task(Resource):
         fn = UPDATE + task.muncode + '/tasks/' + task.localId + '.osm.gz'
         with gzip.open(fn) as fo:
             xml = fo.read()
-        geojson = osm2geojson.xml2geojson(xml)
+        geojson = osm2geojson.xml2geojson(xml, filter_used_refs=False)
+        filtered = {'type': geojson['type'], 'features': []}
+        for f in geojson['features']:
+            tags = ''
+            if 'tags' in f['properties']:
+                tags = '-'.join(f['properties'].get('tags',{}).keys())
+            if f['properties']['type'] != 'node' or 'addr' in tags:
+                filtered['features'].append(f)
         data = task.asdict()
-        data['content'] = geojson
+        data['content'] = filtered
         return data
