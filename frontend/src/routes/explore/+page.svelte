@@ -69,7 +69,6 @@
     const colors = Object.values(TASK_COLORS)
     const style = { 
       fillColor: colors[feature.properties.status % colors.length],
-      fillOpacity: 1,
       dashArray: null,
       weight: 1,
       color: '#3388ff', 
