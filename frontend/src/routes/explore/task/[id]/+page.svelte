@@ -1,9 +1,10 @@
 <script>
   import L from 'leaflet'
-  import { Button, Input } from 'flowbite-svelte'
+  import { Button, Input, Label } from 'flowbite-svelte'
   import { onMount } from 'svelte'
   import { goto } from '$app/navigation'
   import { GeoJSON } from 'svelte-leafletjs'
+	import { enhance } from '$app/forms'
 
   import { login } from '$lib/user'
   import Map from '$lib/Map.svelte'
@@ -74,6 +75,14 @@
     goto(`/explore?map=${getUrl(-1)}`)
   }
 
+  const updateStatus = () => {
+    return async ({ update }) => {
+      await update()
+      exit()
+    }
+  }
+
+
   onMount(() => {
     map.getMap().fitBounds(getGeoJSON().getBounds())
     initialZoom = zoom
@@ -84,8 +93,8 @@
 <div class="flex flex-col md:flex-row flex-grow">
   <div class="w-full flex-grow z-0">
     <Map bind:map bind:center bind:zoom bind:getUrl>
-      <GeoJSON data={buildings} options={geoJsonOptions} bind:getGeoJSON/>
       <GeoJSON data={parts} options={geoJsonOptions}/>
+      <GeoJSON data={buildings} options={geoJsonOptions} bind:getGeoJSON/>
     </Map>
   </div>
   <div class="md:max-w-md w-full flex-grow overflow-scroll px-4 pt-8 border-l-2 border-gray-200 dark:border-gray-600">
@@ -96,17 +105,17 @@
           <li>Referencia: {data.task.localId}</li>
           <li>Tipo: {data.task.type}</li>
           <li>Partes de edificio: {data.task.parts}</li>
-          {#if data.user}
-            <li>
-              Estado:
-              <Input type=number bind:value min=0 max=9 />
-            </li>
-            <Button on:click={exit} color="alternative">Cancelar</Button>
-            <Button>Guardar</Button>
-          {:else}
-            <Button on:click={login}>Registrate para editar</Button>
-          {/if}
         </ul>
+        {#if data.user}
+          <form use:enhance={updateStatus} method="POST">
+            <Label for="status">Estado:</Label>
+            <Input id="status" name="status" type=number bind:value min=0 max=9 />
+            <Button on:click={exit} color="alternative">Cancelar</Button>
+            <Button type="submit">Guardar</Button>
+          </form>
+        {:else}
+          <Button on:click={login}>Registrate para editar</Button>
+        {/if}
       </div>
     </div>
   </div>

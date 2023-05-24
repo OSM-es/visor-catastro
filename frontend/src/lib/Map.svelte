@@ -28,8 +28,6 @@
     return `${zoom + step}/${center[0].toFixed(4)}/${center[1].toFixed(4)}`
   }
 
-  if (!Array.isArray(geoJsonData)) geoJsonData = [geoJsonData]
-
   onMount(() => {
     map.getMap().invalidateSize()
   })

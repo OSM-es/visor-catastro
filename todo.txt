@@ -1,4 +1,11 @@
-# grabar cambio de estado tarea
+# Color de direcciones según el nombre de la calle
+
+# Foto de fachada en popup edificio
+    http://ovc.catastro.meh.es/OVCServWeb/OVCWcfLibres/OVCFotoFachada.svc/RecuperarFotoFachadaGet?ReferenciaCatastral={localid}
+    El archivo de la tarea no tiene la ref localid de los edificios
+        Se puede buscar por coordenadas como pointinfo
+            http://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCoordenadas.asmx/Consulta_RCCOOR?SRS=EPSG:4326&Coordenada_X=-1.361530&Coordenada_Y=39.095248
+        O por address.geojson y el nombre de la calle en catastro
 
 # Datos usuario. Tutorial completado.
 
