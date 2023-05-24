@@ -1,0 +1,11 @@
+# grabar cambio de estado tarea
+
+# Datos usuario. Tutorial completado.
+
+# Redirigir usuarios registrados de / hacia mapa o tutorial
+
+# Guardar bounds del mapa. Osm recuerda el zoom de la última visita
+
+# rutas /explore/[slug] (slug = municipio o provincia)
+>>> Task.query.filter(Task.muncode=='02001')
+>>> Task.query.filter(Task.muncode.startswith('02')).count()
