@@ -31,13 +31,16 @@ class Task(Resource):
         with gzip.open(fn) as fo:
             xml = fo.read()
         geojson = osm2geojson.xml2geojson(xml, filter_used_refs=False)
-        filtered = {'type': geojson['type'], 'features': []}
+        filtered = []
         for f in geojson['features']:
             tags = ''
             if 'tags' in f['properties']:
                 tags = '-'.join(f['properties'].get('tags',{}).keys())
-            if f['properties']['type'] != 'node' or 'addr' in tags:
-                filtered['features'].append(f)
+                if (f['properties']['type'] != 'node' or 'addr' in tags):
+                    filtered.append(f)
+        buildings = [f for f in filtered if 'building:part' not in f['properties']['tags']]
+        parts = [f for f in filtered if 'building:part' in f['properties']['tags']]
         data = task.asdict()
-        data['content'] = filtered
+        data['buildings'] = {'type': geojson['type'], 'features': buildings}
+        data['parts'] = {'type': geojson['type'], 'features': parts}
         return data

@@ -21,12 +21,12 @@
   const tileLayerOptions = { minZoom: 5, maxZoom: 19, attribution }
   const scaleControlOptions = { maxWidth: 200, imperial: false }
 
+  if (!Array.isArray(geoJsonData)) geoJsonData = [geoJsonData]
+
   onMount(() => {
-    if (geoJsonData) {
-      map.getMap().invalidateSize()
-      const bounds = getGeoJSON().getBounds()
-      map.getMap().fitBounds(bounds)
-    }
+    map.getMap().invalidateSize()
+    const bounds = getGeoJSON().getBounds()
+    map.getMap().fitBounds(bounds)
   })
 </script>
 
@@ -38,5 +38,7 @@
 >
   <TileLayer url={tileUrl} options={tileLayerOptions}/>
   <ScaleControl position="bottomleft" options={scaleControlOptions}/>
-  <GeoJSON data={geoJsonData} options={geoJsonOptions} bind:getGeoJSON/>
+  {#each geoJsonData as data}
+    <GeoJSON data={data} options={geoJsonOptions} bind:getGeoJSON/>
+  {/each}
 </LeafletMap>
