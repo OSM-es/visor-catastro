@@ -36,7 +36,7 @@ class Task(Resource):
             tags = ''
             if 'tags' in f['properties']:
                 tags = '-'.join(f['properties'].get('tags',{}).keys())
-                if (f['properties']['type'] != 'node' or 'addr' in tags):
+                if f['properties']['type'] != 'node' or 'addr' in tags:
                     filtered.append(f)
         buildings = [f for f in filtered if 'building:part' not in f['properties']['tags']]
         parts = [f for f in filtered if 'building:part' in f['properties']['tags']]

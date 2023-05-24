@@ -2,6 +2,7 @@ import * as env from '$env/static/public'
 
 export const PUBLIC_API_URL = env.PUBLIC_API_URL || 'http://127.0.0.1/api'
 export const PUBLIC_INITIAL_VIEW = env.PUBLIC_INITIAL_VIEW.split(',') || [36, 1]
+PUBLIC_INITIAL_VIEW.forEach((x, i) => PUBLIC_INITIAL_VIEW[i] = Number(x).toFixed(4))
 export const PUBLIC_INITIAL_ZOOM = Number(env.PUBLIC_INITIAL_ZOOM) || 5
 
 export const TASK_COLORS = {

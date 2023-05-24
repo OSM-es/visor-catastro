@@ -3,7 +3,7 @@
   import TaskInfo from './TaskInfo.svelte'
   import TaskList from './TaskList.svelte'
   import { goto } from '$app/navigation'
-  import { onMount } from 'svelte'
+  import { GeoJSON } from 'svelte-leafletjs'
 
   import { PUBLIC_API_URL, TASK_COLORS } from '$lib/config'
   import Map from '$lib/Map.svelte'
@@ -11,7 +11,7 @@
   export let data
 
   
-  let map, geoJsonData, hoveredFeature, previewFeature
+  let map, geoJsonData, hoveredFeature, previewFeature, getUrl
   let loading = false
   let center = data.center
   let zoom = data.zoom
@@ -30,15 +30,9 @@
     }
   }
 
-  onMount(handleMoveEnd)
-
   function handleMoveEnd() {
-    zoom = map.getMap().getZoom()
-    center = map.getMap().getCenter()
-    const lat = center.lat.toFixed(4)
-    const lng = center.lng.toFixed(4)
     fetchData()
-    goto(`/explore?map=${zoom}/${lat}/${lng}`)
+    goto(`/explore?map=${getUrl()}`)
   }
 
   function updateStyle(feature, layer) {
@@ -95,12 +89,13 @@
   <div class="w-full flex-grow z-0">
     <Map
       bind:map
-      bind:geoJsonData
-      center={center}
-      zoom={zoom}
-      geoJsonOptions={geoJsonOptions}
+      bind:center
+      bind:zoom
+      bind:getUrl
       on:moveend={handleMoveEnd}
-    />
+    >
+      <GeoJSON data={geoJsonData} options={geoJsonOptions}/>
+    </Map>
   </div>
   <div class="md:max-w-md w-full flex-grow overflow-scroll px-4 pt-8 border-l-2 border-gray-200 dark:border-gray-600">
     <div class="h-full max-h-0">

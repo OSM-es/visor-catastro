@@ -1,14 +1,16 @@
 <script>
   import L from 'leaflet'
   import { Button, Input } from 'flowbite-svelte'
+  import { onMount } from 'svelte'
   import { goto } from '$app/navigation'
+  import { GeoJSON } from 'svelte-leafletjs'
 
   import { login } from '$lib/user'
   import Map from '$lib/Map.svelte'
 
   export let data
 
-  let map
+  let map, center, zoom, initialCenter, initialZoom, getGeoJSON, getUrl
   let value = data.task.status
   let buildings = data.task.buildings
   let parts = data.task.parts
@@ -69,22 +71,22 @@
   }
 
   function exit() {
-    const zoom = map.getMap().getZoom() - 1
-    const center = map.getMap().getCenter()
-    const lat = center.lat.toFixed(4)
-    const lng = center.lng.toFixed(4)
-
-    goto(`/explore?map=${zoom}/${lat}/${lng}`)
+    goto(`/explore?map=${getUrl(-1)}`)
   }
+
+  onMount(() => {
+    map.getMap().fitBounds(getGeoJSON().getBounds())
+    initialZoom = zoom
+    initialCenter = center
+  })
 </script>
 
 <div class="flex flex-col md:flex-row flex-grow">
   <div class="w-full flex-grow z-0">
-    <Map
-      bind:map
-      geoJsonData={[parts, buildings]}
-      geoJsonOptions={geoJsonOptions}
-    />
+    <Map bind:map bind:center bind:zoom bind:getUrl>
+      <GeoJSON data={buildings} options={geoJsonOptions} bind:getGeoJSON/>
+      <GeoJSON data={parts} options={geoJsonOptions}/>
+    </Map>
   </div>
   <div class="md:max-w-md w-full flex-grow overflow-scroll px-4 pt-8 border-l-2 border-gray-200 dark:border-gray-600">
     <div class="h-full max-h-0">
