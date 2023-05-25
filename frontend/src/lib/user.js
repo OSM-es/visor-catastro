@@ -1,6 +1,8 @@
 import { PUBLIC_API_URL } from '$lib/config'
 import { invalidate } from '$app/navigation'
 
+let signupUrl = 'https://www.openstreetmap.org/user/new'
+
 export async function login(event) {
   if (event.detail === '/auth') {
     await invalidate('data:user')
@@ -15,4 +17,9 @@ export async function logout() {
   if (resp.ok) {
     await invalidate('data:user')
   }
+}
+
+export function signup() {
+  const options = 'location=yes,height=950,width=800,scrollbars=yes,status=yes'
+  window.open(signupUrl, '_blank', options)
 }
