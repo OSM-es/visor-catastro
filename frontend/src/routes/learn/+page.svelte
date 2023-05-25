@@ -1,10 +1,15 @@
-<article class="prose lg:prose-xl dark:prose-invert">
-  <h1>Tutorial</h1>
+<script>
+  import { Video } from 'flowbite-svelte'
+</script>
+
+<article class="prose md:prose-xl dark:prose-invert">
+  <h2>Tutorial</h2>
   <p>
     Aquí habrá una adaptación del contenido de la guía de importación en formato
     interactivo con enlaces a los vídeos y pidiendo que el usuario
     complete algunas acciones y cuestionarios.
   </p>
+    <Video src="/src/lib/videos/1intro-catastro.webm" controls trackSrc="1intro-catastro.webm" />
   <p>
   Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Egestas congue quisque egestas diam in arcu cursus euismod. Nulla pellentesque dignissim enim sit amet venenatis. Adipiscing elit ut aliquam purus sit amet luctus. Turpis massa sed elementum tempus egestas sed sed risus pretium. Egestas integer eget aliquet nibh. Odio eu feugiat pretium nibh ipsum consequat nisl. Nibh praesent tristique magna sit amet. Vitae auctor eu augue ut lectus arcu bibendum at. Ultricies leo integer malesuada nunc vel risus commodo viverra. Diam in arcu cursus euismod quis viverra nibh cras. Semper auctor neque vitae tempus quam pellentesque nec nam aliquam. Tempor nec feugiat nisl pretium fusce id velit ut tortor. Tellus elementum sagittis vitae et leo duis ut. Ante metus dictum at tempor commodo ullamcorper a. Tortor pretium viverra suspendisse potenti nullam ac tortor vitae. Donec adipiscing tristique risus nec.
   </p>
