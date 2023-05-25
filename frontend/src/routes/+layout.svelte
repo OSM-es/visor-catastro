@@ -40,7 +40,7 @@
       let:hidden
       let:toggle
       fluid="true"
-      navClass="py-1 mx-auto {isMapPage ? 'px-2 sm:px-4 w-full': 'max-w-7xl px-4'}"
+      navClass="py-0.5 mx-auto {isMapPage ? 'px-2 sm:px-4 w-full': 'max-w-7xl px-4'}"
     >
       <NavBrand href="/">
         <img
@@ -48,9 +48,11 @@
         class="mr-3 pt-1 h-12"
         alt="openstreetmap.es"
         />
-        <span class=" text-base sm:text-2xl font-semibold dark:text-white">
-          visor-catastro
-        </span>
+        <div class="dark:text-white">
+          <p class="text-xs font-medium h-2">visor</p>
+          <p class="text-xl font-semibold h-5">catastro</p>
+          <p class="text-xs text-right">OSM.es</p>
+        </div>
       </NavBrand>
       <NavUl {hidden} {ulClass} class="order-1">
         <NavLi href="/learn" active={activeUrl.startsWith('/learn')}>Aprende</NavLi>
@@ -60,7 +62,7 @@
         {#if user}
           <Button pill color="light" id="avatar-menu" class="!p-0.5">
             <Chevron>
-              <Avatar src="{user.img.href}" class="mr-2"/>
+              <Avatar src="{user.img.href}" size="sm" class="mr-2"/>
               <span class="max-md:hidden">{user.display_name}</span>
             </Chevron>
           </Button>
