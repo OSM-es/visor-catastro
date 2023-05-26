@@ -33,16 +33,16 @@
   fluid="true"
   navClass="py-0.5 mx-auto px-2 sm:px-4 w-full"
 >
-  <div class="flex">
+  <div class="flex items-center">
     <span hidden={!activeUrl.startsWith('/learn')}>
       <ToolbarButton
         name="Abre tabla de contenido"
-        class="my-1 px-2.5 lg:hidden"
+        class="px-2.5 lg:hidden"
         on:click={toggleDrawer}
       >
-        <div class="w-4 h-0.5 bg-gray-500 mb-1"></div>
+        <div class="w-4 h-0.5 bg-gray-500 mb-1 mt-1.5"></div>
         <div class="w-3 h-0.5 bg-gray-500 mb-1"></div>
-        <div class="w-4 h-0.5 bg-gray-500"></div>
+        <div class="w-4 h-0.5 bg-gray-500 mb-1.5"></div>
       </ToolbarButton>
     </span>
     <NavBrand href="/">
