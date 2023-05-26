@@ -11,9 +11,9 @@
   setContext('drawer', drawerHiddenStore)
 </script>
 
-<div class="min-h-screen flex flex-col dark:bg-gray-900">
+<div class="min-h-screen flex flex-col dark:bg-neutral-900">
   <header
-    class="sticky top-0 z-40 w-full border-b border-gray-200 dark:border-gray-600"
+    class="sticky top-0 z-40 w-full drop-shadow-md"
   >
   <Topbar user={data.user}/>
   </header>

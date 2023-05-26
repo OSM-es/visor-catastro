@@ -18,7 +18,8 @@
 
   const zoomThreshold = 16
   const geojsonUrl = (bounds) => `${PUBLIC_API_URL}/tasks?bounds=${bounds}`
-
+  const rightBarClass = 'md:max-w-md w-full flex-grow overflow-scroll px-4 pt-8 '
+    + 'border-l-2 border-neutral-300 dark:border-neutral-500 dark:bg-neutral-800'
 
   async function fetchData() {
     if (zoom >= zoomThreshold) {
@@ -98,7 +99,7 @@
       <GeoJSON data={geoJsonData} options={geoJsonOptions}/>
     </Map>
   </div>
-  <div class="md:max-w-md w-full flex-grow overflow-scroll px-4 pt-8 border-l-2 border-gray-200 dark:border-gray-600">
+  <div class={rightBarClass}>
     <div class="h-full max-h-0">
       {#if loading}
         <span>Cargando datos... </span>

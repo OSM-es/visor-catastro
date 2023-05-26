@@ -31,7 +31,7 @@
   let:hidden
   let:toggle
   fluid="true"
-  navClass="py-0.5 mx-auto px-4 w-full"
+  navClass="py-0.5 mx-auto px-4 w-full dark:!bg-[#2E2E2E]"
 >
   <div class="flex items-center">
     <span hidden={!activeUrl.startsWith('/learn')}>
