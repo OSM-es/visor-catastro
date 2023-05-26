@@ -11,7 +11,7 @@
   setContext('drawer', drawerHiddenStore)
 </script>
 
-<div class="h-screen flex flex-col dark:bg-gray-900">
+<div class="min-h-screen flex flex-col dark:bg-gray-900">
   <header
     class="sticky top-0 z-40 w-full border-b border-gray-200 dark:border-gray-600"
   >
