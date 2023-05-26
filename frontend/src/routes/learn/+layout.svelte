@@ -6,9 +6,11 @@
   
   const drawerHiddenStore = getContext('drawer')
 
-  afterNavigate(() => {
+  function closeDrawer() {
     drawerHiddenStore.set(true)
-  })
+  }
+
+  afterNavigate(closeDrawer)
 </script>
 
 <div class="lg:flex">
@@ -28,7 +30,15 @@
     </SidebarWrapper>
   </Sidebar>
 
+  <div
+    hidden={$drawerHiddenStore}
+    class="fixed inset-0 z-20 bg-gray-900/50 dark:bg-gray-900/60"
+    on:click={closeDrawer}
+    on:keydown={closeDrawer}
+  />
+
   <main class="mx-4 mt-8 lg:mx-auto">
+    {$drawerHiddenStore}
     <slot/>
   </main>
 </div>
