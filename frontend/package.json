@@ -17,6 +17,7 @@
     "svelte": "^3.54.0",
     "svelte-leafletjs": "^0.10.0",
     "svelte-preprocess": "^5.0.3",
+    "svelte-preprocess-markdown": "^2.7.3",
     "tailwindcss": "^3.3.2",
     "vite": "^4.3.0"
   },
