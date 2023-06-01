@@ -5,7 +5,7 @@
   import { afterNavigate } from '$app/navigation'
   import { page } from '$app/stores'
 
-  import Toc from '../toc.svx'
+  import Toc from '../toc.md'
 
   const drawerHiddenStore = getContext('drawer')
   const asideClass = 'fixed inset-0 z-30 flex-none h-full w-1/4 lg:static '

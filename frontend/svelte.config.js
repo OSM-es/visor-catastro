@@ -11,13 +11,13 @@ const config = {
     adapter: adapter(),
   },
 
-  extensions: ['.svelte','.svx'],
+  extensions: ['.svelte','.md'],
 
   preprocess: [
     preprocess({
       postcss: true,
     }),
-    mdsvex(),
+    mdsvex({extensions: ['.md']}),
   ],
 };
 
