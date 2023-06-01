@@ -1,6 +1,6 @@
 import preprocess from "svelte-preprocess";
 import adapter from "@sveltejs/adapter-node";
-import { markdown } from 'svelte-preprocess-markdown'
+import { mdsvex } from "mdsvex"
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -11,13 +11,13 @@ const config = {
     adapter: adapter(),
   },
 
-  extensions: ['.svelte','.md'],
+  extensions: ['.svelte','.svx'],
 
   preprocess: [
     preprocess({
       postcss: true,
     }),
-    markdown(),
+    mdsvex(),
   ],
 };
 

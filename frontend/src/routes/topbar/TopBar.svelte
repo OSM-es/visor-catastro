@@ -7,6 +7,7 @@
     NavHamburger,
     ToolbarButton,
   } from 'flowbite-svelte'
+  import { Bars3CenterLeft } from 'svelte-heros-v2'
   
   import { page } from '$app/stores'
   import { getContext } from 'svelte'
@@ -37,12 +38,10 @@
     <span hidden={!activeUrl.startsWith('/learn')}>
       <ToolbarButton
         name="Abre tabla de contenido"
-        class="px-2.5 lg:hidden"
+        class="px-1.5 lg:hidden"
         on:click={toggleDrawer}
       >
-        <div class="w-4 h-0.5 bg-gray-500 mb-1 mt-1.5"></div>
-        <div class="w-3 h-0.5 bg-gray-500 mb-1"></div>
-        <div class="w-4 h-0.5 bg-gray-500 mb-1.5"></div>
+        <Bars3CenterLeft/>
       </ToolbarButton>
     </span>
     <NavBrand href="/">
@@ -60,12 +59,3 @@
     <NavHamburger on:click={toggle} />
   </div>
 </Navbar>
-
-<style>
-  .bar {
-    width: 18px;
-    height: 2px;
-    background-color: gray;
-    margin: 3px 0;
-  }
-</style>

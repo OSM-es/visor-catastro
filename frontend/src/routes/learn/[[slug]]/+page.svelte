@@ -2,5 +2,5 @@
   export let data
 </script>
 
-<svelte:component this={data.content} />
+<svelte:component this={data.content} user={data.user}/>
 

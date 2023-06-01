@@ -1,5 +1,9 @@
-import { Video } from 'flowbite-svelte'
-import { Button } from 'flowbite-svelte'
+<script>
+  import { Button, Video } from 'flowbite-svelte'
+  import { ChevronRight } from 'svelte-heros-v2'
+
+  export let user
+</script>
 
 ## Introducción
 
@@ -12,5 +16,6 @@ Visualiza este vídeo para conocer el proyecto.
 <Video src="/src/lib/videos/1intro-catastro.webm" controls trackSrc="1intro-catastro.webm" />
 
 Conoce como debes registrarte para participar
-
-<Button color="primary">Continuar</Button>
+<Button color="primary">
+  Continuar <ChevronRight/>
+</Button>
