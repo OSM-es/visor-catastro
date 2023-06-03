@@ -3,13 +3,15 @@ import { invalidate } from '$app/navigation'
 
 let signupUrl = 'https://www.openstreetmap.org/user/new'
 
-export async function login(event) {
-  if (event.detail === '/auth') {
-    await invalidate('data:user')
-  } else {
-    const options = 'location=yes,height=620,width=550,scrollbars=yes,status=yes'
-    window.open(PUBLIC_API_URL + '/login', '_blank', options)
-  }
+const loginOptions = 'location=yes,height=620,width=550,scrollbars=yes,status=yes'
+const signupOptions = 'location=yes,height=950,width=800,scrollbars=yes,status=yes'
+
+export function relogin() {
+  window.open(PUBLIC_API_URL + '/relogin', '_blank', loginOptions)
+}
+
+export  function login() {
+  window.open(PUBLIC_API_URL + '/login', '_blank', loginOptions)
 }
 
 export async function logout() {
@@ -20,6 +22,5 @@ export async function logout() {
 }
 
 export function signup() {
-  const options = 'location=yes,height=950,width=800,scrollbars=yes,status=yes'
-  window.open(signupUrl, '_blank', options)
+  window.open(signupUrl, '_blank', signupOptions)
 }

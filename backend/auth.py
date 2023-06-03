@@ -1,9 +1,13 @@
 import time
+import urllib.parse
+
 from authlib.jose import jwt
 from authlib.jose.errors import JoseError
 from authlib.integrations.flask_client import OAuth, OAuthError
 from flask import Blueprint, abort, current_app, redirect, session, url_for
 from flask_httpauth import HTTPTokenAuth
+
+from models import OsmUser, User, db
 
 auth = HTTPTokenAuth(scheme="Bearer")
 auth_bp = Blueprint('auth', __name__, url_prefix='/api')
@@ -34,6 +38,17 @@ def verify_token(token):
         return False
     return True
 
+@auth_bp.route('/relogin')
+def relogin():
+    """Redirige a la página de logout, luego a login de OSM."""
+    r = login()
+    url = (
+        current_app.config['OSM_URL'] +
+        '/logout?referer=' +
+        urllib.parse.quote(r.location)
+    )
+    return redirect(url)
+
 @auth_bp.route('/login')
 def login():
     """Redirige a la página de login de OSM."""
@@ -58,6 +73,20 @@ def authorize():
     resp = get_oauth().get('user/details.json')
     resp.raise_for_status()
     data = resp.json()
+
+    id = data['user']['id']
+    display_name=data['user']['display_name']
+    osm_user = OsmUser.query.get(id)
+    if not osm_user:
+        osm_user = OsmUser(id=id, display_name=display_name)
+        if osm_user.isStated():
+            user = User(import_user=osm_user)
+            db.session.add(user)
+        db.session.add(osm_user)
+        db.session.commit()
+    if osm_user.user:
+        data['user']['user'] = osm_user.user.asdict()
+
     s = jwt.encode({'alg': 'HS256'}, token, current_app.secret_key)
     data['user']['token'] = s.decode('utf-8')
     session['user'] = data['user']

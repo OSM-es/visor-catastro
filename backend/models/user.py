@@ -11,11 +11,15 @@ class OsmUser(db.Model):
         uselist=False,
     )
 
+    def isStated(self):
+        return 'import' in self.display_name or 'catastro' in self.display_name
+
     def asdict(self):
         return {
             'id': self.id,
             'display_name': self.display_name,
             'user': self.user.asdict() if self.user else None,
+            'stated': self.isStated(),
         }
 
 
@@ -38,4 +42,6 @@ class User(db.Model):
             'id': self.id,
             'tutorial': self.tutorial,
             'email': self.email,
+            'osm_id': self.osm_id,
+            'import_id': self.import_id,
         }

@@ -7,8 +7,8 @@
 
     onMount(() => {
         if (window.opener) {
-            const login = window.opener.document.getElementById('login')
-            login.dispatchEvent(new CustomEvent('click', {detail: '/auth'}))
+            const usermenu = window.opener.document.getElementById('usermenu')
+            usermenu.dispatchEvent(new CustomEvent('invalidateuser'))
             window.close()
         } else {
             goto('/')

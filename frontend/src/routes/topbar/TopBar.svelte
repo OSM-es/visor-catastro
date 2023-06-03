@@ -9,8 +9,9 @@
   } from 'flowbite-svelte'
   import { Bars3CenterLeft } from 'svelte-heros-v2'
   
-  import { page } from '$app/stores'
   import { getContext } from 'svelte'
+  import { invalidate } from '$app/navigation'
+  import { page } from '$app/stores'
 
   import Logo from './Logo.svelte'
   import UserMenu from './UserMenu.svelte'
@@ -23,8 +24,12 @@
 
   const drawerHiddenStore = getContext('drawer')
 
-  const toggleDrawer = () => {
+  function toggleDrawer() {
     drawerHiddenStore.update((state) => !state)
+  }
+
+  async function invalidateUser() {
+    await invalidate('data:user')
   }
 </script>
 
@@ -54,7 +59,7 @@
     <NavLi href="/explore" active={activeUrl.startsWith('/explore')}>Explora</NavLi>
   </NavUl>
 
-  <div class="flex md:order-2">
+  <div id="usermenu" class="flex md:order-2" on:invalidateuser={invalidateUser}>
     <UserMenu {user}/>
     <NavHamburger on:click={toggle} />
   </div>

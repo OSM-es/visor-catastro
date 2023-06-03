@@ -1,12 +1,14 @@
 import { PUBLIC_API_URL } from '$lib/config'
 import { error } from '@sveltejs/kit'
 
+import { parse as cookieParser } from 'cookie'
 
 export default class Api {
   static base = PUBLIC_API_URL
 
-  constructor(fetch) {
-    this.fetch = fetch
+  constructor(event) {
+    this.event = event
+    this.fetch = event.fetch
   }
 
   async send({ method, path, data, token }) {
@@ -22,6 +24,14 @@ export default class Api {
   
     const resp = await this.fetch(`${Api.base}/${path}`, opts)
     if (resp.ok || resp.status === 422) {
+      const { session, ...opts } = cookieParser(resp.headers.get('set-cookie'))
+      if (session) {
+        const options = {
+          expires: new Date(opts.Expires),
+          path: '/',
+        }
+        this.event.cookies.set('session', session, options)
+      }
       const data = await resp.json()
       return data
     }
