@@ -19,7 +19,6 @@ class OsmUser(db.Model):
             'id': self.id,
             'display_name': self.display_name,
             'user': self.user.asdict() if self.user else None,
-            'stated': self.isStated(),
         }
 
 

@@ -1,5 +1,5 @@
 <script>
-  import { Button, Radio, Spinner, Video } from 'flowbite-svelte'
+  import { Button, Radio, Video } from 'flowbite-svelte'
   import { Check, ChevronRight } from 'svelte-heros-v2'
 
 	import { enhance } from '$app/forms'
@@ -37,13 +37,10 @@ Si lo deseas, puedes <Button on:click={relogin}>vincular tu cuenta OSM</Button> 
 {:else if !user.user?.import_id && !user?.user?.osm_id}
 {user.display_name} es:
 <form use:enhance method="POST">
-<Radio name="type" value="import">La cuenta que voy a utilizar para la importación.</Radio>
-<Radio name="type">La cuenta que utilizo normalmente en OSM.</Radio>
+  <Radio name="type" value="import">La cuenta que voy a utilizar para la importación.</Radio>
+  <Radio name="type">La cuenta que utilizo normalmente en OSM.</Radio>
 
-<Button type="submit" class="mt-8">
-  {#if saving}<Spinner class="mr-3" size="4" />{/if}
-  Confirmar
-</Button>
+  <Button type="submit" class="mt-8">Confirmar</Button>
 </form>
 
 {:else if !user.user?.import_id}
@@ -52,7 +49,7 @@ Si lo deseas, puedes <Button on:click={relogin}>vincular tu cuenta OSM</Button> 
 {/if}
 
 {#if user?.user?.tutorial?.includes('login')}
-Proceso de registro completo
+¡Proceso de registro completo!
 <Button color="primary" on:click={next}>
   Continuar <ChevronRight/>
 </Button>

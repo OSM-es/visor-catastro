@@ -38,10 +38,13 @@ def verify_token(token):
         return False
     return True
 
+@auth.login_required
 @auth_bp.route('/relogin')
 def relogin():
     """Redirige a la página de logout, luego a login de OSM."""
     r = login()
+    session['user']['relogin'] = True
+    session.modified = True
     url = (
         current_app.config['OSM_URL'] +
         '/logout?referer=' +
@@ -77,18 +80,35 @@ def authorize():
     id = data['user']['id']
     display_name=data['user']['display_name']
     osm_user = OsmUser.query.get(id)
+    relogin = 'user' in session and session['user'].get('relogin', False)
+    if relogin:
+        last_user = OsmUser.query.get(session['user']['id'])
+        user = last_user.user
+    else:
+        user = User()
     if not osm_user:
         osm_user = OsmUser(id=id, display_name=display_name)
-        if osm_user.isStated():
-            user = User(import_user=osm_user)
-            db.session.add(user)
-        db.session.add(osm_user)
-        db.session.commit()
+    if osm_user.isStated():
+        user.import_user = osm_user
+        user.tutorial = 'login'
+        db.session.add(user)
+    elif relogin:
+        if user.import_user:
+            user.osm_user = osm_user
+            user.tutorial = 'login'
+        elif user.osm_user:
+            user.import_user = osm_user
+            user.tutorial = 'login'
+        db.session.add(user)
+    db.session.add(osm_user)
+    db.session.commit()
+
     if osm_user.user:
         data['user']['user'] = osm_user.user.asdict()
 
     s = jwt.encode({'alg': 'HS256'}, token, current_app.secret_key)
     data['user']['token'] = s.decode('utf-8')
+    data['user']['stated'] = osm_user.isStated()
     session['user'] = data['user']
     session.modified = True
     session.permanent = True
