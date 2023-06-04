@@ -10,7 +10,7 @@
 
   export let data
 
-  $: isEditor = data.user?.user && data.user.user.role != 'READ_ONLY'
+  $: isEditor = data.user?.role && data.user.role != 'READ_ONLY'
 
   let map, center, zoom, initialCenter, initialZoom, getGeoJSON, getUrl
   let value = data.task.status
@@ -84,7 +84,7 @@
   }
 
   function doTutorial() {
-    goto('/learn/' + (data?.user?.user ? data.user.user.tutorial.next : 'login'))
+    goto('/learn/' + (data?.user?.tutorial ? data.user.tutorial.next : 'login'))
   }
 
   onMount(() => {

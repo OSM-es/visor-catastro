@@ -29,8 +29,7 @@ def get_oauth():
     return oauth.osm
 
 def passTutorial(user):
-    user.tutorial['passed'].append('login')
-    user.tutorial['next'] = 'setup'
+    user.tutorial = {'passed': ['login'], 'next': 'setup'}
     user.role = User.Role.MAPPER.value
 
 
@@ -109,7 +108,7 @@ def authorize():
     db.session.commit()
 
     if osm_user.user:
-        data['user']['user'] = osm_user.user.asdict()
+        data['user'].update(osm_user.user.asdict())
 
     s = jwt.encode({'alg': 'HS256'}, token, current_app.secret_key)
     data['user']['token'] = s.decode('utf-8')

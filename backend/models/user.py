@@ -50,7 +50,6 @@ class User(db.Model):
 
     def asdict(self):
         return {
-            'id': self.id,
             'tutorial': self.tutorial,
             'email': self.email,
             'role': User.Role(self.role).name,

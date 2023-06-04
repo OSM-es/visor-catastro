@@ -4,7 +4,7 @@
 
 ## Preparación
 
-{#if user?.user?.tutorial?.passed?.includes('login')}
+{#if user?.tutorial?.passed?.includes('login')}
 El tutorial contendrá más contenido interactivo desarrollando la guía de
 importación.
 

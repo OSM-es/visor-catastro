@@ -18,6 +18,6 @@ class User(Resource):
             user = models.User(osm_user=osm_user)
         models.db.session.add(user)
         models.db.session.commit()
-        session['user']['user'] = user.asdict()
+        session['user'].update(user.asdict())
         session.modified = True
-        return {'user': session['user']['user']}
+        return {'errors': []}
