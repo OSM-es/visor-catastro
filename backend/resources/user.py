@@ -6,11 +6,6 @@ from auth import auth
 
 
 class User(Resource):
-    def get(self):
-        user = session.get('user')
-        print(user)
-        return user
-
     @auth.login_required
     def post(self):
         u = session.get('user')

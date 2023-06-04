@@ -2,9 +2,9 @@
     export let user
 </script>
 
-## Setup
+## Preparación
 
-{#if user?.user?.tutorial?.includes('login')}
+{#if user?.user?.tutorial?.passed?.includes('login')}
 El tutorial contendrá más contenido interactivo desarrollando la guía de
 importación.
 

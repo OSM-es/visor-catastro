@@ -28,6 +28,12 @@ def get_oauth():
         )
     return oauth.osm
 
+def passTutorial(user):
+    user.tutorial['passed'].append('login')
+    user.tutorial['next'] = 'setup'
+    user.role = User.Role.MAPPER.value
+
+
 @auth.verify_token
 def verify_token(token):
     """Verificador utilizado por auth.login_required"""
@@ -90,15 +96,14 @@ def authorize():
         osm_user = OsmUser(id=id, display_name=display_name)
     if osm_user.isStated():
         user.import_user = osm_user
-        user.tutorial = 'login'
+        passTutorial(user)
         db.session.add(user)
     elif relogin:
         if user.import_user:
             user.osm_user = osm_user
-            user.tutorial = 'login'
         elif user.osm_user:
             user.import_user = osm_user
-            user.tutorial = 'login'
+        passTutorial(user)
         db.session.add(user)
     db.session.add(osm_user)
     db.session.commit()
@@ -108,7 +113,11 @@ def authorize():
 
     s = jwt.encode({'alg': 'HS256'}, token, current_app.secret_key)
     data['user']['token'] = s.decode('utf-8')
-    data['user']['stated'] = osm_user.isStated()
+    data['user']['stated'] = (
+        osm_user.user and
+        osm_user.user.import_user and
+        osm_user.user.import_user.isStated()
+    )
     session['user'] = data['user']
     session.modified = True
     session.permanent = True

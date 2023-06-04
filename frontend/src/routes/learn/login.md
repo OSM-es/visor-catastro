@@ -48,7 +48,7 @@ Si lo deseas, puedes <Button on:click={relogin}>vincular tu cuenta OSM</Button> 
 
 {/if}
 
-{#if user?.user?.tutorial?.includes('login')}
+{#if user?.user?.tutorial?.passed?.includes('login')}
 ¡Proceso de registro completo!
 <Button color="primary" on:click={next}>
   Continuar <ChevronRight/>
