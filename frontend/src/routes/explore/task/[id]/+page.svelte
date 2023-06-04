@@ -6,10 +6,11 @@
   import { GeoJSON } from 'svelte-leafletjs'
 	import { enhance } from '$app/forms'
 
-  import { login } from '$lib/user'
   import Map from '$lib/Map.svelte'
 
   export let data
+
+  const isEditor = data.user?.user && data.user.user.role != 'READ_ONLY'
 
   let map, center, zoom, initialCenter, initialZoom, getGeoJSON, getUrl
   let value = data.task.status
@@ -82,6 +83,9 @@
     }
   }
 
+  function doTutorial() {
+    goto('/learn/login')
+  }
 
   onMount(() => {
     map.getMap().fitBounds(getGeoJSON().getBounds())
@@ -106,16 +110,16 @@
           <li>Tipo: {data.task.type}</li>
           <li>Partes de edificio: {data.task.parts}</li>
         </ul>
-        {#if data.user}
-          <form use:enhance={updateStatus} method="POST">
-            <Label for="status">Estado:</Label>
-            <Input id="status" name="status" type=number bind:value min=0 max=9 />
-            <Button on:click={exit} color="alternative">Cancelar</Button>
+        <form use:enhance={updateStatus} method="POST">
+          <Label for="status">Estado:</Label>
+          <Input id="status" name="status" type=number bind:value min=0 max=9 disabled={!isEditor} />
+          <Button on:click={exit} color="alternative">Cancelar</Button>
+          {#if isEditor}
             <Button type="submit">Guardar</Button>
-          </form>
-        {:else}
-          <Button on:click={login}>Registrate para editar</Button>
-        {/if}
+          {:else}
+            <Button on:click={doTutorial}>Completa el tutorial para editar</Button>
+          {/if}
+        </form>
       </div>
     </div>
   </div>

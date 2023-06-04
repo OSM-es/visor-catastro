@@ -1,4 +1,12 @@
+from enum import Enum
+
 from models import db
+
+
+class UserRole(Enum):
+    READ_ONLY = -1
+    MAPPER = 0
+    ADMIN = 1
 
 
 class OsmUser(db.Model):
@@ -28,6 +36,7 @@ class User(db.Model):
     )
 
     id = db.Column(db.Integer, primary_key=True)
+    role = db.Column(db.Integer, default=UserRole.READ_ONLY.value)
     tutorial = db.Column(db.String, nullable=True)
     email = db.Column(db.String, nullable=True)
     osm_id = db.Column(db.Integer, db.ForeignKey('osm_user.id'), nullable=True)
@@ -41,6 +50,7 @@ class User(db.Model):
             'id': self.id,
             'tutorial': self.tutorial,
             'email': self.email,
+            'role': UserRole(self.role).name,
             'osm_id': self.osm_id,
             'import_id': self.import_id,
         }

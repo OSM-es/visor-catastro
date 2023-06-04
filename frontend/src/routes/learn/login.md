@@ -11,7 +11,7 @@
   const guideUrl = 'https://wiki.openstreetmap.org/wiki/ES:Catastro_espa%C3%B1ol/Importaci%C3%B3n_de_edificios'
 
   function next() {
-    goto('/learn/login')
+    goto('/learn/setup')
   }
 </script>
 
