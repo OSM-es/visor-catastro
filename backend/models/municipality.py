@@ -1,3 +1,5 @@
+from geoalchemy2 import Geometry
+
 from models import db
 
 
@@ -6,6 +8,7 @@ class Municipality(db.Model):
     muncode = db.Column(db.String, index=True)
     name = db.Column(db.String, nullable=False)
     date = db.Column(db.Date, nullable=False)
+    geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
 
     @staticmethod
     def get_by_code(mun_code):

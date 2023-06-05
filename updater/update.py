@@ -23,7 +23,7 @@ from multiprocessing import Pool, current_process
 from requests.exceptions import RequestException
 from zipfile import BadZipfile
 
-from catatom2osm import catatom
+from catatom2osm import catatom, csvtools
 from catatom2osm import config as catconfig
 from catatom2osm.app import CatAtom2Osm, QgsSingleton
 from catatom2osm.boundary import get_municipalities
@@ -86,7 +86,7 @@ def daily_check():
     "Proceso de recogida de municipios con periodicidad diaria."
     print("Comienza comprobación de actualización")
     municipios = {}
-    provincias = config.include_provs
+    provincias = config.include_provs.copy()
     retries = 0
     need_update = True
     catconfig.set_config({
@@ -108,7 +108,22 @@ def daily_check():
         print("No es necesario actualizar")
     if not provincias and municipios:
         check_mun_diff(municipios)
+        upload_provs(config.include_provs.copy())
         update(list(municipios.keys()))
+
+def upload_provs(provincias):
+    """Solcita cargar provincias en la base de datos."""
+    retries = 0
+    while provincias and retries < config.max_retries:
+        try:
+            url = config.uploader_url + 'province/' + provincias[0]
+            req = requests.put(url)
+            if req.status_code == requests.codes.ok:
+                provincias.pop(0)
+        except RequestException as e:
+            print(str(e))
+            time.sleep(config.retray_delay)
+            retries += 1
 
 def check_prov(prov_code, municipios):
     """Recoge los municipios de una provincia.
@@ -167,6 +182,10 @@ def update(municipios):
             for mun_code in pool.imap_unordered(process, municipios):
                 if mun_code is not None:
                     url = config.uploader_url + 'municipality/' + mun_code
+                    fn = os.path.join(catconfig.app_path, "municipalities.csv")
+                    osmid = csvtools.get_key(fn, mun_code)[1:2]
+                    if osmid:
+                        url += f'?osmid={osmid[0]}'
                     req = requests.put(url)
                     if req.status_code == requests.codes.ok:
                         if mun_code in req.text:

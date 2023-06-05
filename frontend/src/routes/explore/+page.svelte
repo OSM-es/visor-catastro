@@ -16,19 +16,24 @@
   let center = data.center
   let zoom = data.zoom
 
-  const zoomThreshold = 16
-  const geojsonUrl = (bounds) => `${PUBLIC_API_URL}/tasks?bounds=${bounds}`
+  const tasksThreshold = 15
+  const munThreshold = 8
+  const geojsonUrl = (target, bounds) => `${PUBLIC_API_URL}/${target}?bounds=${bounds}`
   const rightBarClass = 'md:max-w-md w-full flex-grow overflow-scroll px-4 pt-8 '
     + 'border-l-2 border-neutral-300 dark:border-neutral-500 dark:bg-neutral-800'
 
+  const target = (zoom) => (
+    zoom >= tasksThreshold ? 
+    'tasks' : 
+    (zoom >= munThreshold ? 'municipalities' : 'provinces')
+  )
+
   async function fetchData() {
-    if (zoom >= zoomThreshold) {
-      loading = true
-      const bounds = map.getMap().getBounds().toBBoxString()
-      const response = await fetch(geojsonUrl(bounds))
-      geoJsonData = await response.json()
-      loading = false
-    }
+    loading = true
+    const bounds = map.getMap().getBounds().toBBoxString()
+    const response = await fetch(geojsonUrl(target(zoom), bounds))
+    geoJsonData = await response.json()
+    loading = false
   }
 
   function handleMoveEnd() {
@@ -45,7 +50,9 @@
   }
 
 	function handleClick(feature) {
-    goto('/explore/task/' + feature.properties.id)
+    if (target(zoom) === 'tasks') {
+      goto('/explore/task/' + feature.properties.id)
+    }
 	}
 
   function handleMouseover(feature, layer) {
@@ -61,18 +68,27 @@
   }
 
   function setStyle(feature) {
-    const colors = Object.values(TASK_COLORS)
-    const style = { 
-      fillColor: colors[feature.properties.status % colors.length],
-      fillOpacity: 1,
-      dashArray: null,
-      weight: 1,
-      color: '#3388ff', 
-    }
-    if (feature.properties.id === hoveredFeature?.properties?.id) {
-      style.dashArray = '5,5'
-      style.weight = 2
-      style.color = 'black'
+    let style
+    if (target(zoom) === 'tasks') {
+      const colors = Object.values(TASK_COLORS)
+      style = { 
+        fillColor: colors[feature.properties.status % colors.length],
+        fillOpacity: 1,
+        dashArray: null,
+        weight: 1,
+        color: '#3388ff', 
+      }
+      if (feature.properties.id === hoveredFeature?.properties?.id) {
+        style.dashArray = '5,5'
+        style.weight = 2
+        style.color = 'black'
+      }
+    } else {
+      style = { 
+        fillColor: 'blue',
+        fillOpacity: 0.2,
+        weight: 2,
+      }
     }
     return style
   }
@@ -104,22 +120,19 @@
       {#if loading}
         <span>Cargando datos... </span>
         <Spinner size={4} />
-      {:else if zoom < zoomThreshold}
+        {:else if target(zoom) === 'provinces'}
         <div class="prose lg:prose-xl dark:prose-invert">
           <p>
-            Aquí se visalizará información de los proyectos de importación visibles
-            en el mapa.
+            Aquí se visalizará estadísticas de la importación por provincias.
           </p>
-          <p>Haz zoom al nivel de escala 300 metros para ver las tareas.</p>
+          <p>Haz zoom al nivel de escala 50 km o en una provincia para ver los municipios.</p>
+        </div>
+      {:else if target(zoom) === 'municipalities'}
+        <div class="prose lg:prose-xl dark:prose-invert">
           <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Egestas congue quisque egestas diam in arcu cursus euismod. Nulla pellentesque dignissim enim sit amet venenatis. Adipiscing elit ut aliquam purus sit amet luctus. Turpis massa sed elementum tempus egestas sed sed risus pretium. Egestas integer eget aliquet nibh. Odio eu feugiat pretium nibh ipsum consequat nisl. Nibh praesent tristique magna sit amet. Vitae auctor eu augue ut lectus arcu bibendum at. Ultricies leo integer malesuada nunc vel risus commodo viverra. Diam in arcu cursus euismod quis viverra nibh cras. Semper auctor neque vitae tempus quam pellentesque nec nam aliquam. Tempor nec feugiat nisl pretium fusce id velit ut tortor. Tellus elementum sagittis vitae et leo duis ut. Ante metus dictum at tempor commodo ullamcorper a. Tortor pretium viverra suspendisse potenti nullam ac tortor vitae. Donec adipiscing tristique risus nec.
+            Aquí se visalizará estadísticas de la importación por municipios.
           </p>
-          <p>
-            Amet consectetur adipiscing elit pellentesque habitant morbi tristique senectus et. Netus et malesuada fames ac turpis egestas sed tempus urna. Scelerisque varius morbi enim nunc. Ut morbi tincidunt augue interdum velit euismod in pellentesque. Posuere morbi leo urna molestie at. A arcu cursus vitae congue. Pretium fusce id velit ut tortor pretium. Ornare quam viverra orci sagittis eu volutpat odio facilisis mauris. Risus commodo viverra maecenas accumsan lacus. Blandit turpis cursus in hac habitasse platea. Sed lectus vestibulum mattis ullamcorper. Potenti nullam ac tortor vitae purus faucibus ornare suspendisse. Maecenas pharetra convallis posuere morbi leo urna molestie.
-          </p>
-          <p>
-            Sed turpis tincidunt id aliquet risus. Id velit ut tortor pretium. Ipsum faucibus vitae aliquet nec ullamcorper sit amet risus. Fermentum iaculis eu non diam phasellus vestibulum lorem sed. Sagittis vitae et leo duis. Tempus quam pellentesque nec nam aliquam sem. Elit ut aliquam purus sit amet luctus venenatis. Rhoncus est pellentesque elit ullamcorper dignissim cras tincidunt. Eget nulla facilisi etiam dignissim diam quis enim. Eu feugiat pretium nibh ipsum consequat. Mauris commodo quis imperdiet massa tincidunt nunc pulvinar sapien. Arcu non odio euismod lacinia at quis risus.
-          </p>
+          <p>Haz zoom al nivel de escala 500 m o en un municipio para ver las tareas.</p>
         </div>
       {:else if previewFeature}
         <TaskInfo task={hoveredFeature}/>

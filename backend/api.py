@@ -7,6 +7,8 @@ import resources
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 api = Api(api_bp)
 api.add_resource(resources.Status, '')
+api.add_resource(resources.Provinces, '/provinces')
+api.add_resource(resources.Municipalities, '/municipalities')
 api.add_resource(resources.Tasks, '/tasks')
 api.add_resource(resources.Task, '/task/<int:id>')
 api.add_resource(resources.User, '/user')

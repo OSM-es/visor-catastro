@@ -1,7 +1,9 @@
 from flask_restful import Resource
 
-from resources.tasks import Tasks, Task
+from resources.municipalities import Municipalities
+from resources.provinces import Provinces
 from resources.user import User
+from resources.tasks import Tasks, Task
 
 
 class Status(Resource):

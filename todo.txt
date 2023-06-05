@@ -7,10 +7,6 @@
             http://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCoordenadas.asmx/Consulta_RCCOOR?SRS=EPSG:4326&Coordenada_X=-1.361530&Coordenada_Y=39.095248
         O por address.geojson y el nombre de la calle en catastro
 
-# Datos usuario. Tutorial completado.
-
-# Redirigir usuarios registrados de / hacia mapa o tutorial
-
 # Guardar bounds del mapa. Osm recuerda el zoom de la última visita
 
 # rutas /explore/[slug] (slug = municipio o provincia)
