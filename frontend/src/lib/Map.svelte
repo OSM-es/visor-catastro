@@ -7,6 +7,7 @@
   export let map
   export let center = PUBLIC_INITIAL_VIEW
   export let zoom = PUBLIC_INITIAL_ZOOM
+  export let minZoom = 5
 
   const dispatch = createEventDispatcher()
   
@@ -14,7 +15,7 @@
   + `target="_blank">OpenStreetMap</a>`
   const mapOptions = { center, zoom }
   const tileUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-  const tileLayerOptions = { minZoom: 5, maxZoom: 19, attribution }
+  const tileLayerOptions = { minZoom, maxZoom: 19, attribution }
   const scaleControlOptions = { maxWidth: 200, imperial: false }
  
   function handleMoveEnd() {

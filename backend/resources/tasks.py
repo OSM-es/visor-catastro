@@ -1,7 +1,10 @@
+import json
+import gzip
+import os
+
 from flask import Response, abort, current_app, request
 from flask_restful import Resource
 import geopandas
-import gzip
 import osm2geojson
 
 import models
@@ -47,7 +50,12 @@ class Task(Resource):
                 f = osm2geojson.shape_to_feature(node, {'type': 'node', 'tags': tags})
                 buildings.append(f)
         parts = [f for f in filtered if 'building:part' in f['properties']['tags']]
+        fn = UPDATE + task.muncode + '/tasks/' + task.localId + '.fixmes.geojson'
         data = task.asdict()
+        if os.path.exists(fn):
+            with open(fn) as fo:
+                fixmes = json.load(fo)
+            data['fixmes'] = fixmes
         data['buildings'] = {'type': geojson['type'], 'features': buildings}
         data['parts'] = {'type': geojson['type'], 'features': parts}
         return data
