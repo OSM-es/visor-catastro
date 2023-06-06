@@ -7,7 +7,7 @@
     NavHamburger,
     ToolbarButton,
   } from 'flowbite-svelte'
-  import { Bars3CenterLeft } from 'svelte-heros-v2'
+  import { BookOpen, Bars3CenterLeft, Map } from 'svelte-heros-v2'
   
   import { getContext } from 'svelte'
   import { invalidate } from '$app/navigation'
@@ -55,8 +55,12 @@
   </div>
 
   <NavUl {hidden} {ulClass} class="order-1">
-    <NavLi href="/learn" active={activeUrl.startsWith('/learn')}>Aprende</NavLi>
-    <NavLi href="/explore" active={activeUrl.startsWith('/explore')}>Explora</NavLi>
+    <NavLi href="/learn" active={activeUrl.startsWith('/learn')} class="flex items-center">
+      <BookOpen class="w-5 m-1"/> Aprende
+    </NavLi>
+    <NavLi href="/explore" active={activeUrl.startsWith('/explore')} class="flex items-center">
+      <Map class="w-5 m-1"/> Explora
+    </NavLi>
   </NavUl>
 
   <div id="usermenu" class="flex md:order-2" on:invalidateuser={invalidateUser}>

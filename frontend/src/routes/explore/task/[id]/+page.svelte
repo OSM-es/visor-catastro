@@ -103,7 +103,7 @@
   </div>
   <div class="md:max-w-md w-full flex-grow overflow-scroll px-4 pt-8 border-l-2 border-gray-200 dark:border-gray-600">
     <div class="h-full max-h-0">
-      <div class="prose lg:prose-xl dark:prose-invert">
+      <div class="prose dark:prose-invert">
         <ul>
           <li>Catastro de {data.task.muncode}</li>
           <li>Referencia: {data.task.localId}</li>
