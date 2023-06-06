@@ -12,3 +12,16 @@
 # rutas /explore/[slug] (slug = municipio o provincia)
 >>> Task.query.filter(Task.muncode=='02001')
 >>> Task.query.filter(Task.muncode.startswith('02')).count()
+
+# Restringir acceso api.tasks.put a editores
+
+# Descarga de archivo de tarea para editores. Eliminar fixmes. 
+
+# Registrar historial de cambios de estado de tareas.
+
+# Visualizar lista de tareas como tabla con ordenar y filtro.
+
+# Ruta dedicada para municipio / provincia filtrando.
+
+# Visualizar datos municipio / provincia.
+

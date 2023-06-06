@@ -17,7 +17,7 @@
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       <!-- svelte-ignore a11y-mouse-events-have-key-events -->
       <div
-        on:click={() => goto('/explore/task/' + task.id)}
+        on:click={() => goto('/explore/task/' + task.properties.id)}
         on:mouseover={() => dispatch('mouseover', { feature: task })}
         on:mouseout={() => dispatch('mouseout')}
         class="hover:bg-amber-400 cursor-pointer"

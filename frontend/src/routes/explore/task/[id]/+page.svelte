@@ -108,7 +108,7 @@
           <li>Catastro de {data.task.muncode}</li>
           <li>Referencia: {data.task.localId}</li>
           <li>Tipo: {data.task.type}</li>
-          <li>Partes de edificio: {data.task.parts}</li>
+          <li>Partes de edificio: {data.task.parts.features.length}</li>
         </ul>
         <form use:enhance={updateStatus} method="POST">
           <Label for="status">Estado:</Label>
