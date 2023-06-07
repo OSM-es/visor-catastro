@@ -2,16 +2,29 @@ import json
 import gzip
 import os
 
-from flask import Response, abort, current_app, request
+from flask import Response, abort, request
 from flask_restful import Resource
+from shapely import bounds, buffer, GeometryCollection
 import geopandas
 import osm2geojson
 
+import overpass
 import models
 from config import Config
 
 UPDATE = Config.UPDATE_PATH
 
+
+def getStreets(boundingBox):
+    bb = f'{boundingBox[1]},{boundingBox[0]},{boundingBox[3]},{boundingBox[2]}'
+    ql = [
+        'way["highway"]["name"]',
+        'relation["highway"]["name"]',
+        'way["place"="square"]["name"]',
+        'relation["place"="square"]["name"]',
+    ]
+    text = overpass.query(*ql, search=bb)
+    return osm2geojson.xml2geojson(text)
 
 class Tasks(Resource):
     def get(self):
@@ -37,6 +50,7 @@ class Task(Resource):
             xml = fo.read()
         geojson = osm2geojson.xml2geojson(xml, filter_used_refs=False)
         shapes = osm2geojson.xml2shapes(xml)
+        bb = bounds(buffer(GeometryCollection([s['shape'] for s in shapes]), 0.0001)).tolist()
         filtered = []
         for f in geojson['features']:
             if 'tags' in f['properties']:
@@ -58,6 +72,7 @@ class Task(Resource):
             data['fixmes'] = fixmes
         data['buildings'] = {'type': geojson['type'], 'features': buildings}
         data['parts'] = {'type': geojson['type'], 'features': parts}
+        data['streets'] = getStreets(bb)
         return data
     
     def put(self, id):

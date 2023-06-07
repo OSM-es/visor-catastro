@@ -18,13 +18,21 @@
   let buildings = data.task.buildings
   let parts = data.task.parts
   let fixmes = data.task?.fixmes
-  const streets = buildings.features.reduce((streets, feat) => {
+  
+  let streets = buildings.features.reduce((streets, feat) => {
     const addr = getAddress(feat.properties.tags)
     if (addr && !streets.includes(addr)) {
       streets.push(addr)
     }
     return streets
   }, [])
+  streets = data.task.streets.features.reduce((streets, feat) => {
+    const addr = feat.properties.tags?.name
+    if (addr && !streets.includes(addr)) {
+      streets.push(addr)
+    }
+    return streets
+  }, streets)
 
   const fixmeTextStyle = `
     position: absolute;
@@ -92,7 +100,19 @@
     return address
   }
 
-  function setStyle(feature) {
+  function streetStyle(feature) {
+    const name = feature.properties.tags?.name
+    const colorIndex = streets.indexOf(name) % STREET_COLORS.length
+    const style = { 
+      weight: 8,
+      opacity: 0.6,
+      fillOpacity: 0.3,
+      color: name ? STREET_COLORS[colorIndex] : 'gray',
+    }
+    return style
+  }
+
+  function buildingStyle(feature) {
     const style = { 
       weight: (feature?.properties?.tags || {})['building:part'] ? 1 : 2,
       fillOpacity: feature?.properties?.tags?.building ? 0.6 : 0.3,
@@ -101,24 +121,31 @@
     return style
   }
 
-  function createMarker(geoJsonPoint, latlng) {
-    let tooltip, marker
-    if (geoJsonPoint.properties?.fixme) {
-      tooltip = geoJsonPoint.properties?.fixme
-      marker = L.marker(latlng, { icon: fixmeIcon })
-    } else {
-      const address = getAddress(geoJsonPoint.properties.tags)
-      const housenumber = geoJsonPoint.properties.tags['addr:housenumber']
-      marker = L.marker(latlng, { icon: entranceIcon(address, housenumber) })
-      tooltip = address + (housenumber ? ', ' + housenumber : '')
-    }
-    marker.bindTooltip(tooltip)
-    return marker
+  function createFixme(geoJsonPoint, latlng) {
+    let marker = L.marker(latlng, { icon: fixmeIcon })
+    return marker.bindTooltip(geoJsonPoint.properties?.fixme)
   }
 
-  const geoJsonOptions = {
-    style: setStyle,
-    pointToLayer: createMarker,
+  function createAddress(geoJsonPoint, latlng) {
+    const address = getAddress(geoJsonPoint.properties.tags)
+    const housenumber = geoJsonPoint.properties.tags['addr:housenumber']
+    let marker = L.marker(latlng, { icon: entranceIcon(address, housenumber) })
+    return marker.bindTooltip(address + (housenumber ? ', ' + housenumber : ''))
+  }
+
+  const fixmeOptions = {pointToLayer: createFixme }
+
+  const streetOptions = {
+    style: streetStyle,
+    onEachFeature: function(feature, layer) {
+      const name = feature.properties.tags?.name
+      if (name) layer.bindTooltip(name, { sticky: true })
+    }
+  }
+
+  const buildingOptions = {
+    style: buildingStyle,
+    pointToLayer: createAddress,
     onEachFeature: function(feature, layer) {
       const tags = JSON.stringify(feature.properties.tags, null, '<br/>')?.replace(/[\"{}]/g, '')
       if (tags && !tags.includes('building:part')) layer.bindPopup(tags)
@@ -150,9 +177,10 @@
 <div class="flex flex-col md:flex-row flex-grow">
   <div class="w-full flex-grow z-0">
     <Map bind:map bind:center bind:zoom bind:getUrl minZoom=15>
-      <GeoJSON data={parts} options={geoJsonOptions}/>
-      <GeoJSON data={buildings} options={geoJsonOptions} bind:getGeoJSON/>
-      {#if fixmes}<GeoJSON data={fixmes} options={geoJsonOptions}/>{/if}
+      <GeoJSON data={data.task.streets} options={streetOptions}/>
+      <GeoJSON data={parts} options={buildingOptions}/>
+      <GeoJSON data={buildings} options={buildingOptions} bind:getGeoJSON/>
+      {#if fixmes}<GeoJSON data={fixmes} options={fixmeOptions}/>{/if}
     </Map>
   </div>
   <div class="md:max-w-md w-full flex-grow overflow-scroll px-4 pt-8 border-l-2 border-gray-200 dark:border-gray-600">

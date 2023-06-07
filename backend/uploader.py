@@ -10,11 +10,12 @@ import json
 import geojson
 import osm2geojson
 import requests
-from flask import Blueprint, current_app, request
+from flask import Blueprint, abort, current_app, request
 from shapely.geometry import shape
 from shapely import GeometryCollection
 from geoalchemy2.shape import from_shape
 
+import overpass
 from models import db, Municipality, Province, Task
 from config import Config
 
@@ -22,13 +23,15 @@ UPDATE = Config.UPDATE_PATH
 uploader = Blueprint('uploader', __name__, url_prefix='/')
 
 
-def get_geometry(url, level):
-    """Busca una geometría en overpass."""
-    response = requests.get(url)
-    shapes = osm2geojson.xml2shapes(response.text)
+def get_geometry(*ql, search=None, level=6):
+    """Busca geometría de límite administrativo en overpass."""
+    text = overpass.query(*ql, search=search)
+    if not text:
+        abort(500)
+    shapes = osm2geojson.xml2shapes(text)
     shape = [
         s for s in shapes 
-        if s['properties']['tags'].get('admin_level', '') == level
+        if s['properties'].get('tags', {}).get('admin_level', '') == level
     ][0]
     geom = GeometryCollection(shape['shape'])
     return shape, from_shape(geom)
@@ -88,11 +91,7 @@ def upload(mun_code):
         return msg
     osmid = request.args.get('osmid', '')
     if osmid:
-        url = (
-            f'https://osm3s.cartobase.es/api/interpreter'
-            f'?data=[out:xml][timeout:250];(wr({osmid}););(._;>>;);out meta;'
-        )
-        __, mun.geom = get_geometry(url, '8')
+        __, mun.geom = get_geometry('wr', search=osmid, level='8')
         log.info(f"Registrada geometría de {mun_code} {mun_name}")
     db.session.add(mun)
     zoning = UPDATE + mun_code + '/' + 'zoning.geojson'
@@ -107,12 +106,8 @@ def upload(mun_code):
 
 @uploader.route("/province/<prov_code>", methods=["PUT"])
 def province(prov_code):
-    url = (
-        f'https://osm3s.cartobase.es/api/interpreter'
-        f'?data=[out:xml][timeout:250];(wr["boundary"="administrative"]'
-        f'["ine:provincia"="{prov_code}"];);(._;>>;);out meta;'
-    )
-    shape, geom = get_geometry(url, '6')
+    ql = f'wr["boundary"="administrative"]["ine:provincia"="{prov_code}"]'
+    shape, geom = get_geometry(ql, level='6')
     name = shape['properties']['tags']['name']
     prov = Province.get_by_code(prov_code)
     if prov is None:
