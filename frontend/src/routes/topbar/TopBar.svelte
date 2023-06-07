@@ -18,7 +18,10 @@
 
   export let user
 
-  let ulClass = 'flex flex-col md:flex-row md:space-x-8 items-center order-1 font-medium'
+  const ulClass = 'flex flex-col md:flex-row md:space-x-8 items-center bg-transparent dark:bg-transparent border-0 sm:max-md:text-sm font-medium'
+  const activeClass = 'bg-transparent text-primary-700 dark:text-white md:dark:bg-transparent'
+  const nonActiveClass = 'text-gray-700 hover:text-primary-500 dark:text-gray-400 dark:hover:text-gray-300'
+  const _liClass = 'flex items-center !py-0'
 
   $: activeUrl = $page.url.pathname
 
@@ -54,11 +57,11 @@
     </NavBrand>
   </div>
 
-  <NavUl {hidden} {ulClass} class="order-1">
-    <NavLi href="/learn" active={activeUrl.startsWith('/learn')} class="flex items-center">
+  <NavUl {hidden} {ulClass} {activeClass} {nonActiveClass} class="order-1">
+    <NavLi href="/learn" active={activeUrl.startsWith('/learn')} class={_liClass}>
       <BookOpen class="w-5 m-1"/> Aprende
     </NavLi>
-    <NavLi href="/explore" active={activeUrl.startsWith('/explore')} class="flex items-center">
+    <NavLi href="/explore" active={activeUrl.startsWith('/explore')} class={_liClass}>
       <Map class="w-5 m-1"/> Explora
     </NavLi>
   </NavUl>
