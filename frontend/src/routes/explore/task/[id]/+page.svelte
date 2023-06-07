@@ -7,6 +7,7 @@
 	import { enhance } from '$app/forms'
 
   import Map from '$lib/Map.svelte'
+  import { STREET_COLORS } from '$lib/config'
 
   export let data
 
@@ -17,27 +18,13 @@
   let buildings = data.task.buildings
   let parts = data.task.parts
   let fixmes = data.task?.fixmes
-
-  const entranceStyle = `
-    background-color: #006400;
-    display: {text ? inline : block};
-    min-width: 0.8rem;
-    min-height: 0.8rem;
-    padding: 0 0.1rem 0 0.1rem;
-    left: -0.4rem;
-    top: -0.4rem;
-    color: white;
-    position: relative;
-    border: 1px solid #FFFFFF;
-  `
-
-  const entranceIcon = (housenumber) => L.divIcon({
-    className: "entrance",
-    iconAnchor: [0, 0],
-    labelAnchor: [-6, 0],
-    popupAnchor: [0, -36],
-    html: `<span style="${entranceStyle}">${housenumber}</span`
-  })
+  const streets = buildings.features.reduce((streets, feat) => {
+    const addr = getAddress(feat.properties.tags)
+    if (addr && !streets.includes(addr)) {
+      streets.push(addr)
+    }
+    return streets
+  }, [])
 
   const fixmeTextStyle = `
     position: absolute;
@@ -69,6 +56,29 @@
     html: `<span style="${fixmeIconStyle}"></span><span style="${fixmeTextStyle}">!</span>`
   })
 
+  function entranceIcon(address, housenumber) {
+    const colorIndex = streets.indexOf(address) % STREET_COLORS.length
+    const style = `
+      background-color: ${STREET_COLORS[colorIndex]};
+      display: ${housenumber ? 'inline' : 'block'};
+      min-width: 0.8rem;
+      min-height: 0.8rem;
+      padding: 0 0.1rem 0 0.1rem;
+      left: -0.4rem;
+      top: -0.4rem;
+      color: ${colorIndex > (STREET_COLORS.length / 2) ? 'black' : 'white'};
+      position: relative;
+      border: 1px solid ${colorIndex > (STREET_COLORS.length / 2) ? 'black' : 'white'};
+    `
+    return L.divIcon({
+      className: "entrance",
+      iconAnchor: [0, 0],
+      labelAnchor: [-6, 0],
+      popupAnchor: [0, -36],
+      html: `<span style="${style}">${housenumber}</span`
+    })
+  }
+
   function centerMap(event) {
     const point = event.target.attributes.href.value.split(',')
     map.getMap().panTo([point[1], point[0]])
@@ -79,16 +89,14 @@
     let address = ''
     if (tags['addr:street']) address = tags['addr:street']
     if (tags['addr:place']) address = tags['addr:place']
-    if (tags['addr:housenumber']) address += (', ' + tags['addr:housenumber'])
     return address
   }
 
   function setStyle(feature) {
-    const address = getAddress(feature?.properties?.tags || {})
     const style = { 
       weight: (feature?.properties?.tags || {})['building:part'] ? 1 : 2,
       fillOpacity: feature?.properties?.tags?.building ? 0.6 : 0.3,
-      color: address ? '#006400' : '#B22222',
+      color: '#B22222',
     }
     return style
   }
@@ -99,9 +107,10 @@
       tooltip = geoJsonPoint.properties?.fixme
       marker = L.marker(latlng, { icon: fixmeIcon })
     } else {
-      const text = geoJsonPoint.properties.tags['addr:housenumber']
-      tooltip = getAddress(geoJsonPoint.properties.tags)
-      marker = L.marker(latlng, { icon: entranceIcon(text) })
+      const address = getAddress(geoJsonPoint.properties.tags)
+      const housenumber = geoJsonPoint.properties.tags['addr:housenumber']
+      marker = L.marker(latlng, { icon: entranceIcon(address, housenumber) })
+      tooltip = address + (housenumber ? ', ' + housenumber : '')
     }
     marker.bindTooltip(tooltip)
     return marker
@@ -112,9 +121,7 @@
     pointToLayer: createMarker,
     onEachFeature: function(feature, layer) {
       const tags = JSON.stringify(feature.properties.tags, null, '<br/>')?.replace(/[\"{}]/g, '')
-      const address = getAddress(feature?.properties?.tags || {})
       if (tags && !tags.includes('building:part')) layer.bindPopup(tags)
-      if (address) layer.bindTooltip(address)
     },
   }
 
@@ -138,7 +145,6 @@
     initialZoom = zoom
     initialCenter = center
   })
-  console.info(fixmes)
 </script>
 
 <div class="flex flex-col md:flex-row flex-grow">

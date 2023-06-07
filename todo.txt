@@ -1,4 +1,4 @@
-# Color de direcciones según el nombre de la calle
+# Visualizar calles en la tarea
 
 # Foto de fachada en popup edificio
     http://ovc.catastro.meh.es/OVCServWeb/OVCWcfLibres/OVCFotoFachada.svc/RecuperarFotoFachadaGet?ReferenciaCatastral={localid}
