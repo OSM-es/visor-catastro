@@ -69,6 +69,12 @@
     html: `<span style="${fixmeIconStyle}"></span><span style="${fixmeTextStyle}">!</span>`
   })
 
+  function centerMap(event) {
+    const point = event.target.attributes.href.value.split(',')
+    map.getMap().panTo([point[1], point[0]])
+    event.preventDefault()
+  }
+
   function getAddress(tags) {
     let address = ''
     if (tags['addr:street']) address = tags['addr:street']
@@ -132,6 +138,7 @@
     initialZoom = zoom
     initialCenter = center
   })
+  console.info(fixmes)
 </script>
 
 <div class="flex flex-col md:flex-row flex-grow">
@@ -151,6 +158,18 @@
           <li>Tipo: {data.task.type}</li>
           <li>Partes de edificio: {data.task.parts.features.length}</li>
         </ul>
+        {#if fixmes}
+          <p>Anotaciones:</p>
+          {#each fixmes?.features as fixme}
+            <ol>
+              <li>
+                <a href="{fixme.geometry.coordinates}" on:click={centerMap}>
+                  {fixme.properties.fixme}
+                </a>
+              </li>
+            </ol>
+          {/each}
+        {/if}
         <form use:enhance={updateStatus} method="POST">
           <Label for="status">Estado:</Label>
           <Input id="status" name="status" type=number bind:value min=0 max=9 disabled={!isEditor} />
