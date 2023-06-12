@@ -13,27 +13,12 @@
 
   $: isEditor = data.user?.role && data.user.role != 'READ_ONLY'
 
+  const urlFF = 'http://ovc.catastro.meh.es/OVCServWeb/OVCWcfLibres/OVCFotoFachada.svc/RecuperarFotoFachadaGet?ReferenciaCatastral='
+
   let map, center, zoom, initialCenter, initialZoom, getGeoJSON, getUrl
   let value = data.task.status
-  let buildings = data.task.buildings
-  let parts = data.task.parts
   let fixmes = data.task?.fixmes
   
-  let streets = buildings.features.reduce((streets, feat) => {
-    const addr = getAddress(feat.properties.tags)
-    if (addr && !streets.includes(addr)) {
-      streets.push(addr)
-    }
-    return streets
-  }, [])
-  streets = data.task.streets.features.reduce((streets, feat) => {
-    const addr = feat.properties.tags?.name
-    if (addr && !streets.includes(addr)) {
-      streets.push(addr)
-    }
-    return streets
-  }, streets)
-
   const fixmeTextStyle = `
     position: absolute;
     top: -35px;
@@ -65,7 +50,7 @@
   })
 
   function entranceIcon(address, housenumber) {
-    const colorIndex = streets.indexOf(address) % STREET_COLORS.length
+    const colorIndex = data.task.streetNames.indexOf(address) % STREET_COLORS.length
     const style = `
       background-color: ${STREET_COLORS[colorIndex]};
       display: ${housenumber ? 'inline' : 'block'};
@@ -94,15 +79,12 @@
   }
 
   function getAddress(tags) {
-    let address = ''
-    if (tags['addr:street']) address = tags['addr:street']
-    if (tags['addr:place']) address = tags['addr:place']
-    return address
+    return tags['addr:street'] || tags['addr:place'] || ''
   }
 
   function streetStyle(feature) {
     const name = feature.properties.tags?.name
-    const colorIndex = streets.indexOf(name) % STREET_COLORS.length
+    const colorIndex = data.task.streetNames.indexOf(name) % STREET_COLORS.length
     const style = { 
       weight: 8,
       opacity: 0.6,
@@ -148,8 +130,17 @@
     pointToLayer: createAddress,
     onEachFeature: function(feature, layer) {
       const tags = JSON.stringify(feature.properties.tags, null, '<br/>')?.replace(/[\"{}]/g, '')
-      if (tags && !tags.includes('building:part')) layer.bindPopup(tags)
+      if (tags && !tags.includes('building:part')) {
+        layer.bindPopup(tags)
+        layer.on('click', showImage)
+      }
     },
+  }
+
+  function showImage({ target }) {
+    const ref = target.feature.properties?.tags?.ref
+    console.info(document.getElementById(`foto_${ref}`))
+    if (ref) document.getElementById(`foto_${ref}`).scrollIntoView()
   }
 
   function exit() {
@@ -178,8 +169,8 @@
   <div class="w-full flex-grow z-0">
     <Map bind:map bind:center bind:zoom bind:getUrl minZoom=15>
       <GeoJSON data={data.task.streets} options={streetOptions}/>
-      <GeoJSON data={parts} options={buildingOptions}/>
-      <GeoJSON data={buildings} options={buildingOptions} bind:getGeoJSON/>
+      <GeoJSON data={data.task.parts} options={buildingOptions}/>
+      <GeoJSON data={data.task.buildings} options={buildingOptions} bind:getGeoJSON/>
       {#if fixmes}<GeoJSON data={fixmes} options={fixmeOptions}/>{/if}
     </Map>
   </div>
@@ -197,14 +188,18 @@
           {#each fixmes?.features as fixme}
             <ol>
               <li>
-                <a href="{fixme.geometry.coordinates}" on:click={centerMap}>
+                <a
+                  href="{fixme.geometry.coordinates}"
+                  on:click={centerMap}
+                  data-sveltekit-preload-data="off"
+                >
                   {fixme.properties.fixme}
                 </a>
               </li>
             </ol>
           {/each}
         {/if}
-        <form use:enhance={updateStatus} method="POST">
+        <form use:enhance={updateStatus} method="POST" class="mb-4">
           <Label for="status">Estado:</Label>
           <Input id="status" name="status" type=number bind:value min=0 max=9 disabled={!isEditor} />
           <Button on:click={exit} color="alternative">Cancelar</Button>
@@ -215,6 +210,10 @@
           {/if}
         </form>
       </div>
+      {#each data.task.images as im, i}
+        <img id="foto_{im.ref}" src="{urlFF}{im.ref}" tabindex="{i+1}" alt="{im.addrs}"/>
+        <p class="mt-0 mb-2 text-sm">{im.addrs}</p>
+      {/each}
     </div>
   </div>
 </div>

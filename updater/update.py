@@ -92,7 +92,7 @@ def daily_check():
     catconfig.set_config({
         'show_progress_bars': False,
         'report_system_info': False,
-        'clean_fixmes': True,
+        'show_refs': True,
     })
     while need_update and provincias and retries < config.max_retries:
         try:

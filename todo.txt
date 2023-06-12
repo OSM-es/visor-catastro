@@ -1,11 +1,4 @@
-# Visualizar calles en la tarea
-
-# Foto de fachada en popup edificio
-    http://ovc.catastro.meh.es/OVCServWeb/OVCWcfLibres/OVCFotoFachada.svc/RecuperarFotoFachadaGet?ReferenciaCatastral={localid}
-    El archivo de la tarea no tiene la ref localid de los edificios
-        Se puede buscar por coordenadas como pointinfo
-            http://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCoordenadas.asmx/Consulta_RCCOOR?SRS=EPSG:4326&Coordenada_X=-1.361530&Coordenada_Y=39.095248
-        O por address.geojson y el nombre de la calle en catastro
+# Validar calles en la tarea
 
 # Guardar bounds del mapa. Osm recuerda el zoom de la última visita
 
@@ -15,7 +8,7 @@
 
 # Restringir acceso api.tasks.put a editores
 
-# Descarga de archivo de tarea para editores. Eliminar fixmes. 
+# Descarga de archivo de tarea para editores. Eliminar fixmes/refs.
 
 # Registrar historial de cambios de estado de tareas.
 
@@ -24,4 +17,3 @@
 # Ruta dedicada para municipio / provincia filtrando.
 
 # Visualizar datos municipio / provincia.
-
