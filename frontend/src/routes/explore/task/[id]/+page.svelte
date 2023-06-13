@@ -7,17 +7,21 @@
 	import { enhance } from '$app/forms'
 
   import Map from '$lib/Map.svelte'
+  import FotosFachada from './FotosFachada.svelte'
   import { STREET_COLORS } from '$lib/config'
-
+  
   export let data
-
-  $: isEditor = data.user?.role && data.user.role != 'READ_ONLY'
 
   const urlFF = 'http://ovc.catastro.meh.es/OVCServWeb/OVCWcfLibres/OVCFotoFachada.svc/RecuperarFotoFachadaGet?ReferenciaCatastral='
 
   let map, center, zoom, initialCenter, initialZoom, getGeoJSON, getUrl
   let value = data.task.status
+  let buildings = data.task.buildings
   let fixmes = data.task?.fixmes
+  let scrollImage, viewImage
+  
+  $: isEditor = data.user?.role && data.user.role != 'READ_ONLY'
+  $: console.info(data)
   
   const fixmeTextStyle = `
     position: absolute;
@@ -72,6 +76,32 @@
     })
   }
 
+  const fixmeOptions = {pointToLayer: createFixme }
+
+  const streetOptions = {
+    style: streetStyle,
+    onEachFeature: function(feature, layer) {
+      const name = feature.properties.tags?.name
+      if (name) layer.bindTooltip(name, { sticky: true })
+    }
+  }
+
+  const buildingOptions = {
+    style: buildingStyle,
+    pointToLayer: createAddress,
+    onEachFeature: function(feature, layer) {
+      const tags = JSON.stringify(feature.properties.tags, null, '<br/>')?.replace(/[\"{}]/g, '')
+      if (tags && !tags.includes('building:part')) {
+        const ref = feature.properties.tags.ref
+        layer.bindPopup(`<a href="?ref=${ref}"><img src="${urlFF}${ref}"/></a>` + tags)
+        layer.on('popupopen', onPoupOpen)
+        layer.on('popupclose', onPopupClose)
+        feature.layer = layer
+      }
+    },
+  }
+
+
   function centerMap(event) {
     const point = event.target.attributes.href.value.split(',')
     map.getMap().panTo([point[1], point[0]])
@@ -115,39 +145,29 @@
     return marker.bindTooltip(address + (housenumber ? ', ' + housenumber : ''))
   }
 
-  const fixmeOptions = {pointToLayer: createFixme }
-
-  const streetOptions = {
-    style: streetStyle,
-    onEachFeature: function(feature, layer) {
-      const name = feature.properties.tags?.name
-      if (name) layer.bindTooltip(name, { sticky: true })
-    }
+  function onPoupOpen({ target }) {
+    scrollImage = target.feature.properties?.tags?.ref
   }
 
-  const buildingOptions = {
-    style: buildingStyle,
-    pointToLayer: createAddress,
-    onEachFeature: function(feature, layer) {
-      const tags = JSON.stringify(feature.properties.tags, null, '<br/>')?.replace(/[\"{}]/g, '')
-      if (tags && !tags.includes('building:part')) {
-        layer.bindPopup(tags)
-        layer.on('click', showImage)
-      }
-    },
+  function onPopupClose() {
+    goto(document.location.pathname)
   }
 
-  function showImage({ target }) {
-    const ref = target.feature.properties?.tags?.ref
-    console.info(document.getElementById(`foto_${ref}`))
-    if (ref) document.getElementById(`foto_${ref}`).scrollIntoView()
+  function showBuilding({ detail }) {
+    const ref = detail
+    const building = buildings.features.find(building => building.properties.tags?.ref === ref)
+    building.layer.openPopup()
+  }
+
+  function dataChange(data) {
+    viewImage = data.imageRef
   }
 
   function exit() {
     goto(`/explore?map=${getUrl(-1)}`)
   }
 
-  const updateStatus = () => {
+  function updateStatus() {
     return async ({ update }) => {
       await update()
       exit()
@@ -162,6 +182,8 @@
     map.getMap().fitBounds(getGeoJSON().getBounds())
     initialZoom = zoom
     initialCenter = center
+    scrollImage = data.imageRef
+    viewImage = data.imageRef
   })
 </script>
 
@@ -210,10 +232,14 @@
           {/if}
         </form>
       </div>
-      {#each data.task.images as im, i}
-        <img id="foto_{im.ref}" src="{urlFF}{im.ref}" tabindex="{i+1}" alt="{im.addrs}"/>
-        <p class="mt-0 mb-2 text-sm">{im.addrs}</p>
-      {/each}
+      {viewImage}
+      {data.imageRef}
+      <FotosFachada
+        images={data.task.images}
+        on:showBuilding={showBuilding}
+        bind:scrollImage 
+        bind:viewImage
+      />
     </div>
   </div>
 </div>

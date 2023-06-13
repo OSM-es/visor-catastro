@@ -43,4 +43,4 @@
   <TileLayer url={tileUrl} options={tileLayerOptions}/>
   <ScaleControl position="bottomleft" options={scaleControlOptions}/>
   <slot></slot>
-  </LeafletMap>
+</LeafletMap>
