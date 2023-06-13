@@ -9,7 +9,7 @@
 
   import Map from '$lib/Map.svelte'
   import FotosFachada from './FotosFachada.svelte'
-  import { STREET_COLORS } from '$lib/config'
+  import { STREET_COLORS, STREET_COLORS_TEXT } from '$lib/config'
   
   export let data
 
@@ -63,9 +63,9 @@
       padding: 0 0.1rem 0 0.1rem;
       left: -0.4rem;
       top: -0.4rem;
-      color: ${colorIndex > (STREET_COLORS.length / 2) ? 'black' : 'white'};
+      color: ${STREET_COLORS_TEXT[colorIndex]};
       position: relative;
-      border: 1px solid ${colorIndex > (STREET_COLORS.length / 2) ? 'black' : 'white'};
+      border: 1px solid ${STREET_COLORS_TEXT[colorIndex]};
     `
     return L.divIcon({
       className: "entrance",
@@ -117,7 +117,7 @@
     const colorIndex = data.task.streetNames.indexOf(name) % STREET_COLORS.length
     const style = { 
       weight: 8,
-      opacity: 0.6,
+      opacity: 0.8,
       fillOpacity: 0.3,
       color: name ? STREET_COLORS[colorIndex] : 'gray',
     }
