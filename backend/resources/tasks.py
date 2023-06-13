@@ -15,17 +15,6 @@ from config import Config
 UPDATE = Config.UPDATE_PATH
 
 
-def getStreets(boundingBox):
-    bb = f'{boundingBox[1]},{boundingBox[0]},{boundingBox[3]},{boundingBox[2]}'
-    ql = [
-        'way["highway"]["name"]',
-        'relation["highway"]["name"]',
-        'way["place"="square"]["name"]',
-        'relation["place"="square"]["name"]',
-    ]
-    text = overpass.query(*ql, search=bb)
-    return osm2geojson.xml2geojson(text)
-
 class Tasks(Resource):
     def get(self):
         q = models.Task.query
@@ -37,6 +26,17 @@ class Tasks(Resource):
         df = geopandas.GeoDataFrame.from_postgis(sql=sql, con=models.db.get_engine())
         return Response(df.to_json(), mimetype='application/json')
 
+
+def getStreets(boundingBox):
+    bb = f'{boundingBox[1]},{boundingBox[0]},{boundingBox[3]},{boundingBox[2]}'
+    ql = [
+        'way["highway"]["name"]',
+        'relation["highway"]["name"]',
+        'way["place"="square"]["name"]',
+        'relation["place"="square"]["name"]',
+    ]
+    text = overpass.query(*ql, search=bb)
+    return osm2geojson.xml2geojson(text)
 
 def isAddr(feature):
     return 'addr' in '-'.join(feature['properties'].get('tags', {}).keys())
@@ -119,7 +119,7 @@ class Task(Resource):
             xml = fo.read()
         geojson = osm2geojson.xml2geojson(xml, filter_used_refs=False)
         shapes = osm2geojson.xml2shapes(xml)
-        bb = bounds(buffer(GeometryCollection([s['shape'] for s in shapes]), 0.0001)).tolist()
+        bb = bounds(buffer(GeometryCollection([s['shape'] for s in shapes]), 0.001)).tolist()
         filtered = remove_no_addr_nodes(geojson)
         buildings = get_buildings_and_nodes_for_addr_in_areas(filtered, shapes)
         parts = [f for f in filtered if 'building:part' in f['properties']['tags']]

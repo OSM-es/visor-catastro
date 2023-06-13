@@ -5,6 +5,7 @@
   import { goto } from '$app/navigation'
   import { GeoJSON } from 'svelte-leafletjs'
 	import { enhance } from '$app/forms'
+  import { page } from '$app/stores'
 
   import Map from '$lib/Map.svelte'
   import FotosFachada from './FotosFachada.svelte'
@@ -21,7 +22,6 @@
   let scrollImage, viewImage
   
   $: isEditor = data.user?.role && data.user.role != 'READ_ONLY'
-  $: console.info(data)
   
   const fixmeTextStyle = `
     position: absolute;
@@ -159,10 +159,6 @@
     building.layer.openPopup()
   }
 
-  function dataChange(data) {
-    viewImage = data.imageRef
-  }
-
   function exit() {
     goto(`/explore?map=${getUrl(-1)}`)
   }
@@ -184,6 +180,7 @@
     initialCenter = center
     scrollImage = data.imageRef
     viewImage = data.imageRef
+    page.subscribe(page => viewImage = page.url.searchParams.get('ref'))
   })
 </script>
 
@@ -232,8 +229,6 @@
           {/if}
         </form>
       </div>
-      {viewImage}
-      {data.imageRef}
       <FotosFachada
         images={data.task.images}
         on:showBuilding={showBuilding}
@@ -243,3 +238,9 @@
     </div>
   </div>
 </div>
+
+<style>
+  :global(.leaflet-popup-content a img) {
+    cursor: zoom-in;
+  }
+</style>

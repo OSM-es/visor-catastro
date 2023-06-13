@@ -17,13 +17,18 @@
   export let scrollImage
   export let viewImage
   
+  let viewer
+  
   $: document.getElementById(`foto_${scrollImage}`)?.scrollIntoView()
   $: {
-    console.info('view', viewImage)
+    if (viewImage) {
+      const index = images.findIndex(im => im.ref === viewImage)
+      viewer.view(index)
+    }
   }
-
+  
   onMount(() => {
-    const viewer = new Viewer2(document.getElementById('FotosFachada'), options)
+    viewer = new Viewer2(document.getElementById('FotosFachada'), options)
   })
 
   function showBuilding(event) {
@@ -40,7 +45,7 @@
         <img
           id="foto_{im.ref}"
           src="{urlFF}{im.ref}"
-          alt="{im.ref} {im.addrs || 'N/D'}"
+          alt="{im.ref} {im.addrs}"
         />
       </div>
       <p class="mt-0 mb-2 text-sm">{im.ref} {im.addrs}</p>  
@@ -74,9 +79,5 @@
     color: white !important;
     background-color: #00000033;
     padding: 0.2em 0.4em;
-  }
-
-  :global(.viewer-backdrop) {
-    background-color: rgba(0, 0, 0, 0.7) !important;
   }
 </style>
