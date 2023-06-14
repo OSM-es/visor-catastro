@@ -7,6 +7,7 @@ Transfiere a /data/dist.
 import datetime
 import json
 
+import csv
 import geojson
 import osm2geojson
 import requests
@@ -16,7 +17,7 @@ from shapely import GeometryCollection
 from geoalchemy2.shape import from_shape
 
 import overpass
-from models import db, Municipality, Province, Task
+from models import db, Municipality, Province, Street, Task
 from config import Config
 
 UPDATE = Config.UPDATE_PATH
@@ -70,6 +71,24 @@ def load_tasks(mun_code, tasks):
         task.geom = from_shape(feat['geometry'])
         db.session.add(task)
 
+def upload_streets(mun_code):
+    """Registra el callejero del municipio."""
+    fn = UPDATE + mun_code + '/tasks/highway_names.csv'
+    count = 0
+    with open(fn) as fh:
+        for st in csv.reader(fh):
+            street = Street(
+                muncode=mun_code,
+                cat_name=st[0],
+                osm_name=st[1],
+                source=Street.Source[st[2]]
+            )
+            db.session.add(street)
+            count += 1
+    db.session.commit()
+    msg = f"Registradas {count} calles en {mun_code}"
+    current_app.logger.info(msg)
+
 @uploader.route("/")
 def status():
     return "ok"
@@ -101,6 +120,7 @@ def upload(mun_code):
     mun.date = src_date
     db.session.commit()
     msg = f"Registradas {len(tasks)} tareas en {mun_code} {mun_name}"
+    upload_streets(mun_code)
     log.info(msg)
     return msg
 
