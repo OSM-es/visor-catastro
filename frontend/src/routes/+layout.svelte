@@ -2,20 +2,18 @@
   import '../app.postcss'
   import Topbar from './topbar/TopBar.svelte'
 
-  import { setContext } from 'svelte'
-  import { writable } from 'svelte/store'
+  import { page } from '$app/stores';
   
   export let data
 
-  const drawerHiddenStore = writable(true)
-  setContext('drawer', drawerHiddenStore)
+  $: headerClass = $page.url.pathname.startsWith('/explore') ? 'h-screen' : ''
 </script>
 
-<div class="min-h-screen flex flex-col dark:bg-neutral-900">
+<div class="{headerClass} flex flex-col dark:bg-neutral-900">
   <header
     class="sticky top-0 z-40 w-full drop-shadow-md"
   >
-  <Topbar user={data.user}/>
+    <Topbar user={data.user}/>
   </header>
 
   <slot/>
