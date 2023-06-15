@@ -77,14 +77,15 @@ def upload_streets(mun_code):
     count = 0
     with open(fn) as fh:
         for st in csv.reader(fh, delimiter='\t'):
-            street = Street(
-                mun_code=mun_code,
-                cat_name=st[0],
-                osm_name=st[1],
-                source=Street.Source[st[2]].value
-            )
-            db.session.add(street)
-            count += 1
+            if st[1]:
+                street = Street(
+                    mun_code=mun_code,
+                    cat_name=st[0],
+                    osm_name=st[1],
+                    source=Street.Source[st[2]].value
+                )
+                db.session.add(street)
+                count += 1
     db.session.commit()
     msg = f"Registradas {count} calles en {mun_code}"
     current_app.logger.info(msg)
