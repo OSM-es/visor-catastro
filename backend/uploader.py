@@ -76,12 +76,12 @@ def upload_streets(mun_code):
     fn = UPDATE + mun_code + '/tasks/highway_names.csv'
     count = 0
     with open(fn) as fh:
-        for st in csv.reader(fh):
+        for st in csv.reader(fh, delimiter='\t'):
             street = Street(
-                muncode=mun_code,
+                mun_code=mun_code,
                 cat_name=st[0],
                 osm_name=st[1],
-                source=Street.Source[st[2]]
+                source=Street.Source[st[2]].value
             )
             db.session.add(street)
             count += 1
