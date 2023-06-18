@@ -5,6 +5,8 @@ export const PUBLIC_INITIAL_VIEW = env.PUBLIC_INITIAL_VIEW.split(',') || [36, 1]
 PUBLIC_INITIAL_VIEW.forEach((x, i) => PUBLIC_INITIAL_VIEW[i] = Number(x).toFixed(4))
 export const PUBLIC_INITIAL_ZOOM = Number(env.PUBLIC_INITIAL_ZOOM) || 5
 
+export const FotoFachadaUrl = 'http://ovc.catastro.meh.es/OVCServWeb/OVCWcfLibres/OVCFotoFachada.svc/RecuperarFotoFachadaGet?ReferenciaCatastral='
+
 export const TASK_COLORS = {
   READY_FOR_ADDRESSES: '#FFFFFF66',
   LOCKED_FOR_ADDRESSES: '#80808099',
@@ -37,7 +39,6 @@ export const STREET_COLORS = [
   '#aaffc3',
   '#808000',
   '#ffd8b1',
-  '#808080',
   '#000075',
   '#800000',
 ]
@@ -60,7 +61,8 @@ export const STREET_COLORS_TEXT = [
   '#000000',
   '#000000',
   '#000000',
-  '#000000',
   '#ffffff',
   '#ffffff',
 ]
+
+export const DEFAULT_STREET_COLOR = '#808080'

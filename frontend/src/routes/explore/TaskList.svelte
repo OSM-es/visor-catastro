@@ -11,7 +11,7 @@
 {#if !tasks || tasks.length === 0}
   <div>No hay tareas aquí.</div>
 {:else}
-  <p>Selecciona una tarea.</p>
+  <p>Selecciona una tarea:</p>
   <div>
     {#each tasks as task (task.id)}
       <!-- svelte-ignore a11y-click-events-have-key-events -->

@@ -14,3 +14,12 @@ class Street(db.Model):
     osm_name = db.Column(db.String, index=True)
     source = db.Column(db.Integer)
     name = db.Column(db.String)
+
+    def asdict(self):
+        return {
+            'mun_code': self.mun_code,
+            'cat_name': self.cat_name,
+            'osm_name': self.osm_name,
+            'source': Street.Source(self.source).name,
+            'name': self.name,
+        }

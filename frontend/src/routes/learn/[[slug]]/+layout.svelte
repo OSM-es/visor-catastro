@@ -1,5 +1,11 @@
 <script>
+  import { setContext } from 'svelte'
+  import { writable } from 'svelte/store'
+  
   import SideBar from './SideBar.svelte'
+
+  const drawerHiddenStore = writable(true)
+  setContext('drawer', drawerHiddenStore)
 </script>
 
 <div class="lg:flex">

@@ -8,9 +8,9 @@ from shapely import bounds, buffer, GeometryCollection
 import geopandas
 import osm2geojson
 
-import overpass
 import models
 from config import Config
+from overpass import getOsmStreets
 
 UPDATE = Config.UPDATE_PATH
 
@@ -27,36 +27,24 @@ class Tasks(Resource):
         return Response(df.to_json(), mimetype='application/json')
 
 
-def getStreets(boundingBox):
-    bb = f'{boundingBox[1]},{boundingBox[0]},{boundingBox[3]},{boundingBox[2]}'
-    ql = [
-        'way["highway"]["name"]',
-        'relation["highway"]["name"]',
-        'way["place"="square"]["name"]',
-        'relation["place"="square"]["name"]',
-    ]
-    text = overpass.query(*ql, search=bb)
-    return osm2geojson.xml2geojson(text)
-
 def isAddr(feature):
     return 'addr' in '-'.join(feature['properties'].get('tags', {}).keys())
 
 def getStreet(tags):
     return tags.get('addr:street') or tags.get('addr:place') or ''
 
-def get_osm_street_names(streets):
-    return list({
-        f['properties'].get('tags', {}).get('name')
-        for f in streets['features']
-        if f['properties'].get('tags', {}).get('name')
-    })
-
-def get_street_names(buildings, osmStreetNames):
-    return list({
-        getStreet(f['properties'].get('tags'))
+def get_streets(buildings):
+    names = {
+        f['properties'].get('tags', {}).get('addr:cat_name', '')
         for f in buildings
-        if getStreet(f['properties'].get('tags'))
-    }.union(osmStreetNames))
+        if f['properties'].get('tags', {}).get('addr:cat_name', '')
+    }
+    return [
+        st.asdict()
+        for st in models.Street.query.filter(
+            models.Street.cat_name.in_(names)
+        ).order_by(models.Street.source, models.Street.osm_name).all()
+    ]
 
 def remove_no_addr_nodes(geojson):
     filtered = []
@@ -86,28 +74,6 @@ def get_fixmes(shapes):
             fixmes.append(f)
     return fixmes
 
-def get_images(buildings):
-    images = defaultdict(set)
-    for f in buildings:
-        tags = f['properties'].get('tags', {})
-        if 'ref' in tags:
-            ref = tags['ref']
-            number = tags.get('addr:housenumber')
-            try:
-                number = number and f'{int(number):05}'
-            except ValueError:
-                pass
-            street = getStreet(tags) + f', {number}' if number else ''
-            if ref in images:
-                if street: images[ref].add(street)
-            else:
-                images[ref] = {street} if street else {}
-    data = [{'ref': ref, 'addrs': '; '.join(addrs)} for ref, addrs in images.items()]
-    data.sort(key=lambda im: im['addrs'])
-    for im in data:
-        im['addrs'] = re.sub(r', 0+', ', ', im['addrs'])
-    return data
-
 
 class Task(Resource):
     def get(self, id):
@@ -129,10 +95,8 @@ class Task(Resource):
         if fixmes: data['fixmes'] = {'type': geojson['type'], 'features': fixmes}
         data['buildings'] = {'type': geojson['type'], 'features': buildings}
         data['parts'] = {'type': geojson['type'], 'features': parts}
-        data['streets'] = getStreets(bb)
-        data['osmStreetNames'] = get_osm_street_names(data['streets'])
-        data['streetNames'] = get_street_names(buildings, data['osmStreetNames'])
-        data['images'] = get_images(buildings)
+        data['osmStreets'] = osm2geojson.xml2geojson(getOsmStreets(bb))
+        data['streets'] = get_streets(buildings)
         return data
     
     def put(self, id):

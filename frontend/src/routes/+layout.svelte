@@ -2,11 +2,11 @@
   import '../app.postcss'
   import Topbar from './topbar/TopBar.svelte'
 
-  import { page } from '$app/stores';
+  import { page } from '$app/stores'
   
   export let data
 
-  $: headerClass = $page.url.pathname.startsWith('/explore') ? 'h-screen' : ''
+  $: headerClass = $page.url.pathname.startsWith('/explore') ? 'h-screen' : 'min-h-screen'
 </script>
 
 <div class="{headerClass} flex flex-col dark:bg-neutral-900">

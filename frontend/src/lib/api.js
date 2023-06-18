@@ -24,13 +24,16 @@ export default class Api {
   
     const resp = await this.fetch(`${Api.base}/${path}`, opts)
     if (resp.ok || resp.status === 422) {
-      const { session, ...opts } = cookieParser(resp.headers.get('set-cookie'))
-      if (session) {
-        const options = {
-          expires: new Date(opts.Expires),
-          path: '/',
+      const cookie = resp.headers.get('set-cookie')
+      if (cookie) {
+        const {session, ...opts} = cookieParser(cookie)
+        if (session) {
+          const options = {
+            expires: new Date(opts.Expires),
+            path: '/',
+          }
+          this.event.cookies.set('session', session, options)
         }
-        this.event.cookies.set('session', session, options)
       }
       const data = await resp.json()
       return data

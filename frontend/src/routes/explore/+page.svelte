@@ -38,7 +38,7 @@
 
   function handleMoveEnd() {
     fetchData()
-    goto(`/explore?map=${getUrl()}`)
+    goto(`/explore?map=${getUrl()}`, { replaceState: true })
   }
 
   function updateStyle(feature, layer) {

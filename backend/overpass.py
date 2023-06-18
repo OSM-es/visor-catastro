@@ -18,3 +18,14 @@ def query(*queryList, search=None, out='xml', timeout=250):
         except requests.RequestException as e:
             print(str(e))
     return ""
+
+
+def getOsmStreets(boundingBox):
+    bb = f'{boundingBox[1]},{boundingBox[0]},{boundingBox[3]},{boundingBox[2]}'
+    ql = [
+        'way["highway"]["name"]',
+        'relation["highway"]["name"]',
+        'way["place"="square"]["name"]',
+        'relation["place"="square"]["name"]',
+    ]
+    return query(*ql, search=bb)

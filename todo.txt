@@ -1,5 +1,3 @@
-# Validar calles en la tarea
-
 # Guardar bounds del mapa. Osm recuerda el zoom de la última visita
 
 # rutas /explore/[slug] (slug = municipio o provincia)
@@ -8,7 +6,7 @@
 
 # Restringir acceso api.tasks.put a editores
 
-# Descarga de archivo de tarea para editores. Eliminar fixmes/refs.
+# Descarga de archivo de tarea para editores. Eliminar fixmes/refs/addr:cat_name.
 
 # Registrar historial de cambios de estado de tareas.
 
@@ -17,3 +15,24 @@
 # Ruta dedicada para municipio / provincia filtrando.
 
 # Visualizar datos municipio / provincia.
+
+# Edición Callejero
+    # Modularizar la tabla con ordenar. Podría servir para lista tareas también.
+        # iconos para ordenar
+        # poner cuadro de búsqueda
+    # Usar un slug para el nombre de la calle.
+    # Desplazar la tabla para que se vea calle actual.
+    # Hacer editable la calle actual.
+    # Añadir columna de estado (validada / no validada)
+    # Botón editar en OSM / JOSM
+    # Botones para callen anterior / siguiente
+    # Botón recargar de osm?
+    # Que pasa con el botón de regresar cuando currentTask es nulo
+
+# Mapa
+    # Añadir fondo cartociudad
+    # Añadir PNOA en zooms grandes
+
+# Fotos Fachada.
+    # Intentar leer los metadatos exif sobre todo para fecha y hora.
+    # Navegar a calles haciendo clic en el mapa.
