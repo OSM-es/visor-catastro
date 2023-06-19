@@ -5,12 +5,12 @@
 	import { enhance } from '$app/forms'
   import { page } from '$app/stores'
 
-  import Map from '$lib/Map.svelte'
-  import FotosFachada from '$lib/FotosFachada.svelte'
-  import ConsLayer from '$lib/ConsLayer.svelte'
-  import FixmesLayer from '$lib/FixmesLayer.svelte'
-  import PartsLayer from '$lib/PartsLayer.svelte'
-  import StreetsLayer from '$lib/StreetsLayer.svelte'
+  import FotosFachada from '$lib/components/FotosFachada.svelte'
+  import Map from '$lib/components/maps/Map.svelte'
+  import ConsLayer from '$lib/components/maps/ConsLayer.svelte'
+  import FixmesLayer from '$lib/components/maps/FixmesLayer.svelte'
+  import PartsLayer from '$lib/components/maps/PartsLayer.svelte'
+  import StreetsLayer from '$lib/components/maps/StreetsLayer.svelte'
   import { currentTask } from '$lib/stores.js'
   
   export let data

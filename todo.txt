@@ -17,15 +17,14 @@
 # Visualizar datos municipio / provincia.
 
 # Edición Callejero
-    # Modularizar la tabla con ordenar. Podría servir para lista tareas también.
-        # iconos para ordenar
-        # poner cuadro de búsqueda
     # Usar un slug para el nombre de la calle.
     # Desplazar la tabla para que se vea calle actual.
     # Hacer editable la calle actual.
     # Añadir columna de estado (validada / no validada)
-    # Botón editar en OSM / JOSM
-    # Botones para callen anterior / siguiente
+    # Navegar a calles haciendo clic en el mapa.
+    # Botón editar en JOSM
+    # Botones ver en OSM / Mapillary / Kartaview
+    # Botones para calle anterior / siguiente
     # Botón recargar de osm?
     # Que pasa con el botón de regresar cuando currentTask es nulo
 
@@ -35,4 +34,4 @@
 
 # Fotos Fachada.
     # Intentar leer los metadatos exif sobre todo para fecha y hora.
-    # Navegar a calles haciendo clic en el mapa.
+    # El subtítulo no pilla el tema oscuro.

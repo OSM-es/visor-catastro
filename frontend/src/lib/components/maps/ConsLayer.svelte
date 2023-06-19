@@ -2,7 +2,6 @@
   import { getContext } from 'svelte'
   import { GeoJSON } from 'svelte-leafletjs'
 
-  import { goto } from '$app/navigation'
   import { FotoFachadaUrl } from '$lib/config'
 
   export let data
