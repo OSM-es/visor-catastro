@@ -20,7 +20,7 @@
   export let viewImage
   
   let viewer
-  let images = getImages(data)
+  $: images = getImages(data)
   
   $: document.getElementById(`foto_${scrollImage}`)?.scrollIntoView()
   $: {

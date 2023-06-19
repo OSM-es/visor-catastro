@@ -6,7 +6,7 @@
   import { GeoJSON } from 'svelte-leafletjs'
 
   import { PUBLIC_API_URL, TASK_COLORS } from '$lib/config'
-  import Map from '$lib/Map.svelte'
+  import Map from '$lib/components/maps/Map.svelte'
 
   export let data
 

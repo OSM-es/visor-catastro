@@ -17,8 +17,6 @@
 
   const urlFF = 'http://ovc.catastro.meh.es/OVCServWeb/OVCWcfLibres/OVCFotoFachada.svc/RecuperarFotoFachadaGet?ReferenciaCatastral='
 
-  currentTask.set(data.task.id)
-  
   let map, center, zoom, initialCenter, initialZoom, getConsLayer, getUrl
   let value = data.task.status
   let buildings = data.task.buildings
@@ -41,6 +39,7 @@
   }
 
   function exit() {
+    currentTask.set(null)
     goto(`/explore?map=${getUrl(-1)}`)
   }
 
@@ -56,6 +55,8 @@
   }
 
 
+  currentTask.set(data.task.id)
+  
   onMount(() => {
     map.getMap().fitBounds(getConsLayer().getBounds())
     initialZoom = zoom
