@@ -25,11 +25,8 @@
     }
     return 0
   })
-  $: {
-    // $table.items = data.slice()
-    items = $table.items
-  }
-
+  $: items = $table.items
+  
   setContext('table', table)
 </script>
 

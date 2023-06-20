@@ -1,8 +1,8 @@
 <script>
   import { onMount } from 'svelte'
-  import { Button, ButtonGroup, Input, Listgroup, ListgroupItem, Popover, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Tooltip } from 'flowbite-svelte'
+  import { Button, ButtonGroup, Input, Listgroup, ListgroupItem, Popover, Select, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Tooltip } from 'flowbite-svelte'
   import { ArrowLeft, ArrowRight, ArrowUturnDown, MagnifyingGlass, PencilSquare, XMark } from 'svelte-heros-v2'
-
+  
   import { currentTask } from '$lib/stores.js'
   import { goto } from '$app/navigation'
   import { page } from '$app/stores'
@@ -23,8 +23,9 @@
   let items = []
   
   $: isEditor = data.user?.role && data.user.role != 'READ_ONLY'
+  $: osm_name = data.osm_name || ''
  
-  const tdClass = "px-4 whitespace-nowrap"
+  const tdClass = "px-4 py-1 whitespace-nowrap"
 
 
   onMount(() => {
@@ -65,10 +66,18 @@
     const url = `https://www.openstreetmap.org/${edit}#map=${zoom}/${center[0]}/${center[1]}`
     window.open(url, '_blank')
   }
+
+  function osmStreetNames(name) {
+    let names = data.osmStreets.features.map((feat) => (feat.properties?.tags?.name || ''))
+    names = Array.from(new Set(names.filter((name) => (name ? true : false)))).sort()
+    names = names.map((name) => ({ value: name, name }))
+    names.push({value: '', name: 'No importar'})
+    return names
+  }
 </script>
 
 <div class="flex flex-col flex-grow">
-  <div class="border-b border-neutral-200 dark:border-neutral-700">
+  <div class="border-b border-neutral-200 dark:border-neutral-700 ">
     <div class="flex flex-row px-4 py-1 space-x-2 bg-neutral-200 dark:bg-neutral-600">
       <div class="lg:w-96">
         <Input size="sm" bind:value={filter} class="max-md:text-xs">
@@ -102,18 +111,27 @@
     <SortTable data={data.streets} bind:items>
       <TableHead defaultRow={false} theadClass="sticky top-0 bg-neutral-100 dark:bg-neutral-700">
         <tr class="text-xs uppercase"> 
-          <SortTableHeadCell key='cat_name'>Catastro {data.cat_name}</SortTableHeadCell>
+          <SortTableHeadCell key='cat_name'>Catastro</SortTableHeadCell>
           <SortTableHeadCell key='osm_name'>Osm</SortTableHeadCell>
           <SortTableHeadCell key='source'>Source</SortTableHeadCell>
         </tr>
         <tr>
-          <TableHeadCell padding="px-4 py-2">
+          <TableHeadCell padding="px-4 py-2 w-2/5">
             {data.cat_name}
           </TableHeadCell>
-          <TableHeadCell padding="px-4 py-2" class="font-normal">
-            {data.osm_name}
-          </TableHeadCell>
-          <TableHeadCell padding="px-4 py-2">
+          <ButtonGroup class="w-full" size="sm">
+            <Select
+              size="sm"
+              items={osmStreetNames(osm_name)}
+              value={osm_name}
+              placeholder=""
+              class="ml-2 py-1.5 !rounded-r-sm"
+            />
+            <Button class="!px-2.5 !py-0 focus:!ring-0" on:click={() => (osm_name = '')}>
+              <XMark size=14/>
+            </Button>
+          </ButtonGroup>
+          <TableHeadCell padding="px-4 py-2 w-1/5">
             {data.source}
           </TableHeadCell>
         </tr>

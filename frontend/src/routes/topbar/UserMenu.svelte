@@ -23,7 +23,7 @@
     <span class="max-md:hidden">{user.display_name}</span>
   </Chevron>
 </Button>
-<Dropdown placement="bottom" triggeredBy="#avatar-menu" class="dark:bg-neutral-700">
+<Dropdown placement="bottom-end" triggeredBy="#avatar-menu" class="dark:bg-neutral-700">
   <DropdownItem>
     Tema:
     <DarkMode/>
