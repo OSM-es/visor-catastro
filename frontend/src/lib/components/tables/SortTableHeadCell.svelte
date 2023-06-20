@@ -6,7 +6,7 @@
 
 
   export let key
-  export let thClass = "px-6 py-2"
+  export let thClass = "px-4 py-2"
   
   const table = getContext('table')
   

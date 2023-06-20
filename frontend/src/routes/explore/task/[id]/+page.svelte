@@ -15,8 +15,6 @@
   
   export let data
 
-  const urlFF = 'http://ovc.catastro.meh.es/OVCServWeb/OVCWcfLibres/OVCFotoFachada.svc/RecuperarFotoFachadaGet?ReferenciaCatastral='
-
   let map, center, zoom, initialCenter, initialZoom, getConsLayer, getUrl
   let value = data.task.status
   let buildings = data.task.buildings

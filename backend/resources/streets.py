@@ -21,13 +21,16 @@ class Streets(Resource):
     def get(self, mun_code):
         mun = models.Municipality.get_by_code(mun_code)
         bounds = to_shape(mun.geom).bounds
-        streets = [
-            st.asdict()
-            for st in models.Street.query.filter(
-                models.Street.mun_code == mun_code
-            ).order_by(models.Street.source, models.Street.osm_name).all()
-        ]
-        name = request.args.get('name', streets[0]['cat_name'])
+        cat_name = request.args.get('name', '')
+        streets = []
+        for st in models.Street.query.filter(
+            models.Street.mun_code == mun_code
+        ).order_by(models.Street.source, models.Street.osm_name).all():
+            streets.append(st.asdict())
+            if not cat_name or cat_name == st.cat_name:
+                cat_name = st.cat_name
+                osm_name = st.osm_name
+                source = st.source
 
         fn = Config.UPDATE_PATH + mun_code + '/tasks/address.osm'
         with open(fn) as fo:
@@ -35,7 +38,7 @@ class Streets(Resource):
         addresses = osm2geojson.xml2geojson(xml)
         addresses['features'] = [
             f for f in addresses['features']
-            if f['properties'].get('tags', {}).get('addr:cat_name', '') == name
+            if f['properties'].get('tags', {}).get('addr:cat_name', '') == cat_name
         ]
         if (addresses['features']):
             shape = shapely.buffer(shapely.from_geojson(json.dumps(addresses)), 0.001)
@@ -44,7 +47,9 @@ class Streets(Resource):
 
         data = {
             'mun_code': mun_code,
-            'name': name,
+            'cat_name': cat_name,
+            'osm_name': osm_name,
+            'source': models.Street.Source(source).name,
             'bounds': bounds,
             'streets': streets,
             'addresses': addresses,

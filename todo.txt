@@ -18,7 +18,6 @@
 
 # Edición Callejero
     # Usar un slug para el nombre de la calle.
-    # Desplazar la tabla para que se vea calle actual.
     # Hacer editable la calle actual.
     # Añadir columna de estado (validada / no validada)
     # Navegar a calles haciendo clic en el mapa.

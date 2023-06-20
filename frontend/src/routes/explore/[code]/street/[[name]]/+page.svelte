@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte'
-  import { Button, ButtonGroup, Input, Listgroup, ListgroupItem, Popover, TableBody, TableBodyCell, TableBodyRow, TableHead, Tooltip } from 'flowbite-svelte'
+  import { Button, ButtonGroup, Input, Listgroup, ListgroupItem, Popover, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Tooltip } from 'flowbite-svelte'
   import { ArrowLeft, ArrowRight, ArrowUturnDown, MagnifyingGlass, PencilSquare, XMark } from 'svelte-heros-v2'
 
   import { currentTask } from '$lib/stores.js'
@@ -24,7 +24,7 @@
   
   $: isEditor = data.user?.role && data.user.role != 'READ_ONLY'
  
-  const tdClass = "px-6 whitespace-nowrap"
+  const tdClass = "px-4 whitespace-nowrap"
 
 
   onMount(() => {
@@ -43,8 +43,8 @@
   })
 
 
-  function filterStreet(filter, street) {
-    return (
+  function filterStreet(filter, street, cat_name) {
+    return street.cat_name !== cat_name && (
       street.cat_name.toLowerCase().includes(filter?.toLowerCase()) ||
       street.osm_name.toLowerCase().includes(filter?.toLowerCase())
     )
@@ -100,14 +100,27 @@
       </ButtonGroup>
     </div>
     <SortTable data={data.streets} bind:items>
-      <TableHead theadClass="sticky top-0 text-xs uppercase bg-neutral-100 dark:bg-neutral-700">
-        <SortTableHeadCell key='cat_name'>Catastro</SortTableHeadCell>
-        <SortTableHeadCell key='osm_name'>Osm</SortTableHeadCell>
-        <SortTableHeadCell key='source'>Source</SortTableHeadCell>
+      <TableHead defaultRow={false} theadClass="sticky top-0 bg-neutral-100 dark:bg-neutral-700">
+        <tr class="text-xs uppercase"> 
+          <SortTableHeadCell key='cat_name'>Catastro {data.cat_name}</SortTableHeadCell>
+          <SortTableHeadCell key='osm_name'>Osm</SortTableHeadCell>
+          <SortTableHeadCell key='source'>Source</SortTableHeadCell>
+        </tr>
+        <tr>
+          <TableHeadCell padding="px-4 py-2">
+            {data.cat_name}
+          </TableHeadCell>
+          <TableHeadCell padding="px-4 py-2" class="font-normal">
+            {data.osm_name}
+          </TableHeadCell>
+          <TableHeadCell padding="px-4 py-2">
+            {data.source}
+          </TableHeadCell>
+        </tr>
       </TableHead>
       <TableBody>
         {#each items as street}
-          {#if filterStreet(filter, street)}
+          {#if filterStreet(filter, street, data.cat_name)}
             <TableBodyRow class="hover:bg-amber-400 cursor-pointer" on:click={() => viewStreet(street.cat_name)}>
               <TableBodyCell {tdClass}>{street.cat_name}</TableBodyCell>
               <TableBodyCell {tdClass}>{street.osm_name}</TableBodyCell>
