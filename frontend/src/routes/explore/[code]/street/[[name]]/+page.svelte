@@ -1,12 +1,14 @@
 <script>
   import { onMount } from 'svelte'
-  import { Button, ButtonGroup, Input, Listgroup, ListgroupItem, Popover, Select, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Tooltip } from 'flowbite-svelte'
-  import { ArrowLeft, ArrowRight, ArrowUturnDown, MagnifyingGlass, PencilSquare, XMark } from 'svelte-heros-v2'
+  import { Button, ButtonGroup, Input, Listgroup, ListgroupItem, Popover, Select, TableBody, TableBodyCell, TableBodyRow, TableHead, Tooltip } from 'flowbite-svelte'
+  import { ArrowLeft, ArrowRight, ArrowUturnDown, ArrowUturnLeft, Check, MagnifyingGlass, PencilSquare, XMark } from 'svelte-heros-v2'
   
   import { currentTask } from '$lib/stores.js'
   import { goto } from '$app/navigation'
   import { page } from '$app/stores'
-  
+
+  import { login } from '$lib/user'
+  import ResponsiveButton from '$lib/components/ResponsiveButton.svelte'
   import Map from '$lib/components/maps/Map.svelte'
   import FotosFachada from '$lib/components/FotosFachada.svelte'
   import ConsLayer from '$lib/components/maps/ConsLayer.svelte'
@@ -21,9 +23,7 @@
   let map, getConsLayer, scrollImage, viewImage, center, zoom
   let filter
   let items = []
-  
-  $: isEditor = data.user?.role && data.user.role != 'READ_ONLY'
-  $: osm_name = data.osm_name || ''
+  let osm_name
  
   const tdClass = "px-4 py-1 whitespace-nowrap"
 
@@ -35,6 +35,7 @@
     m.setMinZoom(m.getZoom())
     m.fitBounds(getConsLayer().getBounds())
     page.subscribe(page => {
+      osm_name = data.osm_name || ''
       if (map) {
         map.getMap().invalidateSize()
         map.getMap().fitBounds(getConsLayer().getBounds())
@@ -100,54 +101,74 @@
             </Listgroup>
           {/if}
         </Popover>
-        <Button size="xs" href="/explore/task/{$currentTask}">
+        <ResponsiveButton
+          size="xs"
+          title="Regresar a la tarea"
+          href="/explore/task/{$currentTask}"
+        >
           <ArrowUturnDown size=18/>
-          <span class="max-lg:hidden ml-1">Regresar a la tarea</span>
-        </Button>
-        <Tooltip placement="bottom" class="lg:hidden">Regresar a la tarea</Tooltip>
+        </ResponsiveButton>
         <Button size="xs"><ArrowRight size=14/></Button>
       </ButtonGroup>
     </div>
-    <SortTable data={data.streets} bind:items>
-      <TableHead defaultRow={false} theadClass="sticky top-0 bg-neutral-100 dark:bg-neutral-700">
-        <tr class="text-xs uppercase"> 
-          <SortTableHeadCell key='cat_name'>Catastro</SortTableHeadCell>
-          <SortTableHeadCell key='osm_name'>Osm</SortTableHeadCell>
-          <SortTableHeadCell key='source'>Source</SortTableHeadCell>
-        </tr>
-        <tr>
-          <TableHeadCell padding="px-4 py-2 w-2/5">
-            {data.cat_name}
-          </TableHeadCell>
-          <ButtonGroup class="w-full" size="sm">
-            <Select
-              size="sm"
-              items={osmStreetNames(osm_name)}
-              value={osm_name}
-              placeholder=""
-              class="ml-2 py-1.5 !rounded-r-sm"
-            />
-            <Button class="!px-2.5 !py-0 focus:!ring-0" on:click={() => (osm_name = '')}>
-              <XMark size=14/>
-            </Button>
-          </ButtonGroup>
-          <TableHeadCell padding="px-4 py-2 w-1/5">
-            {data.source}
-          </TableHeadCell>
-        </tr>
-      </TableHead>
-      <TableBody>
-        {#each items as street}
-          {#if filterStreet(filter, street, data.cat_name)}
-            <TableBodyRow class="hover:bg-amber-400 cursor-pointer" on:click={() => viewStreet(street.cat_name)}>
-              <TableBodyCell {tdClass}>{street.cat_name}</TableBodyCell>
-              <TableBodyCell {tdClass}>{street.osm_name}</TableBodyCell>
-              <TableBodyCell {tdClass}>{street.source}</TableBodyCell>
-            </TableBodyRow>
-          {/if}
-        {/each}
-      </TableBody>
-    </SortTable>
+    <form method="POST">
+      <SortTable data={data.streets} bind:items>
+        <TableHead defaultRow={false} theadClass="sticky top-0 bg-neutral-100 dark:bg-neutral-700">
+          <tr class="text-xs uppercase"> 
+            <SortTableHeadCell key='cat_name'>Catastro</SortTableHeadCell>
+            <SortTableHeadCell key='osm_name'>Osm</SortTableHeadCell>
+            <th>Estado</th>
+            <SortTableHeadCell key='source'>Source</SortTableHeadCell>
+          </tr>
+          <tr>
+            <th class="px-4 py-2 w-1/3">{data.cat_name}</th>
+            {#if data?.user}
+              <th>
+                <ButtonGroup class="w-full" size="sm">
+                  <Select
+                    size="sm"
+                    items={osmStreetNames(osm_name)}
+                    bind:value={osm_name}
+                    placeholder=""
+                    class="ml-2 py-1.5 !rounded-r-sm"
+                  />
+                  <Button class="!px-2.5 focus:!ring-0" on:click={() => (osm_name = '')}>
+                    <XMark size=14/>
+                  </Button>
+                </ButtonGroup>
+              </th>
+            {:else}
+              <Button size="sm" on:click={login}>Registrate para editar</Button>
+            {/if}
+            <th class="px-2 py-0 w-1/6">
+              <!--ResponsiveButton type="submit" title="Confirmar" btnClass="!px-2 h-8 focus:!ring-0">
+                <Check size=18/>
+              </ResponsiveButton-->
+              <ResponsiveButton
+                title="Deshacer"
+                btnClass="!px-2 h-8 focus:!ring-0"
+                on:click={() => (osm_name = data.osm_name)}
+              >
+                <ArrowUturnLeft size=18/>
+              </ResponsiveButton>
+            </th>
+            <th class="px-4 py-2 w-1/6">{data.source}</th>
+          </tr>
+        </TableHead>
+        <TableBody>
+          {#each items as street}
+            {#if filterStreet(filter, street, data.cat_name)}
+              <TableBodyRow class="hover:bg-amber-400 cursor-pointer" on:click={() => viewStreet(street.cat_name)}>
+                <TableBodyCell {tdClass}>{street.cat_name}</TableBodyCell>
+                <TableBodyCell {tdClass}>{street.osm_name}</TableBodyCell>
+                <TableBodyCell {tdClass}><Check size=18/></TableBodyCell>
+                <TableBodyCell {tdClass}>{street.source}</TableBodyCell>
+              </TableBodyRow>
+            {/if}
+          {/each}
+        </TableBody>
+      </SortTable>
+    </form>
   </div>
   <div class="flex flex-row flex-grow">
     <div class="w-full flex-grow z-0">
