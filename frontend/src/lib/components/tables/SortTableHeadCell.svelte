@@ -23,7 +23,7 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-mouse-events-have-key-events -->
 <TableHeadCell padding={thClass}>
-  <div on:click={sortTable} class="flex items-center space-x-1">
+  <div on:click={sortTable} class="flex items-center w-min space-x-1 cursor-pointer">
     <div>
       <slot></slot>
     </div>

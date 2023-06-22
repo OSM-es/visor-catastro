@@ -152,7 +152,7 @@
     </div>
     <form method="POST" use:enhance={dontReset}>
       <SortTable data={streets} let:items={items}>
-        <TableHead defaultRow={false} theadClass="sticky top-0 bg-neutral-100 dark:bg-neutral-700 cursor-pointer">
+        <TableHead defaultRow={false} theadClass="sticky top-0 bg-neutral-100 dark:bg-neutral-700">
           <tr class="text-xs uppercase"> 
             <SortTableHeadCell key='cat_name'>Catastro</SortTableHeadCell>
             <SortTableHeadCell key='osm_name'>Osm</SortTableHeadCell>
