@@ -39,10 +39,8 @@ class Streets(Resource):
             f for f in addresses['features']
             if f['properties'].get('tags', {}).get('addr:cat_name', '') == cat_name
         ]
-        if (addresses['features']):
-            shape = shapely.buffer(shapely.from_geojson(json.dumps(addresses)), 0.001)
-
-            osm_streets = osm2geojson.xml2geojson(getOsmStreets(shape.bounds))
+        shape = shapely.buffer(shapely.from_geojson(json.dumps(addresses)), 0.001)
+        osm_streets = osm2geojson.xml2geojson(getOsmStreets(shape.bounds))
 
         data = {
             'mun_code': mun_code,

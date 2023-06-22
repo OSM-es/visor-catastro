@@ -72,17 +72,29 @@ def load_tasks(mun_code, tasks):
         db.session.add(task)
 
 def upload_streets(mun_code):
-    """Registra el callejero del municipio."""
+    """Registra el callejero del municipio.
+    
+    Excluye las calles que no tengan ninguna dirección asociada.
+    """
+    fn = UPDATE + mun_code + '/tasks/address.osm'
+    with open(fn) as fh:
+        xml = fh.read()
+    data = osm2geojson.xml2geojson(xml)
+    addresses = {
+        ad['properties'].get('tags', {}).get('addr:cat_name', '')
+        for ad in data['features']
+    }
     fn = UPDATE + mun_code + '/tasks/highway_names.csv'
     count = 0
     with open(fn) as fh:
         for st in csv.reader(fh, delimiter='\t'):
-            if st[1]:
+            cat_name, osm_name, source = st[0:3]
+            if osm_name and cat_name in addresses:
                 street = Street(
                     mun_code=mun_code,
-                    cat_name=st[0],
-                    osm_name=st[1],
-                    source=Street.Source[st[2]].value
+                    cat_name=cat_name,
+                    osm_name=osm_name,
+                    source=Street.Source[source].value
                 )
                 db.session.add(street)
                 count += 1
