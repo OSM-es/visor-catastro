@@ -29,7 +29,7 @@
   let prev_name, name, validated
   
   $: streets = filterStreets(data.streets.slice(), filter, data.cat_name)
-
+  $: index = streets.findIndex((st) => st.cat_name === data.cat_name)
 
   onMount(() => {
     const m = map.getMap()
@@ -52,7 +52,8 @@
 
   function filterStreets(streets, filter, cat_name) {
     return streets.filter((street) => {
-      return street.cat_name !== cat_name && (
+      return (
+        street.cat_name === cat_name || 
         street.cat_name.toLowerCase().includes(filter?.toLowerCase()) ||
         street.osm_name.toLowerCase().includes(filter?.toLowerCase())
       )
@@ -109,7 +110,13 @@
         </Input>
       </div>
       <ButtonGroup>
-        <Button size="xs" disabled><ArrowLeft size=14/></Button>
+        <Button
+          size="xs"
+          href="/explore/{data.mun_code}/street/{streets[index - 1]?.cat_name}"
+          disabled={index <= 0}
+        >
+          <ArrowLeft size=14/>
+        </Button>
         <Button id="edit" size="xs">
           <PencilSquare size=18/>
         </Button>
@@ -129,12 +136,18 @@
         >
           <ArrowUturnDown size=18/>
         </ResponsiveButton>
-        <Button size="xs"><ArrowRight size=14/></Button>
+        <Button
+          size="xs"
+          href="/explore/{data.mun_code}/street/{streets[index + 1]?.cat_name}"
+          disabled={index < 0 || index >= (streets.length - 1)}
+        >
+          <ArrowRight size=14/>
+        </Button>
       </ButtonGroup>
     </div>
     <form method="POST" use:enhance={dontReset}>
       <SortTable data={streets} let:items={items}>
-        <TableHead defaultRow={false} theadClass="sticky top-0 bg-neutral-100 dark:bg-neutral-700">
+        <TableHead defaultRow={false} theadClass="sticky top-0 bg-neutral-100 dark:bg-neutral-700 cursor-pointer">
           <tr class="text-xs uppercase"> 
             <SortTableHeadCell key='cat_name'>Catastro</SortTableHeadCell>
             <SortTableHeadCell key='osm_name'>Osm</SortTableHeadCell>
@@ -196,14 +209,19 @@
         </TableHead>
         <TableBody>
           {#each items as street}
-            <TableBodyRow class="hover:bg-amber-400 cursor-pointer" on:click={() => viewStreet(street.cat_name)}>
-              <TableBodyCell {tdClass}>{street.cat_name}</TableBodyCell>
-              <TableBodyCell {tdClass} class={street.validated ? '' : '!text-neutral-500'}>
-                {street.validated ? street.name || noImportar : street.osm_name}
-              </TableBodyCell>
-              <TableBodyCell {tdClass}>{#if street.validated}<Check size=18/>{/if}</TableBodyCell>
-              <TableBodyCell {tdClass}>{street.source}</TableBodyCell>
-            </TableBodyRow>
+            {#if street.cat_name !== data.cat_name}
+              <TableBodyRow
+                class="hover:bg-amber-400 cursor-pointer"
+                on:click={() => viewStreet(street.cat_name)}
+              >
+                <TableBodyCell {tdClass}>{street.cat_name}</TableBodyCell>
+                <TableBodyCell {tdClass} class={street.validated ? '' : '!text-neutral-500'}>
+                  {street.validated ? street.name || noImportar : street.osm_name}
+                </TableBodyCell>
+                <TableBodyCell {tdClass}>{#if street.validated}<Check size=18/>{/if}</TableBodyCell>
+                <TableBodyCell {tdClass}>{street.source}</TableBodyCell>
+              </TableBodyRow>
+            {/if}
           {/each}
         </TableBody>
       </SortTable>

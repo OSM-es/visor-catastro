@@ -21,7 +21,6 @@
     # Navegar a calles haciendo clic en el mapa.
     # Botón editar en JOSM
     # Botones ver en OSM / Mapillary / Kartaview
-    # Botones para calle anterior / siguiente
     # Botón recargar de osm?
     # Que pasa con el botón de regresar cuando currentTask es nulo
 
