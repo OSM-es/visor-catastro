@@ -18,8 +18,6 @@
 
 # Edición Callejero
     # Usar un slug para el nombre de la calle.
-    # Hacer editable la calle actual.
-    # Añadir columna de estado (validada / no validada)
     # Navegar a calles haciendo clic en el mapa.
     # Botón editar en JOSM
     # Botones ver en OSM / Mapillary / Kartaview

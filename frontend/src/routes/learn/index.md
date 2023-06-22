@@ -4,8 +4,6 @@
 
   import { goto } from '$app/navigation'
 
-  export let user
-
   function next() {
     goto('/learn/login')
   }

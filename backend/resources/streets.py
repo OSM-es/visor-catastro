@@ -29,8 +29,7 @@ class Streets(Resource):
             streets.append(st.asdict())
             if not cat_name or cat_name == st.cat_name:
                 cat_name = st.cat_name
-                osm_name = st.osm_name
-                source = st.source
+                street = st
 
         fn = Config.UPDATE_PATH + mun_code + '/tasks/address.osm'
         with open(fn) as fo:
@@ -48,8 +47,10 @@ class Streets(Resource):
         data = {
             'mun_code': mun_code,
             'cat_name': cat_name,
-            'osm_name': osm_name,
-            'source': models.Street.Source(source).name,
+            'osm_name': street.osm_name,
+            'name': street.name,
+            'validated': street.validated,
+            'source': models.Street.Source(street.source).name,
             'bounds': bounds,
             'streets': streets,
             'addresses': addresses,
@@ -57,3 +58,14 @@ class Streets(Resource):
         }
 
         return data
+    
+class Street(Resource):
+    def put(self, mun_code, cat_name):
+        data = request.json
+        street = models.Street.get_by_name(mun_code, cat_name)
+        street.validated = data['validated'] == 'true'
+        street.name = None if not street.validated else data.get('name')
+        print(street.asdict())
+        models.db.session.add(street)
+        models.db.session.commit()
+        return {'errors': []}
