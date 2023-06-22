@@ -84,6 +84,11 @@
     window.open(url, '_blank')
   }
 
+  function gotoNextStreet(next) {
+    const url = `/explore/${data.mun_code}/street/${streets[index + next]?.cat_name}`
+    goto(url)
+  }
+
   function osmStreetNames(name) {
     let names = data.osmStreets.features.map((feat) => (feat.properties?.tags?.name || ''))
     names = Array.from(new Set(names.filter((name) => (name ? true : false)))).sort()
@@ -112,7 +117,7 @@
       <ButtonGroup>
         <Button
           size="xs"
-          href="/explore/{data.mun_code}/street/{streets[index - 1]?.cat_name}"
+          on:click={() => gotoNextStreet(-1)}
           disabled={index <= 0}
         >
           <ArrowLeft size=14/>
@@ -138,7 +143,7 @@
         </ResponsiveButton>
         <Button
           size="xs"
-          href="/explore/{data.mun_code}/street/{streets[index + 1]?.cat_name}"
+          on:click={() => gotoNextStreet(1)}
           disabled={index < 0 || index >= (streets.length - 1)}
         >
           <ArrowRight size=14/>
