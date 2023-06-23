@@ -24,10 +24,10 @@
   const noImportar = 'No importar'
 
   let map, getConsLayer, scrollImage, viewImage, center, zoom
-  let filter
+  let filter, items = []
   
   $: streets = filterStreets(data.streets.slice(), filter, data.cat_name)
-  $: index = streets.findIndex((st) => st.cat_name === data.cat_name)
+  $: index = items.findIndex((st) => st.cat_name === data.cat_name)
 
   onMount(() => {
     const m = map.getMap()
@@ -72,7 +72,7 @@
   }
 
   function gotoNextStreet(next) {
-    const url = `/explore/${data.mun_code}/street/${streets[index + next]?.cat_name}`
+    const url = `/explore/${data.mun_code}/street/${items[index + next]?.cat_name}`
     goto(url)
   }
 
@@ -131,7 +131,7 @@
       </ButtonGroup>
     </div>
     <form method="POST" use:enhance={dontReset}>
-      <SortTable data={streets} let:items={items} divClass="relative overflow-scroll h-40" striped>
+      <SortTable data={streets} bind:items divClass="relative overflow-scroll h-40" striped>
         <TableHead defaultRow={false} theadClass="sticky top-0 bg-neutral-100 dark:bg-neutral-700">
           <tr class="text-xs uppercase"> 
             <SortTableHeadCell key='cat_name'>Catastro</SortTableHeadCell>

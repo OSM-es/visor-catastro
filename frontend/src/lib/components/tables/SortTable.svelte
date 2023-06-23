@@ -33,5 +33,5 @@
 </script>
 
 <Table {divClass} {striped}>
-  <slot items={items}></slot>
+  <slot></slot>
 </Table>
