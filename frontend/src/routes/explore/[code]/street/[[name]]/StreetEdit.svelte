@@ -3,14 +3,14 @@
   import { ArrowUturnLeft, Check, XMark } from 'svelte-heros-v2'
 
   import { page } from '$app/stores'
-  import { afterNavigate } from '$app/navigation'
 
   import { login } from '$lib/user'
   import ResponsiveButton from '$lib/components/ResponsiveButton.svelte'
   
   export let data
-  
-  let editor, name, prev_name
+  export let id = undefined
+
+  let  name, prev_name
   
   const btnClass = "!px-2 h-8 focus:!ring-0"
   const noImportar = 'No importar'
@@ -28,13 +28,9 @@
     name = data.validated ? data.name || '' : (data.source === 'OSM' ? data.osm_name : '')
     prev_name = name
   })
-
-  afterNavigate(() => {
-    editor?.scrollIntoView({ block: 'center', behavior: 'smooth' })
-  })
 </script>
 
-<tr bind:this={editor} class="!bg-amber-400">
+<tr {id} class="!bg-amber-400">
   <td class="px-4 py-2 w-1/3">
     <input name="mun_code" value={data.mun_code} hidden/>
     <input name="cat_name" value={data.cat_name} hidden/>

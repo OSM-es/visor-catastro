@@ -8,6 +8,7 @@
 	export let striped
   export let data = []
   export let items = []
+  export const getTable = () => table
   
   const table = writable({
 		key: null,
@@ -30,6 +31,7 @@
     })
     items = $table.items
   }
+
 </script>
 
 <Table {divClass} {striped}>

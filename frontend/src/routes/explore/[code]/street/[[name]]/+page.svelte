@@ -3,9 +3,10 @@
 	import { enhance } from '$app/forms'
   import { Button, ButtonGroup, Input, Listgroup, ListgroupItem, Popover, Select, TableBody, TableBodyCell, TableBodyRow, TableHead } from 'flowbite-svelte'
   import { ArrowLeft, ArrowRight, ArrowUturnDown, ArrowUturnLeft, Check, MagnifyingGlass, PencilSquare, XMark } from 'svelte-heros-v2'
-  
+  import debounce from 'lodash/debounce'
+
   import { currentTask } from '$lib/stores.js'
-  import { goto, invalidateAll } from '$app/navigation'
+  import { afterNavigate, goto, invalidateAll } from '$app/navigation'
   import { page } from '$app/stores'
 
   import ResponsiveButton from '$lib/components/ResponsiveButton.svelte'
@@ -24,10 +25,11 @@
   const noImportar = 'No importar'
 
   let map, getConsLayer, scrollImage, viewImage, center, zoom
-  let filter, items = []
+  let filter, items = [], getTable
   
   $: streets = filterStreets(data.streets.slice(), filter, data.cat_name)
   $: index = items.findIndex((st) => st.cat_name === data.cat_name)
+
 
   onMount(() => {
     const m = map.getMap()
@@ -42,7 +44,16 @@
       }
       viewImage = page.url.searchParams.get('ref')
     })
+    getTable().subscribe(focusEditor)
   })
+
+  const focusEditor = debounce(() => {
+    console.info('focus')
+    const editor = document.getElementById('editor')
+    editor?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+  }, 100)
+
+  afterNavigate(focusEditor)
 
 
   function filterStreets(streets, filter, cat_name) {
@@ -131,7 +142,7 @@
       </ButtonGroup>
     </div>
     <form method="POST" use:enhance={dontReset}>
-      <SortTable data={streets} bind:items divClass="relative overflow-scroll h-40" striped>
+      <SortTable data={streets} bind:items bind:getTable divClass="relative overflow-scroll h-40" striped>
         <TableHead defaultRow={false} theadClass="sticky top-0 bg-neutral-100 dark:bg-neutral-700">
           <tr class="text-xs uppercase"> 
             <SortTableHeadCell key='cat_name'>Catastro</SortTableHeadCell>
@@ -143,7 +154,7 @@
         <TableBody>
           {#each items as street}
             {#if street.cat_name === data.cat_name}
-            <StreetEdit {data}></StreetEdit>
+              <StreetEdit id="editor" {data}></StreetEdit>
             {:else}
             <TableBodyRow
               id={street.cat_name === data.cat_name ? 'activeStreet' : undefined}
