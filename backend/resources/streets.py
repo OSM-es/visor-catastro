@@ -63,7 +63,6 @@ class Street(Resource):
         street = models.Street.get_by_name(mun_code, cat_name)
         street.validated = data['validated'] == 'true'
         street.name = None if not street.validated else data.get('name')
-        print(street.asdict())
         models.db.session.add(street)
         models.db.session.commit()
         return {'errors': []}

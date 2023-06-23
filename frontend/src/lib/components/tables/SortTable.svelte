@@ -4,8 +4,8 @@
 
 	import { Table } from 'flowbite-svelte'
 
-  export let divClass = 'relative overflow-scroll max-sm:h-32 h-44'
-	export let striped = 'striped'
+  export let divClass
+	export let striped
   export let data = []
   export let items = []
   
