@@ -19,9 +19,9 @@
   export let scrollImage
   export let viewImage
   
-  let viewer
-  $: images = getImages(data)
+  let viewer, images
   
+  $: getImages(data)
   $: document.getElementById(`foto_${scrollImage}`)?.scrollIntoView()
   $: {
     if (viewImage) {
@@ -31,6 +31,7 @@
   }
   
   onMount(() => {
+    getImages(data)
     viewer = new Viewer2(document.getElementById('FotosFachada'), options)
   })
 
@@ -50,19 +51,17 @@
       }
     }
 
-    let images = Object.entries(addresses).map(([ref, addrs]) => {
+    images = Object.entries(addresses).map(([ref, addrs]) => {
       return { ref, addrs }
     })
     images.sort((first, second) => first.addrs > second.addrs)
     for (const im of images) {
       im.addrs = im.addrs.replace(/ 0+/, ' ')
     }
-
-    return images
   }
 
   function viewed(event) {
-    const ref = event.detail.image.alt.split(' ', 1)[0]
+    const ref = event.detail.originalImage.id.replace('foto_', '')
     dispatch('viewed', ref)
   }
 
@@ -72,7 +71,7 @@
 </script>
 
 <div id="FotosFachada" on:viewed={viewed} on:hidden={hidden}>
-    {#each images as im}
+  {#each images as im}
     <div class="text-gray-900 dark:text-gray-100">
       <div>
         <img
