@@ -43,12 +43,7 @@ class Streets(Resource):
         osm_streets = osm2geojson.xml2geojson(getOsmStreets(shape.bounds))
 
         data = {
-            'mun_code': mun_code,
-            'cat_name': cat_name,
-            'osm_name': street.osm_name,
-            'name': street.name,
-            'validated': street.validated,
-            'source': models.Street.Source(street.source).name,
+            'street': street.asdict(),
             'bounds': bounds,
             'streets': streets,
             'addresses': addresses,

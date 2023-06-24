@@ -17,7 +17,6 @@
 # Visualizar datos municipio / provincia.
 
 # Edición Callejero
-    # Usar un slug para el nombre de la calle.
     # Navegar a calles haciendo clic en el mapa.
     # Botón editar en JOSM
     # Botones ver en OSM / Mapillary / Kartaview

@@ -1,8 +1,9 @@
 <script>
-  import { onMount } from 'svelte'
+  import { onMount, setContext } from 'svelte'
+  import { writable } from 'svelte/store'
 	import { enhance } from '$app/forms'
-  import { Button, ButtonGroup, Input, Listgroup, ListgroupItem, Popover, Select, TableBody, TableBodyCell, TableBodyRow, TableHead } from 'flowbite-svelte'
-  import { ArrowLeft, ArrowRight, ArrowUturnDown, ArrowUturnLeft, Check, MagnifyingGlass, PencilSquare, XMark } from 'svelte-heros-v2'
+  import { Button, ButtonGroup, Input, Listgroup, ListgroupItem, Popover, TableBody, TableBodyCell, TableBodyRow, TableHead } from 'flowbite-svelte'
+  import { ArrowLeft, ArrowRight, ArrowUturnDown, ArrowsPointingIn, Check, MagnifyingGlass, PencilSquare, XMark } from 'svelte-heros-v2'
   import debounce from 'lodash/debounce'
 
   import { currentTask } from '$lib/stores.js'
@@ -24,11 +25,22 @@
   const tdClass = "px-4 py-1 whitespace-nowrap"
   const noImportar = 'No importar'
 
+  const street = writable(data.street)
+
+  setContext('street', street)
+
   let map, getConsLayer, scrollImage, viewImage, center, zoom
   let filter, items = [], getTable
   
-  $: streets = filterStreets(data.streets.slice(), filter, data.cat_name)
-  $: index = items.findIndex((st) => st.cat_name === data.cat_name)
+  $: streets = filterStreets(data.streets.slice(), filter, $street.cat_name)
+  $: index = items.findIndex((st) => st.cat_name === $street.cat_name)
+  $: street.set(data.street)
+  
+
+  const focusEditor = debounce(() => {
+    const editor = document.getElementById('editor')
+    editor?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+  }, 100)
 
 
   onMount(() => {
@@ -37,24 +49,20 @@
     m.setMaxBounds(bounds)
     m.setMinZoom(m.getZoom())
     m.fitBounds(getConsLayer().getBounds())
-    page.subscribe(page => {
-      if (map) {
-        map.getMap().invalidateSize()
-        map.getMap().fitBounds(getConsLayer().getBounds())
-      }
-      viewImage = page.url.searchParams.get('ref')
-    })
     getTable().subscribe(focusEditor)
   })
 
-  const focusEditor = debounce(() => {
-    console.info('focus')
-    const editor = document.getElementById('editor')
-    editor?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+  afterNavigate(() => {
+    viewImage = $page.url.searchParams.get('ref')
+    focusEditor()
+    centerMap()
+  })
+
+
+  const centerMap = debounce(() => {
+    map.getMap().invalidateSize()
+    map.getMap().fitBounds(getConsLayer().getBounds())
   }, 100)
-
-  afterNavigate(focusEditor)
-
 
   function filterStreets(streets, filter, cat_name) {
     return streets.filter((street) => {
@@ -73,7 +81,7 @@
   }
 
   function viewStreet(name) {
-    goto(`/explore/${data.mun_code}/street/${name}`)
+    goto(`/explore/${$street.mun_code}/street/${name}`)
   }
 
   function gotoOsm() {
@@ -83,7 +91,7 @@
   }
 
   function gotoNextStreet(next) {
-    const url = `/explore/${data.mun_code}/street/${items[index + next]?.cat_name}`
+    const url = `/explore/${$street.mun_code}/street/${items[index + next]?.cat_name}`
     goto(url)
   }
 
@@ -134,6 +142,13 @@
         </ResponsiveButton>
         <Button
           class="!px-2"
+          on:click={() => (centerMap() || focusEditor())}
+          disabled={index < 0 || index >= (streets.length - 1)}
+        >
+          <ArrowsPointingIn size=20/>
+        </Button>
+        <Button
+          class="!px-2"
           on:click={() => gotoNextStreet(1)}
           disabled={index < 0 || index >= (streets.length - 1)}
         >
@@ -153,12 +168,12 @@
         </TableHead>
         <TableBody>
           {#each items as street}
-            {#if street.cat_name === data.cat_name}
+            {#if street.cat_name === data.street.cat_name}
               <StreetEdit id="editor" {data}></StreetEdit>
             {:else}
             <TableBodyRow
-              id={street.cat_name === data.cat_name ? 'activeStreet' : undefined}
-              class="hover:bg-amber-400 {street.cat_name === data.cat_name ? '!bg-amber-400' : 'cursor-pointer'}"
+              id={street.cat_name === data.street.cat_name ? 'activeStreet' : undefined}
+              class="hover:bg-amber-400 {street.cat_name === data.street.cat_name ? '!bg-amber-400' : 'cursor-pointer'}"
               on:click={() => viewStreet(street.cat_name)}
             >
               <TableBodyCell {tdClass}>{street.cat_name}</TableBodyCell>
