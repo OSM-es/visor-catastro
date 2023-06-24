@@ -73,15 +73,15 @@
 
 <div id="FotosFachada" on:viewed={viewed} on:hidden={hidden}>
     {#each images as im}
-    <div>
+    <div class="text-gray-900 dark:text-gray-100">
       <div>
         <img
           id="foto_{im.ref}"
           src="{FotoFachadaUrl}{im.ref}"
-          alt="{im.ref} {im.addrs}"
+          alt="{im.addrs ? im.addrs : im.ref}"
         />
       </div>
-      <p class="mt-0 mb-2 text-sm">{im.ref} {im.addrs}</p>  
+      <p class="mt-0 mb-2 text-sm">{im.addrs ? im.addrs : im.ref}</p>
     </div>
   {/each}
 </div>

@@ -29,4 +29,3 @@
 
 # Fotos Fachada.
     # Intentar leer los metadatos exif sobre todo para fecha y hora.
-    # El subtítulo no pilla el tema oscuro.
