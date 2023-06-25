@@ -26,6 +26,3 @@
 # Mapa
     # Añadir fondo cartociudad
     # Añadir PNOA en zooms grandes
-
-# Fotos Fachada.
-    # Intentar leer los metadatos exif sobre todo para fecha y hora.

@@ -125,7 +125,7 @@
         </Button>
         <Popover triggeredBy="#edit" placement="bottom-start" arrow={false} offset=2 class="flex flex-row" defaultClass="p-0 w-48">
           {#if zoom < 19}
-            <p class="text-sm mx-3 my-2 whitespace-nowrap">Haz zoom para editar</p>
+            <p class="text-sm mx-3 my-2 whitespace-nowrap">Haz zoom en el mapa para editar</p>
           {:else}
             <Listgroup class="divide-none" active>
               <ListgroupItem on:click={gotoOsm}>Editar en OSM</ListgroupItem>

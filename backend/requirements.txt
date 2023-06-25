@@ -2,6 +2,7 @@ alembic==1.10.3
 aniso8601==9.0.1
 attrs==23.1.0
 Authlib==1.2.0
+cachelib==0.9.0
 certifi==2022.12.7
 cffi==1.15.1
 charset-normalizer==3.1.0
@@ -11,6 +12,7 @@ cligj==0.7.2
 cryptography==40.0.2
 Fiona==1.9.3
 Flask==2.2.3
+Flask-Caching==2.0.2
 Flask-Cors==3.0.10
 Flask-HTTPAuth==4.8.0
 Flask-Migrate==4.0.4

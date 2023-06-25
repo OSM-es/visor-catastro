@@ -52,3 +52,12 @@ class Config:
         'http://overpass-api.de/api/interpreter',
         'http://overpass.osm.rambler.ru/cgi/interpreter',
     ]
+
+    # Catastro
+    FOTO_FACHADA_URL = 'http://ovc.catastro.meh.es/OVCServWeb/OVCWcfLibres/OVCFotoFachada.svc/RecuperarFotoFachadaGet?ReferenciaCatastral='
+
+    # Cache
+    CACHE_TYPE = 'FileSystemCache'
+    CACHE_DEFAULT_TIMEOUT = 0
+    CACHE_DIR = '/data/cache'
+    CACHE_THRESHOLD = 1000

@@ -1,11 +1,12 @@
 <script>
   import Viewer2 from 'viewerjs'
   import 'viewerjs/dist/viewer.css'
+  import ExifReader from 'exifreader'
 
   import { createEventDispatcher, onMount } from 'svelte'
-  import { goto } from '$app/navigation'
+  import { afterNavigate, goto } from '$app/navigation'
 
-  import { FotoFachadaUrl } from '$lib/config'
+  import { PUBLIC_API_URL } from '$lib/config'
 
   const options = {
     navbar: false,
@@ -30,14 +31,28 @@
     }
   }
   
+
   onMount(() => {
     getImages(data)
     viewer = new Viewer2(document.getElementById('FotosFachada'), options)
   })
 
+  afterNavigate(() => {
+    for (const i in images) {
+      const ref = images[i].ref
+      const el = document.getElementById(`foto_${ref}`)
+      const alt = el?.getAttribute('alt')
+      if (el && !alt.includes('Año:')) {
+        getDate(ref).then((year) => {
+          if (year) el.setAttribute('alt', alt + '. Año: ' + year)
+        })
+      }
+    }
+  })
+
+
   function getImages(data) {
     const addresses = {}
-
     for (const feat of data) {
       const tags = feat.properties?.tags || {}
       const ref = tags?.ref
@@ -68,15 +83,21 @@
   function hidden() {
     goto(document.location.pathname)
   }
+
+  async function getDate(ref) {
+    const tags = await ExifReader.load(`${PUBLIC_API_URL}/photo/${ref}`)
+    const imageDate = tags?.DateTimeOriginal?.description
+    return imageDate?.split(':')[0]
+  }
 </script>
 
 <div id="FotosFachada" on:viewed={viewed} on:hidden={hidden}>
-  {#each images as im}
+  {#each images as im, i}
     <div class="text-gray-900 dark:text-gray-100">
       <div>
         <img
           id="foto_{im.ref}"
-          src="{FotoFachadaUrl}{im.ref}"
+          src="{PUBLIC_API_URL}/photo/{im.ref}"
           alt="{im.addrs ? im.addrs : im.ref}"
         />
       </div>
