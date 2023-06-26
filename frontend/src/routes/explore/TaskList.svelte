@@ -23,9 +23,9 @@
         class="hover:bg-amber-400 cursor-pointer"
       >
         {task.properties.muncode}
-        {task.properties.localid}
+        {task.properties.id}
         {task.properties.type}
-        {task.properties.parts}
+        {task.properties.difficulty}
         {task.properties.status}
       </div>
     {/each}

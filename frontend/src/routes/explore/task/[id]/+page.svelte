@@ -1,10 +1,11 @@
 <script>
-  import { Button, Input, Label } from 'flowbite-svelte'
+  import { Button, Select, Label } from 'flowbite-svelte'
   import { onMount } from 'svelte'
   import { goto } from '$app/navigation'
 	import { enhance } from '$app/forms'
   import { page } from '$app/stores'
 
+  import { TASK_COLORS } from '$lib/config'
   import FotosFachada from '$lib/components/FotosFachada.svelte'
   import Map from '$lib/components/maps/Map.svelte'
   import ConsLayer from '$lib/components/maps/ConsLayer.svelte'
@@ -16,7 +17,6 @@
   export let data
 
   let map, center, zoom, initialCenter, initialZoom, getConsLayer, getUrl
-  let value = data.task.status
   let buildings = data.task.buildings
   let fixmes = data.task?.fixmes
   let scrollImage, viewImage
@@ -52,7 +52,6 @@
     goto('/learn/' + (data?.user?.tutorial ? data.user.tutorial.next : 'login'))
   }
 
-
   currentTask.set(data.task.id)
   
   onMount(() => {
@@ -79,7 +78,7 @@
           <li>Catastro de {data.task.muncode}</li>
           <li>Referencia: {data.task.localId}</li>
           <li>Tipo: {data.task.type}</li>
-          <li>Partes de edificio: {data.task.parts.features.length}</li>
+          <li>Dificultad: {data.task.difficulty}</li>
         </ul>
         {#if fixmes}
           <p>Anotaciones:</p>
@@ -110,8 +109,15 @@
           {/each}
         {/if}
         <form use:enhance={updateStatus} method="POST" class="mb-4">
-          <Label for="status">Estado:</Label>
-          <Input id="status" name="status" type=number bind:value min=0 max=9 disabled={!isEditor} />
+          <Label>
+            Estado:
+            <Select
+              name="status"
+              value={data.task.status}
+              items={Object.keys(TASK_COLORS).map(st => ({ value: st, name: st }))}
+              disabled={!isEditor}
+            />
+          </Label>
           <Button on:click={exit} color="alternative">Cancelar</Button>
           {#if isEditor}
             <Button type="submit">Guardar</Button>

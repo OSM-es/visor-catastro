@@ -70,9 +70,8 @@
   function setStyle(feature) {
     let style
     if (target(zoom) === 'tasks') {
-      const colors = Object.values(TASK_COLORS)
       style = { 
-        fillColor: colors[feature.properties.status % colors.length],
+        fillColor: TASK_COLORS[feature.properties.status],
         fillOpacity: 1,
         dashArray: null,
         weight: 1,

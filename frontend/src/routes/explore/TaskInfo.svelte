@@ -7,7 +7,7 @@
     <li>Código de municipio: {task.properties.muncode}</li>
     <li>Referencia: {task.properties.localid}</li>
     <li>Tipo: {task.properties.type}</li>
-    <li>Partes de edificio: {task.properties.parts}</li>
+    <li>Dificultad: {task.properties.difficulty}</li>
     <li>Estado: {task.properties.status}</li>
   </ul>
 </div>

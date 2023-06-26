@@ -1,18 +1,8 @@
-# Guardar bounds del mapa. Osm recuerda el zoom de la última visita
-
 # rutas /explore/[slug] (slug = municipio o provincia)
 >>> Task.query.filter(Task.muncode=='02001')
 >>> Task.query.filter(Task.muncode.startswith('02')).count()
 
-# Restringir acceso api.tasks.put a editores
-
-# Descarga de archivo de tarea para editores. Eliminar fixmes/refs/addr:cat_name.
-
-# Registrar historial de cambios de estado de tareas.
-
 # Visualizar lista de tareas como tabla con ordenar y filtro.
-
-# Ruta dedicada para municipio / provincia filtrando.
 
 # Visualizar datos municipio / provincia.
 
@@ -24,5 +14,13 @@
     # Que pasa con el botón de regresar cuando currentTask es nulo
 
 # Mapa
+    # Guardar bounds del mapa. Osm recuerda el zoom de la última visita
     # Añadir fondo cartociudad
     # Añadir PNOA en zooms grandes
+
+# Edición tarea
+    # Restringir acceso api.tasks.put a editores
+    # Descarga de archivo de tarea sólo para editores. Eliminar fixmes/refs/addr:cat_name.
+    # Registrar historial de cambios de estado de tareas.
+    # Obtener las calles y estado revisión nombre de la bd
+    # Posible desdoble del estado de la tarea por edificios / direcciones

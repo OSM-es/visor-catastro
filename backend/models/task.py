@@ -5,27 +5,34 @@ from geoalchemy2 import Geometry, Index
 from models import db
 
 
-class TaskStatus(Enum):
-    READY_FOR_ADDRESSES = 0
-    LOCKED_FOR_ADDRESSES = 1
-    READY_FOR_MAPPING = 2
-    LOCKED_FOR_MAPPING = 3
-    MAPPED = 4
-    LOCKED_FOR_VALIDATION = 5
-    VALIDATED = 6
-    INVALIDATED = 7
-    BLOCKED_BY_SYSTEM = 8
-    NEED_UPDATE = 9
-
-
 class Task(db.Model):
+    class Status(Enum):
+        READY_FOR_ADDRESSES = 0
+        LOCKED_FOR_ADDRESSES = 1
+        READY_FOR_MAPPING = 2
+        LOCKED_FOR_MAPPING = 3
+        MAPPED = 4
+        LOCKED_FOR_VALIDATION = 5
+        VALIDATED = 6
+        INVALIDATED = 7
+        BLOCKED_BY_SYSTEM = 8
+        NEED_UPDATE = 9
+
+    class Difficulty(Enum):
+        EASY = 1
+        MODERATE = 2
+        CHALLENGING = 3
+
     id = db.Column(db.Integer, primary_key=True)
     muncode = db.Column(db.String, index=True)
     localId = db.Column('localid', db.String, index=True)
     zone = db.Column(db.String)
     type = db.Column(db.String)
+    status = db.Column(db.Integer, default=Status.READY_FOR_ADDRESSES.value)
     parts = db.Column(db.Integer)
-    status = db.Column(db.Integer, default=TaskStatus.READY_FOR_ADDRESSES.value)
+    buildings = db.Column(db.Integer)
+    addresses = db.Column(db.Integer)
+    difficulty = db.Column(db.Integer)
     geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
     __table_args__ = (Index('codes_index', 'localid', 'muncode'), )
 
@@ -42,6 +49,6 @@ class Task(db.Model):
             'localId': self.localId,
             'muncode': self.muncode,
             'type': self.type,
-            'parts': self.parts,
-            'status': self.status,
+            'difficulty': Task.Difficulty(self.difficulty).name,
+            'status': Task.Status(self.status).name,
         }

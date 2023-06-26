@@ -24,6 +24,8 @@ class Tasks(Resource):
             q = q.filter(models.Task.geom.intersects(bb))
         sql = q.statement
         df = geopandas.GeoDataFrame.from_postgis(sql=sql, con=models.db.get_engine())
+        df['difficulty'] = df['difficulty'].map(lambda v: models.Task.Difficulty(v).name)
+        df['status'] = df['status'].map(lambda v: models.Task.Status(v).name)
         return Response(df.to_json(), mimetype='application/json')
 
 
@@ -104,5 +106,5 @@ class Task(Resource):
         if not task:
             abort(404)
         data = request.json
-        task.status = data['status']
+        task.status = models.Task.Status[data['status']].value
         models.db.session.commit()

@@ -9,6 +9,7 @@ import json
 
 import csv
 import geojson
+import gzip
 import osm2geojson
 import requests
 from flask import Blueprint, abort, current_app, request
@@ -20,6 +21,8 @@ import overpass
 from models import db, Municipality, Province, Street, Task
 from config import Config
 
+MODERATE_THRESHOLD = 10
+CHALLENGING_THRESHOLD = 20
 UPDATE = Config.UPDATE_PATH
 uploader = Blueprint('uploader', __name__, url_prefix='/')
 
@@ -57,6 +60,29 @@ def merge_tasks(zoning):
             tasks[local_id]['properties']['parts'] += feat['properties']['parts']
     return tasks
 
+def calc_difficulty(task):
+    """Obtiene los datos necesarios para calcular la dificultad."""
+    fn = f"{UPDATE}{task.muncode}/tasks/{task.localId}.osm.gz"
+    with gzip.open(fn) as fo:
+        xml = fo.read()
+    geojson = osm2geojson.xml2geojson(xml)
+    (buildings, parts, addresses) = (0, 0, 0)
+    for feat in geojson['features']:
+        tags = feat['properties'].get('tags', {})
+        buildings += 1 if 'building' in tags else 0
+        parts += 1 if 'building:part' in tags else 0
+        addresses += 1 if 'addr:cat_name' in tags else 0
+    complexity = max(buildings, parts, addresses)
+    if complexity >= CHALLENGING_THRESHOLD:
+        difficulty = Task.Difficulty['CHALLENGING']
+    elif complexity >= MODERATE_THRESHOLD:
+        difficulty = Task.Difficulty['MODERATE']
+    else:
+        difficulty = Task.Difficulty['EASY']
+    task.buildings = buildings
+    task.parts = parts
+    task.addresses = addresses
+    task.difficulty = difficulty.value
 
 def load_tasks(mun_code, tasks):
     """Registra las tareas.
@@ -69,6 +95,7 @@ def load_tasks(mun_code, tasks):
     for feat in tasks.values():
         task = Task(**feat['properties'])
         task.geom = from_shape(feat['geometry'])
+        calc_difficulty(task)
         db.session.add(task)
 
 def upload_streets(mun_code):
