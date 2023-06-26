@@ -10,8 +10,9 @@
 
   export let data
 
-  
+
   let map, geoJsonData, hoveredFeature, previewFeature, getUrl
+  let muncode, type, difficulty, status
   let loading = false
   let center = data.center
   let zoom = data.zoom
@@ -27,6 +28,21 @@
     'tasks' : 
     (zoom >= munThreshold ? 'municipalities' : 'provinces')
   )
+
+
+  $: tasks = filterTasks(geoJsonData, muncode, type, difficulty, status)
+
+
+  function filterTasks(geoJsonData, muncode, type, difficulty, status) {
+    let data = geoJsonData?.features || []
+    if (data) {
+      if (muncode) data = data.filter(t => t.properties.muncode === muncode)
+      if (type) data = data.filter(t => t.properties.type === type)
+      if (difficulty) data = data.filter(t => t.properties.difficulty === difficulty)
+      if (status) data = data.filter(t => t.properties.status === status)
+    }
+    return { type: 'FeatureCollection', features: data }
+  }
 
   async function fetchData() {
     loading = true
@@ -111,7 +127,7 @@
       bind:getUrl
       on:moveend={handleMoveEnd}
     >
-      <GeoJSON data={geoJsonData} options={geoJsonOptions}/>
+      <GeoJSON data={tasks} options={geoJsonOptions}/>
     </Map>
   </div>
   <div class={rightBarClass}>
@@ -137,7 +153,11 @@
         <TaskInfo task={hoveredFeature}/>
       {:else}
         <TaskList
-          tasks={geoJsonData?.features}
+          tasks={tasks.features}
+          bind:muncode
+          bind:type
+          bind:difficulty
+          bind:status
           on:click={(event) => handleClick(event.detail.feature)}
           on:mouseover={(event) => handleMouseover(event.detail.feature)}
           on:mouseout={(event) => handleMouseover()}

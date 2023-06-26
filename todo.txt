@@ -2,8 +2,6 @@
 >>> Task.query.filter(Task.muncode=='02001')
 >>> Task.query.filter(Task.muncode.startswith('02')).count()
 
-# Visualizar lista de tareas como tabla con ordenar y filtro.
-
 # Visualizar datos municipio / provincia.
 
 # Edición Callejero

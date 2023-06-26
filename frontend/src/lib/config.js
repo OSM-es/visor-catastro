@@ -5,7 +5,29 @@ export const PUBLIC_INITIAL_VIEW = env.PUBLIC_INITIAL_VIEW.split(',') || [36, 1]
 PUBLIC_INITIAL_VIEW.forEach((x, i) => PUBLIC_INITIAL_VIEW[i] = Number(x).toFixed(4))
 export const PUBLIC_INITIAL_ZOOM = Number(env.PUBLIC_INITIAL_ZOOM) || 5
 
-export const FotoFachadaUrl = 'http://ovc.catastro.meh.es/OVCServWeb/OVCWcfLibres/OVCFotoFachada.svc/RecuperarFotoFachadaGet?ReferenciaCatastral='
+export const TASK_TYPE_VALUES = {
+  Urbana: 'Urbana',
+  Rústica: 'Rústica',
+}
+
+export const TASK_DIFFICULTY_VALUES = {
+  EASY: 'Fácil',
+  MODERATE: 'Moderada',
+  CHALLENGING: 'Desafiante',
+}
+
+export const TASK_STATUS_VALUES = {
+  READY_FOR_ADDRESSES: 'Lista para direcciones',
+  LOCKED_FOR_ADDRESSES: 'Bloqueda para direcciones',
+  READY_FOR_MAPPING: 'Lista para mapeo',
+  LOCKED_FOR_MAPPING: 'Bloqueada para mapeo',
+  MAPPED: 'Mapeada',
+  LOCKED_FOR_VALIDATION: 'Bloqueada para validación',
+  VALIDATED: 'Validada',
+  INVALIDATED: 'No válida',
+  BLOCKED_BY_SYSTEM: 'Bloqueo del sistema',
+  NEED_UPDATE: 'Necesita actualizar',
+}
 
 export const TASK_COLORS = {
   READY_FOR_ADDRESSES: '#FFFFFF66',

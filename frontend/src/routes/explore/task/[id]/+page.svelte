@@ -5,7 +5,7 @@
 	import { enhance } from '$app/forms'
   import { page } from '$app/stores'
 
-  import { TASK_COLORS } from '$lib/config'
+  import { TASK_COLORS, TASK_TYPE_VALUES, TASK_DIFFICULTY_VALUES, TASK_STATUS_VALUES } from '$lib/config'
   import FotosFachada from '$lib/components/FotosFachada.svelte'
   import Map from '$lib/components/maps/Map.svelte'
   import ConsLayer from '$lib/components/maps/ConsLayer.svelte'
@@ -77,8 +77,8 @@
         <ul>
           <li>Catastro de {data.task.muncode}</li>
           <li>Referencia: {data.task.localId}</li>
-          <li>Tipo: {data.task.type}</li>
-          <li>Dificultad: {data.task.difficulty}</li>
+          <li>Tipo: {TASK_TYPE_VALUES[data.task.type]}</li>
+          <li>Dificultad: {TASK_DIFFICULTY_VALUES[data.task.difficulty]}</li>
         </ul>
         {#if fixmes}
           <p>Anotaciones:</p>
@@ -114,7 +114,8 @@
             <Select
               name="status"
               value={data.task.status}
-              items={Object.keys(TASK_COLORS).map(st => ({ value: st, name: st }))}
+              items={Object.entries(TASK_STATUS_VALUES).map(([value, name]) => ({ value, name }))}
+              placeholder=""
               disabled={!isEditor}
             />
           </Label>
