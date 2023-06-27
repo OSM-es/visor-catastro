@@ -10,6 +10,7 @@
   import { afterNavigate, goto, invalidateAll } from '$app/navigation'
   import { page } from '$app/stores'
 
+  import { login } from '$lib/user'
   import ResponsiveButton from '$lib/components/ResponsiveButton.svelte'
   import Map from '$lib/components/maps/Map.svelte'
   import FotosFachada from '$lib/components/FotosFachada.svelte'
@@ -160,16 +161,36 @@
       <SortTable data={streets} bind:items bind:getTable divClass="relative overflow-scroll h-40" striped>
         <TableHead defaultRow={false} theadClass="sticky top-0 bg-neutral-100 dark:bg-neutral-700">
           <tr class="text-xs uppercase"> 
-            <SortTableHeadCell key='cat_name'>Catastro</SortTableHeadCell>
-            <SortTableHeadCell key='osm_name'>Osm</SortTableHeadCell>
-            <SortTableHeadCell key='validated'>Estado</SortTableHeadCell>
-            <SortTableHeadCell key='source'>Source</SortTableHeadCell>
+            <SortTableHeadCell key='cat_name' thClass="px-4 py-2 w-1/3">Catastro</SortTableHeadCell>
+            <SortTableHeadCell key='osm_name' thClass="px-4 py-2 w-1/3">Osm</SortTableHeadCell>
+            <SortTableHeadCell key='validated' thClass="px-4 py-2 w-1/6">Estado</SortTableHeadCell>
+            <SortTableHeadCell key='source' thClass="px-4 py-2 w-1/6">Source</SortTableHeadCell>
           </tr>
         </TableHead>
         <TableBody>
           {#each items as street}
             {#if street.cat_name === data.street.cat_name}
-              <StreetEdit id="editor" {data}></StreetEdit>
+              <tr id="editor" class="bg-amber-400 text-gray-900 dark:text-white font-medium">
+                <td class="px-4 py-2">
+                  <input name="mun_code" value={street.mun_code} hidden/>
+                  <input name="cat_name" value={street.cat_name} hidden/>
+                  {street.cat_name}
+                </td>
+                {#if data?.user}
+                  <StreetEdit osmStreets={data.osmStreets}></StreetEdit>
+                {:else}
+                  <td>
+                    <Button size="sm" on:click={login} class="!px-2 h-8 focus:!ring-0">Registrate para editar</Button>
+                  </td>
+                  <td class="px-4 py-0">
+                    {#if street.validated}<Check size=18/>{/if}
+                  </td>
+                {/if}
+                <td class="px-4 py-2">
+                  <input name="source" value={street.source} hidden/>
+                  {street.source}
+                </td>
+              </tr>
             {:else}
             <TableBodyRow
               id={street.cat_name === data.street.cat_name ? 'activeStreet' : undefined}

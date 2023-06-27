@@ -5,7 +5,7 @@
 	import { enhance } from '$app/forms'
   import { page } from '$app/stores'
 
-  import { TASK_COLORS, TASK_TYPE_VALUES, TASK_DIFFICULTY_VALUES, TASK_STATUS_VALUES } from '$lib/config'
+  import { TASK_TYPE_VALUES, TASK_DIFFICULTY_VALUES, TASK_STATUS_VALUES } from '$lib/config'
   import FotosFachada from '$lib/components/FotosFachada.svelte'
   import Map from '$lib/components/maps/Map.svelte'
   import ConsLayer from '$lib/components/maps/ConsLayer.svelte'
