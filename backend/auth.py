@@ -95,7 +95,7 @@ def authorize():
         last_user = OsmUser.query.get(session['user']['id'])
         user = last_user.user
     else:
-        user = User()
+        user = osm_user.user if osm_user and osm_user.user else User()
     if not osm_user:
         osm_user = OsmUser(id=id, display_name=display_name)
     if osm_user.isStated():
