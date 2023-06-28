@@ -75,8 +75,7 @@
     <div class="h-full max-h-0">
       <div class="prose dark:prose-invert">
         <ul>
-          <li>Catastro de {data.task.muncode}</li>
-          <li>Referencia: {data.task.localId}</li>
+          <li>Catastro de {data.task.name} ({data.task.muncode})</li>
           <li>Tipo: {TASK_TYPE_VALUES[data.task.type]}</li>
           <li>Dificultad: {TASK_DIFFICULTY_VALUES[data.task.difficulty]}</li>
         </ul>

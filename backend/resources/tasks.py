@@ -11,6 +11,7 @@ from auth import auth
 from config import Config
 from overpass import getOsmStreets
 
+Municipality = models.Municipality
 UPDATE = Config.UPDATE_PATH
 
 
@@ -25,11 +26,45 @@ class Tasks(Resource):
         df = geopandas.GeoDataFrame.from_postgis(sql=sql, con=models.db.get_engine())
         df['difficulty'] = df['difficulty'].map(lambda v: models.Task.Difficulty(v).name)
         df['status'] = df['status'].map(lambda v: models.Task.Status(v).name)
-        Municipality = models.Municipality
         q = Municipality.query.filter(Municipality.muncode.in_(df.muncode.unique()))
         municip = {m.muncode: m.name for m in q.all()}
         df['name'] = df['muncode'].map(lambda v: municip[v])
         return Response(df.to_json(), mimetype='application/json')
+
+
+class Task(Resource):
+    def get(self, id):
+        task = models.Task.query.get(id)
+        if not task:
+            abort(404)
+        fn = UPDATE + task.muncode + '/tasks/' + task.localId + '.osm.gz'
+        with gzip.open(fn) as fo:
+            xml = fo.read()
+        geojson = osm2geojson.xml2geojson(xml, filter_used_refs=False)
+        shapes = osm2geojson.xml2shapes(xml)
+        bb = bounds(buffer(GeometryCollection([s['shape'] for s in shapes]), 0.001)).tolist()
+        filtered = remove_no_addr_nodes(geojson)
+        buildings = get_buildings_and_nodes_for_addr_in_areas(filtered, shapes)
+        parts = [f for f in filtered if 'building:part' in f['properties']['tags']]
+        fixmes = get_fixmes(shapes)
+        fn = UPDATE + task.muncode + '/tasks/' + task.localId + '.fixmes.geojson'
+        data = task.asdict()
+        data['name'] = Municipality.get_by_code(task.muncode).name
+        if fixmes: data['fixmes'] = {'type': geojson['type'], 'features': fixmes}
+        data['buildings'] = {'type': geojson['type'], 'features': buildings}
+        data['parts'] = {'type': geojson['type'], 'features': parts}
+        data['osmStreets'] = osm2geojson.xml2geojson(getOsmStreets(bb))
+        data['streets'] = get_streets(buildings)
+        return data
+    
+    @auth.login_required(role=[models.User.Role.MAPPER, models.User.Role.ADMIN])
+    def put(self, id):
+        task = models.Task.query.get(id)
+        if not task:
+            abort(404)
+        data = request.json
+        task.status = models.Task.Status[data['status']].value
+        models.db.session.commit()
 
 
 def isAddr(feature):
@@ -78,37 +113,3 @@ def get_fixmes(shapes):
             f = osm2geojson.shape_to_feature(node, {'fixme': fixme})
             fixmes.append(f)
     return fixmes
-
-
-class Task(Resource):
-    def get(self, id):
-        task = models.Task.query.get(id)
-        if not task:
-            abort(404)
-        fn = UPDATE + task.muncode + '/tasks/' + task.localId + '.osm.gz'
-        with gzip.open(fn) as fo:
-            xml = fo.read()
-        geojson = osm2geojson.xml2geojson(xml, filter_used_refs=False)
-        shapes = osm2geojson.xml2shapes(xml)
-        bb = bounds(buffer(GeometryCollection([s['shape'] for s in shapes]), 0.001)).tolist()
-        filtered = remove_no_addr_nodes(geojson)
-        buildings = get_buildings_and_nodes_for_addr_in_areas(filtered, shapes)
-        parts = [f for f in filtered if 'building:part' in f['properties']['tags']]
-        fixmes = get_fixmes(shapes)
-        fn = UPDATE + task.muncode + '/tasks/' + task.localId + '.fixmes.geojson'
-        data = task.asdict()
-        if fixmes: data['fixmes'] = {'type': geojson['type'], 'features': fixmes}
-        data['buildings'] = {'type': geojson['type'], 'features': buildings}
-        data['parts'] = {'type': geojson['type'], 'features': parts}
-        data['osmStreets'] = osm2geojson.xml2geojson(getOsmStreets(bb))
-        data['streets'] = get_streets(buildings)
-        return data
-    
-    @auth.login_required(role=[models.User.Role.MAPPER, models.User.Role.ADMIN])
-    def put(self, id):
-        task = models.Task.query.get(id)
-        if not task:
-            abort(404)
-        data = request.json
-        task.status = models.Task.Status[data['status']].value
-        models.db.session.commit()
