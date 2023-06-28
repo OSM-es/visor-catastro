@@ -33,6 +33,7 @@ class Task(db.Model):
     buildings = db.Column(db.Integer)
     addresses = db.Column(db.Integer)
     difficulty = db.Column(db.Integer)
+    history = db.relationship('TaskHistory', back_populates='task')
     geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
     __table_args__ = (Index('codes_index', 'localid', 'muncode'), )
 

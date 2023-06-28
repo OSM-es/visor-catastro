@@ -71,7 +71,7 @@
     })
     images.sort((first, second) => first.addrs > second.addrs)
     for (const im of images) {
-      im.addrs = im.addrs.replace(/ 0+/, ' ')
+      im.addrs = im.addrs.replace(/ 0+/g, ' ')
     }
   }
 

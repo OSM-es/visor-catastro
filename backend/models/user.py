@@ -13,6 +13,7 @@ class OsmUser(db.Model):
         viewonly=True,
         uselist=False,
     )
+    history = db.relationship('History', back_populates='user')
 
     def isStated(self):
         return 'import' in self.display_name or 'catastro' in self.display_name
@@ -46,7 +47,6 @@ class User(db.Model):
     import_id = db.Column(db.Integer, db.ForeignKey('osm_user.id'), nullable=True)
     osm_user = db.relationship('OsmUser', foreign_keys=osm_id, back_populates='user')
     import_user = db.relationship('OsmUser', foreign_keys=import_id, back_populates='user')
-
 
     def asdict(self):
         return {

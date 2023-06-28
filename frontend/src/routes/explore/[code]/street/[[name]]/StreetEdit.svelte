@@ -2,7 +2,7 @@
 	import { getContext } from 'svelte'
   
   import { Button, ButtonGroup, Select } from 'flowbite-svelte'
-  import { ArrowUturnLeft, Check, XMark } from 'svelte-heros-v2'
+  import { ArrowUturnLeft, Check, LockClosed, XMark } from 'svelte-heros-v2'
 
   import ResponsiveButton from '$lib/components/ResponsiveButton.svelte'
 
@@ -41,15 +41,22 @@
       items={osmStreetNames()}
       bind:value={name}
       placeholder=""
-      class="ml-2 py-1.5 !rounded-r-sm"
+      class="ml-2 py-1.5 !rounded-r-sm disabled:opacity-50"
+      disabled={$street.locked}
     />
-    <Button class="!px-2.5 focus:!ring-0" on:click={() => (name = '')}>
+    <Button
+      class="!px-2.5 focus:!ring-0"
+      on:click={() => (name = '')}
+      disabled={$street.locked}
+    >
       <XMark size=14/>
     </Button>
   </ButtonGroup>
 </td>
 <td class="px-2 py-0">
-  {#if $street.validated && name === prev_name}
+  {#if $street.locked}
+    <LockClosed size=18/>
+  {:else if $street.validated && name === prev_name}
     <ResponsiveButton 
       type="submit"
       title="Deshacer"

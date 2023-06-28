@@ -3,7 +3,7 @@
   import { writable } from 'svelte/store'
 	import { enhance } from '$app/forms'
   import { Button, ButtonGroup, Input, Listgroup, ListgroupItem, Popover, TableBody, TableBodyCell, TableBodyRow, TableHead } from 'flowbite-svelte'
-  import { ArrowLeft, ArrowRight, ArrowUturnDown, ArrowsPointingIn, Check, MagnifyingGlass, PencilSquare, XMark } from 'svelte-heros-v2'
+  import { ArrowLeft, ArrowRight, ArrowUturnDown, ArrowsPointingIn, Check, LockClosed, MagnifyingGlass, PencilSquare, XMark } from 'svelte-heros-v2'
   import debounce from 'lodash/debounce'
 
   import { currentTask } from '$lib/stores.js'
@@ -37,7 +37,7 @@
   $: index = items.findIndex((st) => st.cat_name === $street.cat_name)
   $: street.set(data.street)
   
-
+  
   const focusEditor = debounce(() => {
     const editor = document.getElementById('editor')
     editor?.scrollIntoView({ block: 'center', behavior: 'smooth' })
@@ -101,6 +101,10 @@
       await update({ reset: false })
       invalidateAll()
     }
+  }
+
+  function isLocked() {
+    return data.street.is_locked && data.user.id !== data.street.owner?.id
   }
 </script>
 
@@ -176,14 +180,24 @@
                   <input name="cat_name" value={street.cat_name} hidden/>
                   {street.cat_name}
                 </td>
-                {#if data?.user}
+                {#if data?.user && !isLocked()}
                   <StreetEdit osmStreets={data.osmStreets}></StreetEdit>
                 {:else}
-                  <td>
-                    <Button size="sm" on:click={login} class="!px-2 h-8 focus:!ring-0">Registrate para editar</Button>
-                  </td>
+                  {#if isLocked()}
+                    <td class="px-4 py-0">
+                      Edición bloqueada por {street.owner.display_name}
+                    </td>
+                  {:else}
+                    <td>
+                      <Button size="sm" on:click={login} class="!px-2 h-8 focus:!ring-0">Registrate para editar</Button>
+                    </td>
+                  {/if}
                   <td class="px-4 py-0">
-                    {#if street.validated}<Check size=18/>{/if}
+                    {#if isLocked()}
+                      <LockClosed size=18/>
+                    {:else if street.validated}
+                      <Check size=18/>
+                    {/if}
                   </td>
                 {/if}
                 <td class="px-4 py-2">
@@ -201,7 +215,9 @@
               <TableBodyCell {tdClass} class={street.validated ? '' : '!text-neutral-500'}>
                 {street.validated ? street.name || noImportar : street.osm_name}
               </TableBodyCell>
-              <TableBodyCell {tdClass}>{#if street.validated}<Check size=18/>{/if}</TableBodyCell>
+              <TableBodyCell {tdClass}>
+                {#if street.validated}<Check size=18/>{/if}
+              </TableBodyCell>
               <TableBodyCell {tdClass}>{street.source}</TableBodyCell>
             </TableBodyRow>
             {/if}

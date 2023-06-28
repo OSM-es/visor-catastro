@@ -32,6 +32,11 @@ def passTutorial(user):
     user.tutorial = {'passed': ['login'], 'next': 'setup'}
     user.role = User.Role.MAPPER.value
 
+def get_current_user():
+    if 'user' in session:
+        return OsmUser.query.get(session['user']['id'])
+    return None
+
 
 @auth.verify_token
 def verify_token(token):

@@ -1,8 +1,11 @@
+from datetime import datetime
 from enum import Enum
 
 from sqlalchemy.sql import expression
 
 from models import db
+
+STREET_LOCK_TIMEOUT = 3600
 
 
 class Street(db.Model):
@@ -16,6 +19,7 @@ class Street(db.Model):
     osm_name = db.Column(db.String, index=True)
     source = db.Column(db.Integer)
     validated = db.Column(db.Boolean, nullable=False, server_default=expression.false())
+    history = db.relationship('StreetHistory', back_populates='street')
     name = db.Column(db.String)
 
     @staticmethod
@@ -30,4 +34,20 @@ class Street(db.Model):
             'validated': self.validated,
             'source': Street.Source(self.source).name,
             'name': self.name,
+            'is_locked': self.is_locked(),
+            'owner': self.owner.asdict() if self.owner else None,
         }
+    
+    def is_locked(self):
+        if self.history:
+            last = self.history[-1]
+            age = (last.date - datetime.now()).total_seconds()
+            return last.action == last.Action.LOCKED.value and age < STREET_LOCK_TIMEOUT
+        return False
+    
+    @property
+    def owner(self):
+        if self.history:
+            last = self.history[-1]
+            return last.user
+        return False
