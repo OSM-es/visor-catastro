@@ -23,16 +23,15 @@
     <li>Ediciones: {user.changesets.count}</li>
     <li>Mensajes sin leer: {user.messages.received.unread}</li>
 	</ul>
-	<form use:enhance={updateForm} 
-    method="POST"
-    action="?/save"
-  >
-    <Input
-      type="email"
-      name="email"
-      value={form?.email ?? ''}
-    />
-    <Button type="submit">Enviar</Button>
-	</form>
-  <p>{form?.status ?? ''}</p>
+  {#if user.stated}
+    <form use:enhance={updateForm} 
+      method="POST"
+      action="?/save"
+    >
+      <Input type="email" name="email" value={user.email}/>
+      <Button type="submit">Enviar</Button>
+    </form>
+  {:else}
+    <Button href="/learn/login">Completa el tutorial para editar</Button>
+  {/if}
 </article>
