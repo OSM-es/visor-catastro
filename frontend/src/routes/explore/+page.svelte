@@ -1,11 +1,10 @@
 <script>
   import { Spinner } from 'flowbite-svelte'
-  import TaskInfo from './TaskInfo.svelte'
   import TaskList from './TaskList.svelte'
   import { goto } from '$app/navigation'
   import { GeoJSON } from 'svelte-leafletjs'
 
-  import { PUBLIC_API_URL, TASK_COLORS } from '$lib/config'
+  import { PUBLIC_API_URL, TASK_COLORS, TASK_DIFFICULTY_VALUES, TASK_STATUS_VALUES, TASK_TYPE_VALUES } from '$lib/config'
   import Map from '$lib/components/maps/Map.svelte'
 
   export let data
@@ -108,9 +107,21 @@
     return style
   }
 
+  function taskInfo(task) {
+    return `
+      <ul>
+        <li>Municipio: ${task.muncode}</li>
+        <li>Tipo: ${TASK_TYPE_VALUES[task.type]}</li>
+        <li>Dificultad: ${TASK_DIFFICULTY_VALUES[task.difficulty]}</li>
+        <li>Estado: ${TASK_STATUS_VALUES[task.status]}</li>
+      </ul>
+    `
+  }
+
   const geoJsonOptions = {
     style: setStyle,
     onEachFeature: function(feature, layer) {
+      layer.bindTooltip(taskInfo(feature.properties))
       layer.on('click', () => handleClick(feature, layer))
       layer.on('mouseover', () => handleMouseover(feature, layer))
       layer.on('mouseout', () => handleMouseout(feature, layer))
@@ -149,8 +160,6 @@
           </p>
           <p>Haz zoom al nivel de escala 500 m o en un municipio para ver las tareas.</p>
         </div>
-      {:else if previewFeature}
-        <TaskInfo task={hoveredFeature}/>
       {:else}
         <TaskList
           tasks={tasks.features}
@@ -160,7 +169,7 @@
           bind:status
           on:click={(event) => handleClick(event.detail.feature)}
           on:mouseover={(event) => handleMouseover(event.detail.feature)}
-          on:mouseout={(event) => handleMouseover()}
+          on:mouseout={() => handleMouseover()}
         />
       {/if}
     </div>

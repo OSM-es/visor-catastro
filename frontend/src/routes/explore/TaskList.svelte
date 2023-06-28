@@ -29,13 +29,17 @@
     <caption class="text-left mb-2">Selecciona una tarea:</caption>
     <TableHead defaultRow={false} theadClass="bg-neutral-100 dark:bg-neutral-700">
       <tr class="text-xs uppercase"> 
-        {#if munCount > 1}<SortTableHeadCell thClass="p-2" key='muncode'>Municipio</SortTableHeadCell>{/if}
+        {#if munCount > 1 || muncode}
+          <SortTableHeadCell thClass="p-2" key='muncode'>Municipio</SortTableHeadCell>
+        {/if}
         <SortTableHeadCell thClass="p-2" key='type'>Tipo</SortTableHeadCell>
         <SortTableHeadCell thClass="p-2" key='difficulty'>Dificultad</SortTableHeadCell>
         <SortTableHeadCell thClass="p-2" key='status'>Estado</SortTableHeadCell>
       </tr>
       <tr>
-        {#if munCount > 1}<FilterTableHeadCell key='muncode' bind:value={muncode}></FilterTableHeadCell>{/if}
+        {#if munCount > 1 || muncode}
+          <FilterTableHeadCell key='muncode' bind:value={muncode}></FilterTableHeadCell>
+        {/if}
         <FilterTableHeadCell key='type' bind:value={type} items={TASK_TYPE_VALUES}></FilterTableHeadCell>
         <FilterTableHeadCell key='difficulty' bind:value={difficulty} items={TASK_DIFFICULTY_VALUES}></FilterTableHeadCell>
         <FilterTableHeadCell key='status' bind:value={status} items={TASK_STATUS_VALUES}></FilterTableHeadCell>
@@ -51,7 +55,9 @@
           on:mouseout={() => dispatch('mouseout')}
           class={trClass}
         >
-          {#if munCount > 1}<TableBodyCell {tdClass}>{task.muncode}</TableBodyCell>{/if}
+          {#if munCount > 1 || muncode}
+            <TableBodyCell {tdClass}>{task.muncode}</TableBodyCell>
+          {/if}
           <TableBodyCell {tdClass}>{TASK_TYPE_VALUES[task.type]}</TableBodyCell>
           <TableBodyCell {tdClass}>{TASK_DIFFICULTY_VALUES[task.difficulty]}</TableBodyCell>
           <TableBodyCell {tdClass}>{TASK_STATUS_VALUES[task.status]}</TableBodyCell>
