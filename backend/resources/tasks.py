@@ -25,6 +25,10 @@ class Tasks(Resource):
         df = geopandas.GeoDataFrame.from_postgis(sql=sql, con=models.db.get_engine())
         df['difficulty'] = df['difficulty'].map(lambda v: models.Task.Difficulty(v).name)
         df['status'] = df['status'].map(lambda v: models.Task.Status(v).name)
+        Municipality = models.Municipality
+        q = Municipality.query.filter(Municipality.muncode.in_(df.muncode.unique()))
+        municip = {m.muncode: m.name for m in q.all()}
+        df['name'] = df['muncode'].map(lambda v: municip[v])
         return Response(df.to_json(), mimetype='application/json')
 
 

@@ -107,21 +107,28 @@
     return style
   }
 
-  function taskInfo(task) {
-    return `
-      <ul>
-        <li>Municipio: ${task.muncode}</li>
-        <li>Tipo: ${TASK_TYPE_VALUES[task.type]}</li>
-        <li>Dificultad: ${TASK_DIFFICULTY_VALUES[task.difficulty]}</li>
-        <li>Estado: ${TASK_STATUS_VALUES[task.status]}</li>
-      </ul>
-    `
+  function featInfo(feat) {
+    let info = ''
+    if (feat.provcode) {
+      info = `<ul><li>Provincia: ${feat.name} (${feat.provcode})</li>`
+    } else {
+      info = `<ul><li>Municipio: ${feat.name} (${feat.muncode})</li>`
+    }
+    if (feat.localid) {
+      info += `
+        <li>Tipo: ${TASK_TYPE_VALUES[feat.type]}</li>
+        <li>Dificultad: ${TASK_DIFFICULTY_VALUES[feat.difficulty]}</li>
+        <li>Estado: ${TASK_STATUS_VALUES[feat.status]}</li>
+      `
+    }
+    info += '</ul>'
+    return info
   }
 
   const geoJsonOptions = {
     style: setStyle,
     onEachFeature: function(feature, layer) {
-      layer.bindTooltip(taskInfo(feature.properties))
+      layer.bindTooltip(featInfo(feature.properties))
       layer.on('click', () => handleClick(feature, layer))
       layer.on('mouseover', () => handleMouseover(feature, layer))
       layer.on('mouseout', () => handleMouseout(feature, layer))

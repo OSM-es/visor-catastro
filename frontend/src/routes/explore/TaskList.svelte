@@ -18,6 +18,10 @@
   let items = []
 
   $: munCount = (new Set(tasks?.map(t => t.properties.muncode))).size
+  $: munItems = tasks?.reduce((i, v) => {
+    i[v.properties.muncode] = `${v.properties.name} (${v.properties.muncode})`
+    return i
+  }, {}) || []
   
   const dispatch = createEventDispatcher()
   const tdClass = 'px-2 py-0.5 whitespace-nowrap'
@@ -38,7 +42,7 @@
       </tr>
       <tr>
         {#if munCount > 1 || muncode}
-          <FilterTableHeadCell key='muncode' bind:value={muncode}></FilterTableHeadCell>
+          <FilterTableHeadCell key='muncode' bind:value={muncode} items={munItems}></FilterTableHeadCell>
         {/if}
         <FilterTableHeadCell key='type' bind:value={type} items={TASK_TYPE_VALUES}></FilterTableHeadCell>
         <FilterTableHeadCell key='difficulty' bind:value={difficulty} items={TASK_DIFFICULTY_VALUES}></FilterTableHeadCell>

@@ -10,8 +10,6 @@
   export let items = defaultItems()
   export let thClass = "p-0.5 font-normal"
   
-  items = getItems()
-  
   function defaultItems() {
     return Array.from(
       new Set($table.items.map(it => it[key]))
@@ -29,6 +27,5 @@
 </script>
 
 <TableHeadCell padding={thClass}>
-  <Select size="sm" {items} bind:value placeholder="Filtro ..." class="py-0.5"
-/>
+  <Select size="sm" items={getItems()} bind:value placeholder="Filtro ..." class="py-0.5"/>
 </TableHeadCell>
