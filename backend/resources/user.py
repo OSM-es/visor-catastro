@@ -2,13 +2,13 @@ from flask import abort, request, session
 from flask_restful import Resource
 
 import models
-from auth import auth, get_current_user
+from auth import auth
 
 
 class User(Resource):
     @auth.login_required
     def post(self):
-        osm_user = get_current_user()
+        osm_user = auth.current_user()
         if osm_user.user:
             abort(400, 'La cuenta ya ha sido registrada')
         if request.json.get('type', '') == 'import':
@@ -23,7 +23,7 @@ class User(Resource):
 
     @auth.login_required
     def put(self):
-        osm_user = get_current_user()
+        osm_user = auth.current_user()
         user = osm_user.user
         if not user:
             abort(400)

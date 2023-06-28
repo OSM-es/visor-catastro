@@ -1,6 +1,4 @@
-from collections import defaultdict
 import gzip
-import re
 
 from flask import Response, abort, request
 from flask_restful import Resource
@@ -9,6 +7,7 @@ import geopandas
 import osm2geojson
 
 import models
+from auth import auth
 from config import Config
 from overpass import getOsmStreets
 
@@ -101,6 +100,7 @@ class Task(Resource):
         data['streets'] = get_streets(buildings)
         return data
     
+    @auth.login_required(role=[models.User.Role.MAPPER, models.User.Role.ADMIN])
     def put(self, id):
         task = models.Task.query.get(id)
         if not task:

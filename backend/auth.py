@@ -44,9 +44,16 @@ def verify_token(token):
     try:
         s = jwt.decode(token, current_app.secret_key)
         s.validate()
-    except JoseError as e:
-        return False
-    return True
+    except JoseError:
+        return None
+    return get_current_user()
+
+@auth.get_user_roles
+def get_user_roles(user):
+    if user.user:
+        return [User.Role(user.user.role)]
+    return []
+
 
 @auth.login_required
 @auth_bp.route('/relogin')

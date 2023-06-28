@@ -4,7 +4,7 @@ from collections import defaultdict
 
 import osm2geojson
 import shapely
-from flask import abort, request, session
+from flask import abort, request
 from flask_restful import Resource
 from geoalchemy2.shape import to_shape
 
@@ -66,7 +66,7 @@ class Street(Resource):
     @auth.login_required
     def put(self, mun_code, cat_name):
         data = request.json
-        user = get_current_user()
+        user = auth.current_user()
         street = models.Street.get_by_name(mun_code, cat_name)
         if not street:
             abort(404)
