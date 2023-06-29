@@ -13,7 +13,8 @@
   export let muncode
   export let type
   export let difficulty
-  export let status
+  export let ad_status
+  export let bu_status
 
   let items = []
 
@@ -38,7 +39,8 @@
         {/if}
         <SortTableHeadCell thClass="p-2" key='type'>Tipo</SortTableHeadCell>
         <SortTableHeadCell thClass="p-2" key='difficulty'>Dificultad</SortTableHeadCell>
-        <SortTableHeadCell thClass="p-2" key='status'>Estado</SortTableHeadCell>
+        <SortTableHeadCell thClass="p-2" key='bu_status'>Estado edificios</SortTableHeadCell>
+        <SortTableHeadCell thClass="p-2" key='ad_status'>Estado direcciones</SortTableHeadCell>
       </tr>
       <tr>
         {#if munCount > 1 || muncode}
@@ -46,7 +48,8 @@
         {/if}
         <FilterTableHeadCell key='type' bind:value={type} items={TASK_TYPE_VALUES}></FilterTableHeadCell>
         <FilterTableHeadCell key='difficulty' bind:value={difficulty} items={TASK_DIFFICULTY_VALUES}></FilterTableHeadCell>
-        <FilterTableHeadCell key='status' bind:value={status} items={TASK_STATUS_VALUES}></FilterTableHeadCell>
+        <FilterTableHeadCell key='status' bind:value={bu_status} items={TASK_STATUS_VALUES}></FilterTableHeadCell>
+        <FilterTableHeadCell key='status' bind:value={ad_status} items={TASK_STATUS_VALUES}></FilterTableHeadCell>
       </tr>
     </TableHead>
     <TableBody>
@@ -64,7 +67,8 @@
           {/if}
           <TableBodyCell {tdClass}>{TASK_TYPE_VALUES[task.type]}</TableBodyCell>
           <TableBodyCell {tdClass}>{TASK_DIFFICULTY_VALUES[task.difficulty]}</TableBodyCell>
-          <TableBodyCell {tdClass}>{TASK_STATUS_VALUES[task.status]}</TableBodyCell>
+          <TableBodyCell {tdClass}>{TASK_STATUS_VALUES[task.bu_status]}</TableBodyCell>
+          <TableBodyCell {tdClass}>{TASK_STATUS_VALUES[task.ad_status]}</TableBodyCell>
         </tr>
       {/each}
     </TableBody>

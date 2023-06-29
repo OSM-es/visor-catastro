@@ -24,8 +24,12 @@ class Tasks(Resource):
             q = q.filter(models.Task.geom.intersects(bb))
         sql = q.statement
         df = geopandas.GeoDataFrame.from_postgis(sql=sql, con=models.db.get_engine())
-        df['difficulty'] = df['difficulty'].map(lambda v: models.Task.Difficulty(v).name)
-        df['status'] = df['status'].map(lambda v: models.Task.Status(v).name)
+        get_status = lambda v: models.Task.Status(v).name
+        get_diff = lambda v: models.Task.Difficulty(v).name
+        df['difficulty'] = df['difficulty'].map(get_diff)
+        df['status'] = df[['ad_status', 'bu_status']].max(axis=1).map(get_status)
+        df['ad_status'] = df['ad_status'].map(get_status)
+        df['bu_status'] = df['bu_status'].map(get_status)
         q = Municipality.query.filter(Municipality.muncode.in_(df.muncode.unique()))
         municip = {m.muncode: m.name for m in q.all()}
         df['name'] = df['muncode'].map(lambda v: municip[v])
@@ -63,7 +67,8 @@ class Task(Resource):
         if not task:
             abort(404)
         data = request.json
-        task.status = models.Task.Status[data['status']].value
+        task.ad_status = models.Task.Status[data['ad_status']].value
+        task.bu_status = models.Task.Status[data['bu_status']].value
         models.db.session.commit()
 
 

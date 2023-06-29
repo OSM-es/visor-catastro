@@ -109,10 +109,20 @@
         {/if}
         <form use:enhance={updateStatus} method="POST" class="mb-4">
           <Label>
-            Estado:
+            Estado direcciones:
             <Select
-              name="status"
-              value={data.task.status}
+              name="ad_status"
+              value={data.task.ad_status}
+              items={Object.entries(TASK_STATUS_VALUES).map(([value, name]) => ({ value, name }))}
+              placeholder=""
+              disabled={!isEditor}
+            />
+          </Label>
+          <Label>
+            Estado edificios:
+            <Select
+              name="bu_status"
+              value={data.task.bu_status}
               items={Object.entries(TASK_STATUS_VALUES).map(([value, name]) => ({ value, name }))}
               placeholder=""
               disabled={!isEditor}

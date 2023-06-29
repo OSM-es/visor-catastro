@@ -2,11 +2,8 @@ import { redirect } from '@sveltejs/kit'
 
 export function load({ depends, locals }) {
   depends('data:user')
-  depends('data:status')
 
   if (!locals.user) throw redirect(302, '/')
-
-  return { status: locals.status || '--' }
 }
 
 export const actions = {

@@ -7,16 +7,13 @@ from models import db
 
 class Task(db.Model):
     class Status(Enum):
-        READY_FOR_ADDRESSES = 0
-        LOCKED_FOR_ADDRESSES = 1
-        READY_FOR_MAPPING = 2
-        LOCKED_FOR_MAPPING = 3
-        MAPPED = 4
-        LOCKED_FOR_VALIDATION = 5
-        VALIDATED = 6
-        INVALIDATED = 7
-        BLOCKED_BY_SYSTEM = 8
-        NEED_UPDATE = 9
+        READY = 0
+        LOCKED_FOR_MAPPING = 1
+        MAPPED = 2
+        LOCKED_FOR_VALIDATION = 3
+        VALIDATED = 4
+        INVALIDATED = 5
+        NEED_UPDATE = 6
 
     class Difficulty(Enum):
         EASY = 1
@@ -28,7 +25,8 @@ class Task(db.Model):
     localId = db.Column('localid', db.String, index=True)
     zone = db.Column(db.String)
     type = db.Column(db.String)
-    status = db.Column(db.Integer, default=Status.READY_FOR_ADDRESSES.value)
+    ad_status = db.Column(db.Integer, default=Status.READY.value)
+    bu_status = db.Column(db.Integer, default=Status.READY.value)
     parts = db.Column(db.Integer)
     buildings = db.Column(db.Integer)
     addresses = db.Column(db.Integer)
@@ -51,5 +49,6 @@ class Task(db.Model):
             'muncode': self.muncode,
             'type': self.type,
             'difficulty': Task.Difficulty(self.difficulty).name,
-            'status': Task.Status(self.status).name,
+            'ad_status': Task.Status(self.ad_status).name,
+            'bu_status': Task.Status(self.bu_status).name,
         }

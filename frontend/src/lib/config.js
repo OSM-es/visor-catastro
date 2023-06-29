@@ -17,28 +17,23 @@ export const TASK_DIFFICULTY_VALUES = {
 }
 
 export const TASK_STATUS_VALUES = {
-  READY_FOR_ADDRESSES: 'Lista para direcciones',
-  LOCKED_FOR_ADDRESSES: 'Bloqueda para direcciones',
-  READY_FOR_MAPPING: 'Lista para mapeo',
-  LOCKED_FOR_MAPPING: 'Bloqueada para mapeo',
+  READY: 'Disponible',
+  LOCKED_FOR_MAPPING: 'Mapeando',
   MAPPED: 'Mapeada',
-  LOCKED_FOR_VALIDATION: 'Bloqueada para validación',
+  LOCKED_FOR_VALIDATION: 'Validando',
   VALIDATED: 'Validada',
   INVALIDATED: 'No válida',
-  BLOCKED_BY_SYSTEM: 'Bloqueo del sistema',
   NEED_UPDATE: 'Necesita actualizar',
 }
 
 export const TASK_COLORS = {
-  READY_FOR_ADDRESSES: '#FFFFFF66',
-  LOCKED_FOR_ADDRESSES: '#80808099',
-  READY_FOR_MAPPING: '#ADFF2F66',
+  READY: '#FFFFFF66',
+  //READY_FOR_MAPPING: '#ADFF2F66',
   LOCKED_FOR_MAPPING: '#80808099',
   MAPPED: '#1E90FF99',
   LOCKED_FOR_VALIDATION: '#80808099',
   VALIDATED: '#00800099',
   INVALIDATED: '#FF450099',
-  BLOCKED_BY_SYSTEM: '#80808099',
   NEED_UPDATE: '#FFD70099',
 }
 

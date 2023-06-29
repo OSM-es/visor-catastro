@@ -20,4 +20,3 @@
     # Descarga de archivo de tarea sólo para editores. Eliminar fixmes/refs/addr:cat_name.
     # Registrar historial de cambios de estado de tareas.
     # Obtener las calles y estado revisión nombre de la bd
-    # Posible desdoble del estado de la tarea por edificios / direcciones

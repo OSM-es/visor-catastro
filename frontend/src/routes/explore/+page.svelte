@@ -11,7 +11,7 @@
 
 
   let map, geoJsonData, hoveredFeature, previewFeature, getUrl
-  let muncode, type, difficulty, status
+  let muncode, type, difficulty, ad_status, bu_status
   let loading = false
   let center = data.center
   let zoom = data.zoom
@@ -29,16 +29,17 @@
   )
 
 
-  $: tasks = filterTasks(geoJsonData, muncode, type, difficulty, status)
+  $: tasks = filterTasks(geoJsonData, muncode, type, difficulty, ad_status, bu_status)
 
 
-  function filterTasks(geoJsonData, muncode, type, difficulty, status) {
+  function filterTasks(geoJsonData, muncode, type, difficulty, ad_status, bu_status) {
     let data = geoJsonData?.features || []
     if (data) {
       if (muncode) data = data.filter(t => t.properties.muncode === muncode)
       if (type) data = data.filter(t => t.properties.type === type)
       if (difficulty) data = data.filter(t => t.properties.difficulty === difficulty)
-      if (status) data = data.filter(t => t.properties.status === status)
+      if (ad_status) data = data.filter(t => t.properties.ad_status === ad_status)
+      if (bu_status) data = data.filter(t => t.properties.bu_status === bu_status)
     }
     return { type: 'FeatureCollection', features: data }
   }
@@ -87,7 +88,7 @@
     if (target(zoom) === 'tasks') {
       style = { 
         fillColor: TASK_COLORS[feature.properties.status],
-        fillOpacity: 1,
+        fillOpacity: feature.properties.bu_status == feature.properties.ad_status ? 1 : 0.5,
         dashArray: null,
         weight: 1,
         color: '#3388ff', 
@@ -118,7 +119,8 @@
       info += `
         <li>Tipo: ${TASK_TYPE_VALUES[feat.type]}</li>
         <li>Dificultad: ${TASK_DIFFICULTY_VALUES[feat.difficulty]}</li>
-        <li>Estado: ${TASK_STATUS_VALUES[feat.status]}</li>
+        <li>Estado edificios: ${TASK_STATUS_VALUES[feat.bu_status]}</li>
+        <li>Estado direcciones: ${TASK_STATUS_VALUES[feat.ad_status]}</li>
       `
     }
     info += '</ul>'
@@ -173,7 +175,8 @@
           bind:muncode
           bind:type
           bind:difficulty
-          bind:status
+          bind:ad_status
+          bind:bu_status
           on:click={(event) => handleClick(event.detail.feature)}
           on:mouseover={(event) => handleMouseover(event.detail.feature)}
           on:mouseout={() => handleMouseover()}
