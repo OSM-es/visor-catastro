@@ -54,7 +54,7 @@ class Config:
     ]
 
     # Catastro
-    FOTO_FACHADA_URL = 'http://ovc.catastro.meh.es/OVCServWeb/OVCWcfLibres/OVCFotoFachada.svc/RecuperarFotoFachadaGet?ReferenciaCatastral='
+    FOTO_FACHADA_URL = 'https://ovc.catastro.meh.es/OVCServWeb/OVCWcfLibres/OVCFotoFachada.svc/RecuperarFotoFachadaGet?ReferenciaCatastral='
 
     # Cache
     CACHE_TYPE = 'FileSystemCache'

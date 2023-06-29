@@ -3,7 +3,7 @@ from enum import Enum
 
 from sqlalchemy.sql import expression
 
-from models import db
+from models import db, StreetHistory
 
 STREET_LOCK_TIMEOUT = 3600
 
@@ -39,10 +39,12 @@ class Street(db.Model):
         }
     
     def is_locked(self):
-        if self.history:
-            last = self.history[-1]
-            age = (last.date - datetime.now()).total_seconds()
-            return last.action == last.Action.LOCKED.value and age < STREET_LOCK_TIMEOUT
+        i = len(self.history) - 1
+        while i >= 0 and self.history[i].action != StreetHistory.Action.LOCKED.value:
+            i -= 1
+        if (i >= 0):
+            age = (datetime.now() - self.history[i].date).total_seconds()
+            return age < STREET_LOCK_TIMEOUT
         return False
     
     @property
