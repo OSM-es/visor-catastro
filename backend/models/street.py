@@ -3,7 +3,7 @@ from enum import Enum
 
 from sqlalchemy.sql import expression
 
-from models import db, StreetHistory
+from models import db, StreetHistory, StreetLock
 
 STREET_LOCK_TIMEOUT = 3600
 
@@ -20,6 +20,7 @@ class Street(db.Model):
     source = db.Column(db.Integer)
     validated = db.Column(db.Boolean, nullable=False, server_default=expression.false())
     history = db.relationship('StreetHistory', back_populates='street')
+    lock = db.relationship('StreetLock', back_populates='street', uselist=False)
     name = db.Column(db.String)
 
     @staticmethod
@@ -39,17 +40,28 @@ class Street(db.Model):
         }
     
     def is_locked(self):
-        i = len(self.history) - 1
-        while i >= 0 and self.history[i].action != StreetHistory.Action.LOCKED.value:
-            i -= 1
-        if (i >= 0):
-            age = (datetime.now() - self.history[i].date).total_seconds()
-            return age < STREET_LOCK_TIMEOUT
+        if self.lock:
+            age = (datetime.now() - self.lock.date).total_seconds()
+            if age < STREET_LOCK_TIMEOUT:
+                return True
+            self.unlock()
         return False
-    
+
+    def unlock(self):
+        db.session.delete(self.lock)
+        db.session.commit()
+
+    def set_lock(self, user):
+        self.lock = StreetLock(user=user)
+        db.session.add(self)
+        db.session.commit()
+
     @property
     def owner(self):
-        if self.history:
-            last = self.history[-1]
-            return last.user
+        if self.lock:
+            return self.lock.user
         return False
+
+    def add_history(self, user):
+        action = StreetHistory.Action.VALIDATED.value if self.validated else StreetHistory.Action.RESET.value
+        self.history.append(StreetHistory(user=user, action=action, name=self.name))

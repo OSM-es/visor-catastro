@@ -23,18 +23,30 @@ class TaskHistory(History):
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
     task = db.relationship('Task', back_populates='history')
 
-    __mapper_args__ = {'polymorphic_identity': 'T'}
+    __mapper_args__ = {'polymorphic_identity': 'TH'}
 
 
 class StreetHistory(History):
     class Action(Enum):
-        LOCKED = 1
-        VALIDATED = 2
-        RESET = 3
+        VALIDATED = 1
+        RESET = 2
 
     id = db.Column(db.Integer, db.ForeignKey('history.id'), primary_key=True)
     street_id = db.Column(db.Integer, db.ForeignKey('street.id'), nullable=False)
     street = db.relationship('Street', back_populates='history')
     name = db.Column(db.String, nullable=True)
 
-    __mapper_args__ = {'polymorphic_identity': 'S'}
+    __mapper_args__ = {'polymorphic_identity': 'SH'}
+
+class StreetLock(History):
+    LOCKED = 0
+
+    id = db.Column(db.Integer, db.ForeignKey('history.id'), primary_key=True)
+    street_id = db.Column(db.Integer, db.ForeignKey('street.id'), nullable=False)
+    street = db.relationship('Street', back_populates='lock')
+
+    __mapper_args__ = {'polymorphic_identity': 'SL'}
+
+    def __init__(self, *args, **kwargs):
+        kwargs['action'] = StreetLock.LOCKED
+        super(StreetLock, self).__init__(*args, **kwargs)

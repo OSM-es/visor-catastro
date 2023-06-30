@@ -36,10 +36,7 @@ class Streets(Resource):
 
         user = get_current_user()
         if not street.is_locked() and user:
-            h = models.StreetHistory(user=user, street=street)
-            h.action = models.StreetHistory.Action.LOCKED.value
-            models.db.session.add(h)
-            models.db.session.commit()
+            street.set_lock(user)
 
         fn = Config.UPDATE_PATH + mun_code + '/tasks/address.osm'
         with open(fn) as fo:
@@ -74,8 +71,8 @@ class Street(Resource):
             abort(403)
         street.validated = data['validated'] == 'true'
         street.name = None if not street.validated else data.get('name')
-        h = models.StreetHistory(user=user, street=street, name=street.name)
-        h.action = h.Action.VALIDATED.value if street.validated else h.Action.RESET.value
+        street.unlock()
+        street.add_history(user)
         models.db.session.add(street)
         models.db.session.commit()
         return {'errors': []}
