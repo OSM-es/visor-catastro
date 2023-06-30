@@ -22,7 +22,7 @@ api.add_resource(resources.User, '/user')
 
 @api_bp.route('/photo/<string:ref>')
 @api_cache.cached()
-def getPhto(ref):
+def getPhoto(ref):
     resp = False
     try:
         url = current_app.config.get('FOTO_FACHADA_URL') + ref
