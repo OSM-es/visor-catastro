@@ -46,7 +46,7 @@ export default class Api {
     return this.send({ method: 'GET', path, token })
   }
   
-  del(path, token) {
+  delete(path, token) {
     return this.send({ method: 'DELETE', path, token })
   }
   

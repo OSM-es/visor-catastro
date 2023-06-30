@@ -7,7 +7,7 @@
   import debounce from 'lodash/debounce'
 
   import { currentTask } from '$lib/stores.js'
-  import { afterNavigate, goto, invalidateAll } from '$app/navigation'
+  import { afterNavigate, beforeNavigate, goto, invalidateAll } from '$app/navigation'
   import { page } from '$app/stores'
 
   import { login } from '$lib/user'
@@ -37,7 +37,6 @@
   $: index = items.findIndex((st) => st.cat_name === $street.cat_name)
   $: street.set(data.street)
   
-  
   const focusEditor = debounce(() => {
     const editor = document.getElementById('editor')
     editor?.scrollIntoView({ block: 'center', behavior: 'smooth' })
@@ -57,6 +56,11 @@
     viewImage = $page.url.searchParams.get('ref')
     focusEditor()
     centerMap()
+  })
+
+  beforeNavigate(() => {
+    const url = `/papi/street/${$street.mun_code}/${$street.cat_name}/lock`
+		fetch(url, {method: 'DELETE'})
   })
 
 

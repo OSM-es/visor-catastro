@@ -3,7 +3,6 @@
   import { Button, Input } from 'flowbite-svelte'
 
   export let data
-	export let form
 
   $: user = data.user
 
