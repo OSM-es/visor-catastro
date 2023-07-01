@@ -58,7 +58,8 @@ class Streets(Resource):
         }
 
         return data
-    
+
+
 class Street(Resource):
     @auth.login_required
     def put(self, mun_code, cat_name):
@@ -76,6 +77,7 @@ class Street(Resource):
         models.db.session.add(street)
         models.db.session.commit()
         return {'errors': []}
+
 
 class StreetLock(Resource):
     @auth.login_required

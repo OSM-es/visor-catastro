@@ -60,7 +60,7 @@ class Street(db.Model):
     def owner(self):
         if self.lock:
             return self.lock.user
-        return False
+        return None
 
     def add_history(self, user):
         action = StreetHistory.Action.VALIDATED.value if self.validated else StreetHistory.Action.RESET.value

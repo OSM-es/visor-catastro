@@ -1,8 +1,11 @@
+from datetime import datetime
 from enum import Enum
 
 from geoalchemy2 import Geometry, Index
 
-from models import db
+from models import db, TaskHistory
+
+TASK_LOCK_TIMEOUT = 86400
 
 
 class Task(db.Model):
@@ -43,6 +46,11 @@ class Task(db.Model):
         return f"{self.muncode} {self.localId} {self.type} {self.parts}"
 
     def asdict(self):
+        owner = self.owner
+        ad_mapper = self.ad_mapper
+        bu_mapper = self.bu_mapper
+        ad_validator = self.ad_validator
+        bu_validator = self.bu_validator
         return {
             'id': self.id,
             'localId': self.localId,
@@ -51,4 +59,69 @@ class Task(db.Model):
             'difficulty': Task.Difficulty(self.difficulty).name,
             'ad_status': Task.Status(self.ad_status).name,
             'bu_status': Task.Status(self.bu_status).name,
+            'is_locked': self.is_locked(),
+            'owner': owner.asdict() if owner else None,
+            'ad_mapper': ad_mapper.asdict() if ad_mapper else None,
+            'bu_mapper': bu_mapper.asdict() if bu_mapper else None,
+            'ad_validator': ad_validator.asdict() if ad_validator else None,
+            'bu_validator': bu_validator.asdict() if bu_validator else None,
         }
+
+    def is_locked(self):
+        if self.history:
+            last = self.history[-1]
+            if last.action in TaskHistory.lock_actions:
+                age = (datetime.now() - last.date).total_seconds()
+                if age < TASK_LOCK_TIMEOUT:
+                    return True
+        return False
+
+    def last_action(self, target, *actions):
+        i = len(self.history) - 1
+        while (
+            i >= 0
+            and self.history[i].action not in actions
+            and not getattr(self.history[i], target)
+        ):
+            i -= 1
+        if (i >= 0):
+            return self.history[i]
+        return None
+
+    @property
+    def owner(self):
+        if self.is_locked():
+            return self.history[-1].user
+        return None
+
+    @property
+    def ad_mapper(self):
+        mapper = self.last_action('addresses', TaskHistory.Action.MAPPED)
+        return mapper and mapper.user
+
+    @property
+    def bu_mapper(self):
+        mapper = self.last_action('buildings', TaskHistory.Action.MAPPED)
+        return mapper and mapper.user
+
+    @property
+    def ad_validator(self):
+        val = self.last_action(
+            'addresses',
+            TaskHistory.Action.VALIDATED,
+            TaskHistory.Action.INVALIDATED,
+        )
+        return val and val.user
+
+    @property
+    def bu_validator(self):
+        val = self.last_action(
+            'buildings',
+            TaskHistory.Action.VALIDATED,
+            TaskHistory.Action.INVALIDATED,
+        )
+        return val and val.user
+
+    def add_history(self, user, target):
+        action = TaskHistory.Action.VALIDATED.value if self.validated else TaskHistory.Action.RESET.value
+        self.history.append(TaskHistory(user=user, action=action, target=target))

@@ -12,14 +12,20 @@
   import FixmesLayer from '$lib/components/maps/FixmesLayer.svelte'
   import PartsLayer from '$lib/components/maps/PartsLayer.svelte'
   import StreetsLayer from '$lib/components/maps/StreetsLayer.svelte'
+  import TaskActions from './TaskActions.svelte'
   import { currentTask } from '$lib/stores.js'
-  
+
   export let data
 
   let map, center, zoom, initialCenter, initialZoom, getConsLayer, getUrl
   let buildings = data.task.buildings
   let fixmes = data.task?.fixmes
   let scrollImage, viewImage
+  let streetsToValidate = data.task.streets?.filter(s => !s.validated) || []
+  let haveStreetsToValidate = streetsToValidate?.length > 0
+  let taskColor = 'text-success-500'
+  if (data.task.difficulty === 'MODERATE') taskColor = 'text-warning-500'
+  if (data.task.difficulty === 'CHALLENGING') taskColor = 'text-danger-500'
   
   $: isEditor = data.user?.role && data.user.role != 'READ_ONLY'
   
@@ -74,16 +80,39 @@
   <div class="md:max-w-md w-full flex-grow overflow-scroll px-4 pt-8 border-l-2 border-gray-200 dark:border-gray-600">
     <div class="h-full max-h-0">
       <div class="prose dark:prose-invert">
-        <ul>
-          <li>Catastro de {data.task.name} ({data.task.muncode})</li>
-          <li>Tipo: {TASK_TYPE_VALUES[data.task.type]}</li>
-          <li>Dificultad: {TASK_DIFFICULTY_VALUES[data.task.difficulty]}</li>
-        </ul>
+        <h3>Catastro de {data.task.name} ({data.task.muncode})</h3>
+        <p>
+          Tarea tipo
+          <span class="font-bold">{TASK_TYPE_VALUES[data.task.type]}</span>,
+          dificultad
+          <span class="font-bold {taskColor}">
+            {TASK_DIFFICULTY_VALUES[data.task.difficulty]}</span>.
+        </p>
+        {#if data.task.bu_status !== data.task.ad_status}
+          <h4>Edificios:</h4>
+        {/if}
+        <TaskActions
+          status={data.task.bu_status}
+          user={data.user}
+          mapper={data.task.ad_mapper}
+          validator={data.task.ad_validator}
+          task={data.task}
+        />
+        {#if data.task.bu_status !== data.task.ad_status}
+          <h4>Direcciones:</h4>
+          <TaskActions
+            status={data.task.ad_status}
+            user={data.user}
+            mapper={data.task.bu_mapper}
+            validator={data.task.bu_validator}
+            task={data.task}
+          />
+        {/if}
         {#if fixmes}
-          <p>Anotaciones:</p>
-          {#each fixmes?.features as fixme}
-            <ol>
-              <li>
+          <h5>Anotaciones:</h5>
+          <ol class="mt-0">
+            {#each fixmes?.features as fixme}
+              <li class="my-0">
                 <a
                   href="{fixme.geometry.coordinates}"
                   on:click={centerMap}
@@ -92,20 +121,21 @@
                   {fixme.properties.fixme}
                 </a>
               </li>
-            </ol>
-          {/each}
+            {/each}
+          </ol>
         {/if}
         {#if data.task.streets?.length}
-          <p>Calles:</p>
-          {#each data.task.streets as street}
-            <ul>
-              <li>
-                <a href="/explore/{data.task.muncode}/street/{street.cat_name}">
-                  {street.cat_name}
-                </a>
-              </li>
-            </ul>
-          {/each}
+          <h5>Nombres de calle{haveStreetsToValidate ? ' por revisar' : ''}:</h5>
+          <ul class="mt-0">
+            {#each data.task.streets as street}
+              <li class="my-0">
+                  <a href="/explore/{data.task.muncode}/street/{street.cat_name}">
+                    {street.cat_name}
+                  </a>
+                {street.validated ? 'Confirmado' : 'Pendiente'}
+                </li>
+            {/each}
+          </ul>
         {/if}
         <form use:enhance={updateStatus} method="POST" class="mb-4">
           <Label>
@@ -136,12 +166,12 @@
           {/if}
         </form>
       </div>
-      <FotosFachada
+      <!--FotosFachada
         data={buildings.features}
         on:viewed={showBuilding}
         bind:scrollImage 
         bind:viewImage
-      />
+      /-->
     </div>
   </div>
 </div>
