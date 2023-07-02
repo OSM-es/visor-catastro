@@ -19,4 +19,6 @@
 # Edición tarea
     # Descarga de archivo de tarea sólo para editores. Eliminar fixmes/refs/addr:cat_name.
     # Registrar historial de cambios de estado de tareas.
-    # Obtener las calles y estado revisión nombre de la bd
+
+# Registro
+    # Error se duplican usuarios al vincular cuenta de importación que ya existe

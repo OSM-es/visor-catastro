@@ -70,35 +70,25 @@ class Task(Resource):
         if task.is_locked() and task.owner != user:
             abort(403)
         data = request.json
-        ad_status = data.get('ad_status')
-        bu_status = data.get('bu_status')
-        new_ad_status = ad_status and models.Task.Status[ad_status].value
-        new_bu_status = bu_status and models.Task.Status[bu_status].value
-        addreses = False
-        buildings = False
-        action = None
-        if new_ad_status and new_ad_status != task.ad_status:
-            addresses = True
-            action = new_ad_status
-            if new_bu_status and new_bu_status != task.bu_status:
-                buildings = True
-                if new_bu_status != new_ad_status:
-                    raise(400)
-            task.ad_status = new_ad_status
-        if new_bu_status:
-            if not new_ad_status or new_ad_status == task.ad_status:
-                buildings = True
-                action = new_bu_status
-            task.bu_status = new_bu_status
-        if action:
-            h = models.TaskHistory(
-                user=user,
-                action=action,
-                buildings=buildings,
-                addresses=addresses
-            )
-            task.history.append(h)
-            models.db.session.commit()
+        status = data.get('status')
+        status = status and models.Task.Status[status].value
+        addresses = data.get('addresses') == 'true'
+        buildings = data.get('buildings') == 'true'
+        action = models.TaskHistory.Action.from_status(status).value
+        if not addresses and not buildings:
+            abort(400)
+        if addresses:
+            task.ad_status = status
+        if buildings:
+            task.bu_status = status
+        h = models.TaskHistory(
+            user=user,
+            action=action,
+            buildings=buildings,
+            addresses=addresses,
+        )
+        task.history.append(h)
+        models.db.session.commit()
 
 
 def isAddr(feature):

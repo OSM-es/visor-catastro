@@ -50,7 +50,7 @@
   function updateStatus() {
     return async ({ update }) => {
       await update()
-      exit()
+      //exit()
     }
   }
 
@@ -80,63 +80,65 @@
   <div class="md:max-w-md w-full flex-grow overflow-scroll px-4 pt-8 border-l-2 border-gray-200 dark:border-gray-600">
     <div class="h-full max-h-0">
       <div class="prose dark:prose-invert">
-        <h3>Catastro de {data.task.name} ({data.task.muncode})</h3>
-        <p>
-          Tarea tipo
-          <span class="font-bold">{TASK_TYPE_VALUES[data.task.type]}</span>,
-          dificultad
-          <span class="font-bold {taskColor}">
-            {TASK_DIFFICULTY_VALUES[data.task.difficulty]}</span>.
-        </p>
-        {#if data.task.bu_status !== data.task.ad_status}
-          <h4>Edificios:</h4>
-        {/if}
-        <TaskActions
-          status={data.task.bu_status}
-          user={data.user}
-          mapper={data.task.ad_mapper}
-          validator={data.task.ad_validator}
-          task={data.task}
-        />
-        {#if data.task.bu_status !== data.task.ad_status}
-          <h4>Direcciones:</h4>
+        <form use:enhance={updateStatus} method="POST" class="mb-4">
+          <h3>Catastro de {data.task.name} ({data.task.muncode})</h3>
+          <p>
+            Tarea tipo
+            <span class="font-bold">{TASK_TYPE_VALUES[data.task.type]}</span>,
+            dificultad
+            <span class="font-bold {taskColor}">
+              {TASK_DIFFICULTY_VALUES[data.task.difficulty]}</span>.
+          </p>
+          {#if data.task.bu_status !== data.task.ad_status}
+            <h4>Edificios:</h4>
+          {/if}
           <TaskActions
-            status={data.task.ad_status}
+            status={data.task.bu_status}
             user={data.user}
-            mapper={data.task.bu_mapper}
-            validator={data.task.bu_validator}
+            mapper={data.task.ad_mapper}
+            validator={data.task.ad_validator}
             task={data.task}
           />
-        {/if}
-        {#if fixmes}
-          <h5>Anotaciones:</h5>
-          <ol class="mt-0">
-            {#each fixmes?.features as fixme}
-              <li class="my-0">
-                <a
-                  href="{fixme.geometry.coordinates}"
-                  on:click={centerMap}
-                  data-sveltekit-preload-data="off"
-                >
-                  {fixme.properties.fixme}
-                </a>
-              </li>
-            {/each}
-          </ol>
-        {/if}
-        {#if data.task.streets?.length}
-          <h5>Nombres de calle{haveStreetsToValidate ? ' por revisar' : ''}:</h5>
-          <ul class="mt-0">
-            {#each data.task.streets as street}
-              <li class="my-0">
-                  <a href="/explore/{data.task.muncode}/street/{street.cat_name}">
-                    {street.cat_name}
+          {#if data.task.bu_status !== data.task.ad_status && !data.task.is_locked}
+            <h4>Direcciones:</h4>
+            <TaskActions
+              status={data.task.ad_status}
+              user={data.user}
+              mapper={data.task.bu_mapper}
+              validator={data.task.bu_validator}
+              task={data.task}
+            />
+          {/if}
+          {#if fixmes}
+            <h5>Anotaciones:</h5>
+            <ol class="mt-0">
+              {#each fixmes?.features as fixme}
+                <li class="my-0">
+                  <a
+                    href="{fixme.geometry.coordinates}"
+                    on:click={centerMap}
+                    data-sveltekit-preload-data="off"
+                  >
+                    {fixme.properties.fixme}
                   </a>
-                {street.validated ? 'Confirmado' : 'Pendiente'}
                 </li>
-            {/each}
-          </ul>
-        {/if}
+              {/each}
+            </ol>
+          {/if}
+          {#if data.task.streets?.length}
+            <h5>Nombres de calle{haveStreetsToValidate ? ' por revisar' : ''}:</h5>
+            <ul class="mt-0">
+              {#each data.task.streets as street}
+                <li class="my-0">
+                    <a href="/explore/{data.task.muncode}/street/{street.cat_name}">
+                      {street.cat_name}
+                    </a>
+                  {street.validated ? 'Confirmado' : 'Pendiente'}
+                  </li>
+              {/each}
+            </ul>
+          {/if}
+        </form>
         <form use:enhance={updateStatus} method="POST" class="mb-4">
           <Label>
             Estado direcciones:

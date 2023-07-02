@@ -18,6 +18,10 @@ class Task(db.Model):
         INVALIDATED = 5
         NEED_UPDATE = 6
 
+        @staticmethod
+        def from_action(action):
+            return Task.Status(action)
+
     class Difficulty(Enum):
         EASY = 1
         MODERATE = 2
@@ -73,8 +77,8 @@ class Task(db.Model):
             if last.action in TaskHistory.lock_actions:
                 age = (datetime.now() - last.date).total_seconds()
                 if age < TASK_LOCK_TIMEOUT:
-                    return True
-        return False
+                    return Task.Status.from_action(last.action).name
+        return None
 
     def last_action(self, target, *actions):
         i = len(self.history) - 1

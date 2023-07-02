@@ -29,6 +29,10 @@ class TaskHistory(History):
         INVALIDATED = 5
         NEED_UPDATE = 6
 
+        @staticmethod
+        def from_status(status):
+            return TaskHistory.Action(status)
+
     lock_actions = [
         Action.LOCKED_FOR_MAPPING.value,
         Action.LOCKED_FOR_VALIDATION.value,

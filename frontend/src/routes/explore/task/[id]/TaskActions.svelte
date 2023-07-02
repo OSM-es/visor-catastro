@@ -11,25 +11,31 @@
   export let task
 </script>
 
-{#if status.includes('LOCKED')}
+<input name="addresses" value={status === task.ad_status} hidden/>
+<input name="buildings" value={status === task.bu_status} hidden/>
+{#if task.is_locked}
   {#if task.owner.id !== user.id}
     <p>
       Tarea
       <span class="font-bold text-danger-500">bloqueada</span>, otro usuario la está
-      <span class="lowercase">{TASK_STATUS_VALUES[status]}</span>.
+      <span class="lowercase">{TASK_STATUS_VALUES[task.is_locked]}</span>.
     </p>
-  {:else}
+  {:else if status === 'LOCKED_FOR_MAPPING'}
     <p>Diálogo para mapear.</p>
+  {:else if status === 'LOCKED_FOR_VALIDATION'}
+    <p>¿Esta tarea está bien mapeada? Si/No. Enviar tarea Detener validación</p>
   {/if}
 {:else if status === 'MAPPED'}
   <p>
     Tarea
-    <span class="text-success-500 font-bold">mapeada</span>{#if user.id === mapper.id},
+    <span class="text-success-500 font-bold">mapeada</span>{#if user.id === mapper?.id},
       otro usuario debe validarla.
     {:else}
-      {' '}por {mapper.display_name}
+      {' '}por {mapper?.display_name}
       <EditorButton {user} action={'validar'}>
-        <Button>Valídala</Button>
+        <Button type="submit" name="status" value="LOCKED_FOR_VALIDATION">
+          Valídala
+        </Button>
       </EditorButton>
     {/if}
   </p>
