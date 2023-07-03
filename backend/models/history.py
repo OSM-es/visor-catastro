@@ -22,12 +22,14 @@ class History(db.Model):
 
 class TaskHistory(History):
     class Action(Enum):
+        READY = 0
         LOCKED_FOR_MAPPING = 1
         MAPPED = 2
         LOCKED_FOR_VALIDATION = 3
         VALIDATED = 4
         INVALIDATED = 5
         NEED_UPDATE = 6
+        LOCK_CANCELLED = 7
 
         @staticmethod
         def from_status(status):
@@ -38,6 +40,13 @@ class TaskHistory(History):
         Action.LOCKED_FOR_VALIDATION.value,
     ]
 
+    status_change_actions = [
+        Action.READY.value,
+        Action.MAPPED.value,
+        Action.INVALIDATED.value,
+        Action.NEED_UPDATE.value,
+    ]
+
     id = db.Column(db.Integer, db.ForeignKey('history.id'), primary_key=True)
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
     task = db.relationship('Task', back_populates='history')
@@ -46,6 +55,14 @@ class TaskHistory(History):
 
     __mapper_args__ = {'polymorphic_identity': 'TH'}
 
+    def asdict(self):
+        return {
+            'date': self.date.isoformat(),
+            'user': self.user.display_name,
+            'action': TaskHistory.Action(self.action).name,
+            'addresses': self.addresses,
+            'buildings': self.buildings,
+        }
 
 class StreetHistory(History):
     class Action(Enum):

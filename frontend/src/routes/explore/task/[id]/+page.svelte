@@ -5,7 +5,7 @@
 	import { enhance } from '$app/forms'
   import { page } from '$app/stores'
 
-  import { TASK_TYPE_VALUES, TASK_DIFFICULTY_VALUES, TASK_STATUS_VALUES } from '$lib/config'
+  import { TASK_TYPE_VALUES, TASK_DIFFICULTY_VALUES, TASK_STATUS_VALUES, TASK_UNDO_VALUES } from '$lib/config'
   import FotosFachada from '$lib/components/FotosFachada.svelte'
   import Map from '$lib/components/maps/Map.svelte'
   import ConsLayer from '$lib/components/maps/ConsLayer.svelte'
@@ -21,8 +21,6 @@
   let buildings = data.task.buildings
   let fixmes = data.task?.fixmes
   let scrollImage, viewImage
-  let streetsToValidate = data.task.streets?.filter(s => !s.validated) || []
-  let haveStreetsToValidate = streetsToValidate?.length > 0
   let taskColor = 'text-success-500'
   if (data.task.difficulty === 'MODERATE') taskColor = 'text-warning-500'
   if (data.task.difficulty === 'CHALLENGING') taskColor = 'text-danger-500'
@@ -42,20 +40,20 @@
     building.layer.openPopup()
   }
 
-  function exit() {
-    currentTask.set(null)
-    goto(`/explore?map=${getUrl(-1)}`)
-  }
-
   function updateStatus() {
     return async ({ update }) => {
-      await update()
-      //exit()
+      await update({ reset: false })
+      if (!data.task.is_locked) exit()
     }
   }
 
   function doTutorial() {
     goto('/learn/' + (data?.user?.tutorial ? data.user.tutorial.next : 'login'))
+  }
+
+  function exit() {
+    currentTask.set(null)
+    goto(`/explore?map=${getUrl(-1)}`)
   }
 
   currentTask.set(data.task.id)
@@ -81,7 +79,7 @@
     <div class="h-full max-h-0">
       <div class="prose dark:prose-invert">
         <form use:enhance={updateStatus} method="POST" class="mb-4">
-          <h3>Catastro de {data.task.name} ({data.task.muncode})</h3>
+          <h3 class="mt-0">Catastro de {data.task.name} ({data.task.muncode})</h3>
           <p>
             Tarea tipo
             <span class="font-bold">{TASK_TYPE_VALUES[data.task.type]}</span>,
@@ -89,25 +87,33 @@
             <span class="font-bold {taskColor}">
               {TASK_DIFFICULTY_VALUES[data.task.difficulty]}</span>.
           </p>
+          bu: {data.task.bu_status} {data.task.bu_mapper?.id}<br/>
+          ad: {data.task.ad_status} {data.task.ad_mapper?.id}
+          {data.task.is_locked}
           {#if data.task.bu_status !== data.task.ad_status}
             <h4>Edificios:</h4>
           {/if}
           <TaskActions
             status={data.task.bu_status}
             user={data.user}
-            mapper={data.task.ad_mapper}
-            validator={data.task.ad_validator}
+            mapper={data.task.bu_mapper}
             task={data.task}
           />
-          {#if data.task.bu_status !== data.task.ad_status && !data.task.is_locked}
+          {#if data.task.bu_status !== data.task.ad_status}
             <h4>Direcciones:</h4>
             <TaskActions
               status={data.task.ad_status}
               user={data.user}
-              mapper={data.task.bu_mapper}
-              validator={data.task.bu_validator}
+              mapper={data.task.ad_mapper}
               task={data.task}
             />
+          {/if}
+          {#if data.task.undo_status}
+            <Button type="submit" name="undo_status" value={data.task.undo_status} color="alternative">
+              {TASK_UNDO_VALUES[data.task.undo_status]}
+            </Button>
+          {:else}
+            <Button on:click={exit} color="alternative">Seleccionar otra tarea</Button>
           {/if}
           {#if fixmes}
             <h5>Anotaciones:</h5>
@@ -125,41 +131,37 @@
               {/each}
             </ol>
           {/if}
-          {#if data.task.streets?.length}
-            <h5>Nombres de calle{haveStreetsToValidate ? ' por revisar' : ''}:</h5>
-            <ul class="mt-0">
-              {#each data.task.streets as street}
-                <li class="my-0">
-                    <a href="/explore/{data.task.muncode}/street/{street.cat_name}">
-                      {street.cat_name}
-                    </a>
-                  {street.validated ? 'Confirmado' : 'Pendiente'}
-                  </li>
-              {/each}
-            </ul>
-          {/if}
         </form>
         <form use:enhance={updateStatus} method="POST" class="mb-4">
+          bu: {data.task.bu_status}
+          ad: {data.task.ad_status}
           <Label>
-            Estado direcciones:
+            Estado:
             <Select
-              name="ad_status"
-              value={data.task.ad_status}
+              name="status"
               items={Object.entries(TASK_STATUS_VALUES).map(([value, name]) => ({ value, name }))}
               placeholder=""
               disabled={!isEditor}
             />
           </Label>
-          <Label>
-            Estado edificios:
-            <Select
-              name="bu_status"
-              value={data.task.bu_status}
-              items={Object.entries(TASK_STATUS_VALUES).map(([value, name]) => ({ value, name }))}
-              placeholder=""
-              disabled={!isEditor}
-            />
-          </Label>
+          <div class="flex space-x-8 mb-8">
+            <label>
+              <input
+                type="radio"
+                name="buildings"
+                value="true"
+              />
+              Edificios
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="addresses"
+                value="true"
+              />
+              Direcciones
+            </label>
+          </div>
           <Button on:click={exit} color="alternative">Cancelar</Button>
           {#if isEditor}
             <Button type="submit">Guardar</Button>
@@ -174,6 +176,12 @@
         bind:scrollImage 
         bind:viewImage
       /-->
+      {data.task.history?.length}
+      <ul>
+        {#each data.task.history as h}
+        <li>{h.date} {h.user} {h.action} bu:{h.buildings} ad:{h.addresses}</li>
+        {/each}
+      </ul>
     </div>
   </div>
 </div>

@@ -71,6 +71,8 @@ class Task(Resource):
             abort(403)
         data = request.json
         status = data.get('status')
+        undo_status = data.get('undo_status')
+        if undo_status: status = undo_status
         status = status and models.Task.Status[status].value
         addresses = data.get('addresses') == 'true'
         buildings = data.get('buildings') == 'true'
@@ -81,11 +83,10 @@ class Task(Resource):
             task.ad_status = status
         if buildings:
             task.bu_status = status
+        if undo_status:
+            action = models.TaskHistory.Action.LOCK_CANCELLED.value
         h = models.TaskHistory(
-            user=user,
-            action=action,
-            buildings=buildings,
-            addresses=addresses,
+            user=user, action=action, buildings=buildings, addresses=addresses,
         )
         task.history.append(h)
         models.db.session.commit()

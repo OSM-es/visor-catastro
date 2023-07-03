@@ -64,11 +64,13 @@ class Task(db.Model):
             'ad_status': Task.Status(self.ad_status).name,
             'bu_status': Task.Status(self.bu_status).name,
             'is_locked': self.is_locked(),
+            'undo_status': self.undo_status(),
             'owner': owner.asdict() if owner else None,
             'ad_mapper': ad_mapper.asdict() if ad_mapper else None,
             'bu_mapper': bu_mapper.asdict() if bu_mapper else None,
             'ad_validator': ad_validator.asdict() if ad_validator else None,
             'bu_validator': bu_validator.asdict() if bu_validator else None,
+            'history': [h.asdict() for h in self.history]
         }
 
     def is_locked(self):
@@ -83,13 +85,23 @@ class Task(db.Model):
     def last_action(self, target, *actions):
         i = len(self.history) - 1
         while (
-            i >= 0
-            and self.history[i].action not in actions
-            and not getattr(self.history[i], target)
+            i >= 0 and (
+                self.history[i].action not in actions
+                or not getattr(self.history[i], target)
+            )
         ):
             i -= 1
         if (i >= 0):
             return self.history[i]
+        return None
+
+    def undo_status(self):
+        if self.is_locked():
+            target = 'addresses' if self.history[-1].addresses else 'buildings'
+            last = self.last_action(target, *TaskHistory.status_change_actions)
+            if last:
+                return Task.Status.from_action(last.action).name
+            return Task.Status.READY.name
         return None
 
     @property
@@ -100,20 +112,20 @@ class Task(db.Model):
 
     @property
     def ad_mapper(self):
-        mapper = self.last_action('addresses', TaskHistory.Action.MAPPED)
+        mapper = self.last_action('addresses', TaskHistory.Action.MAPPED.value)
         return mapper and mapper.user
 
     @property
     def bu_mapper(self):
-        mapper = self.last_action('buildings', TaskHistory.Action.MAPPED)
+        mapper = self.last_action('buildings', TaskHistory.Action.MAPPED.value)
         return mapper and mapper.user
 
     @property
     def ad_validator(self):
         val = self.last_action(
             'addresses',
-            TaskHistory.Action.VALIDATED,
-            TaskHistory.Action.INVALIDATED,
+            TaskHistory.Action.VALIDATED.value,
+            TaskHistory.Action.INVALIDATED.value,
         )
         return val and val.user
 
@@ -121,8 +133,8 @@ class Task(db.Model):
     def bu_validator(self):
         val = self.last_action(
             'buildings',
-            TaskHistory.Action.VALIDATED,
-            TaskHistory.Action.INVALIDATED,
+            TaskHistory.Action.VALIDATED.value,
+            TaskHistory.Action.INVALIDATED.value,
         )
         return val and val.user
 

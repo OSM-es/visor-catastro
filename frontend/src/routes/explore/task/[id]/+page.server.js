@@ -14,8 +14,8 @@ export const actions = {
     const data = Object.fromEntries(formData)
 
     console.info(data)
-    // const result = await locals.api.put(
-    //   `task/${params.id}`, data, locals.user.token
-    // )
+    const result = await locals.api.put(
+      `task/${params.id}`, data, locals.user.token
+    )
   }
 }

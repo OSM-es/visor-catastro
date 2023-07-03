@@ -22,8 +22,15 @@ export const TASK_STATUS_VALUES = {
   MAPPED: 'Mapeada',
   LOCKED_FOR_VALIDATION: 'Validando',
   VALIDATED: 'Validada',
-  INVALIDATED: 'No válida',
+  INVALIDATED: 'Se necesita más mapeo',
   NEED_UPDATE: 'Necesita actualizar',
+}
+
+export const TASK_UNDO_VALUES = {
+  READY: 'No, detener mapeo',
+  MAPPED: 'Detener validación',
+  INVALIDATED: 'No, detener mapeo',
+  NEED_UPDATE: 'No, detener mapeo',
 }
 
 export const TASK_COLORS = {
