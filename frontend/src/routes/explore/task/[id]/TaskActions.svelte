@@ -11,18 +11,29 @@
 
   let streetsToValidate = task.streets?.filter(s => !s.validated) || []
   let newStatus
+  let addresses = streetsToValidate.length === 0
+  let buildings = true
   $: {
     if (status === 'LOCKED_FOR_VALIDATION') {
       newStatus = 'VALIDATED'
     }
   }
+  $: {
+    if (!buildings && !addresses) {
+      addresses = true
+      buildings = true
+    }
+  }
 </script>
 
-<input name="addresses" value={status === task.ad_status} hidden/>
-<input name="buildings" value={status === task.bu_status} hidden/>
+{#if status !== 'READY'}
+  <input name="addresses" value={status === task.ad_status} hidden/>
+  <input name="buildings" value={status === task.bu_status} hidden/>
+{:else if !task.streets.length || streetsToValidate.length}
+  <input name="addresses" value={addresses} hidden/>
+  <input name="buildings" value={buildings} hidden/>
+{/if}
 {#if status.startsWith('LOCKED_')}
-  {task.owner?.id}
-  {user?.id}
   {#if task.owner?.id !== user?.id}
     <p>
       Tarea
@@ -63,40 +74,49 @@
     </Button>
   {/if}
 {:else if status === 'READY'}
-  <p>ready</p>
   {#if task.streets?.length}
     <h5>Nombres de calle:</h5>
     <ul class="mt-0">
       {#each task.streets as street}
         <li class="my-0">
-            <a href="/explore/{task.muncode}/street/{street.cat_name}">
-              {street.cat_name}
-            </a>
+          <a href="/explore/{task.muncode}/street/{street.cat_name}">
+            {street.cat_name}
+          </a>
           {street.validated ? 'Confirmado' : 'Pendiente'}
-          </li>
+        </li>
       {/each}
     </ul>
-    {#if streetsToValidate}
-      <p>
+    {#if streetsToValidate.length}
+      <p class="text-danger-500">
         Falta revisar {streetsToValidate.length}
         {streetsToValidate.length > 1 ? 'nombres' : 'nombre'}
         para poder importar direcciones.
       </p>
+    {:else}
+      <p class="text-success-500">Revisión de nombres de calle completa.</p>
     {/if}
   {/if}
   <p>Voy a importar
-    <Checkbox name="buildings" checked>Edificios</Checkbox>
+    <Checkbox
+      name="buildings"
+      value="true"
+      bind:checked={buildings}
+      disabled={!task.streets.length || streetsToValidate.length}
+    >
+      Edificios
+    </Checkbox>
     <Checkbox
       name="addresses"
-      checked={streetsToValidate.length == 0}
-      disabled={streetsToValidate.length != 0}
+      value="true"
+      bind:checked={addresses}
+      disabled={!task.streets.length || streetsToValidate.length}
     >
-      Direcciones
+      Direcciones{!task.streets.length}
     </Checkbox>
   </p>
   <EditorButton {user} action={'validar'}>
-    <Button type="submit" name="status" value="LOCKED_FOR_VALIDATION" class="mr-4">
-      Valídala
+    <Button type="submit" name="status" value="LOCKED_FOR_MAPPING" class="mr-4">
+      Importar {buildings ? (addresses ? 'todo' : 'edificios') : 'direcciones'}
     </Button>
   </EditorButton>
 {:else if status === 'INVALIDATED'}

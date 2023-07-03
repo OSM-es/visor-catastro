@@ -79,7 +79,7 @@
     <div class="h-full max-h-0">
       <div class="prose dark:prose-invert">
         <form use:enhance={updateStatus} method="POST" class="mb-4">
-          <h3 class="mt-0">Catastro de {data.task.name} ({data.task.muncode})</h3>
+          <h3 class="mt-0">Catastro de {data.task.name} ({data.task.muncode}) · #{data.task.id}</h3>
           <p>
             Tarea tipo
             <span class="font-bold">{TASK_TYPE_VALUES[data.task.type]}</span>,
@@ -87,9 +87,6 @@
             <span class="font-bold {taskColor}">
               {TASK_DIFFICULTY_VALUES[data.task.difficulty]}</span>.
           </p>
-          bu: {data.task.bu_status} {data.task.bu_mapper?.id}<br/>
-          ad: {data.task.ad_status} {data.task.ad_mapper?.id}
-          {data.task.is_locked}
           {#if data.task.bu_status !== data.task.ad_status}
             <h4>Edificios:</h4>
           {/if}
@@ -115,8 +112,8 @@
           {:else}
             <Button on:click={exit} color="alternative">Seleccionar otra tarea</Button>
           {/if}
-          {#if fixmes}
-            <h5>Anotaciones:</h5>
+          {#if fixmes && data.task.bu_status !== 'VALIDATED'}
+            <h4>Anotaciones:</h4>
             <ol class="mt-0">
               {#each fixmes?.features as fixme}
                 <li class="my-0">
@@ -132,7 +129,7 @@
             </ol>
           {/if}
         </form>
-        <form use:enhance={updateStatus} method="POST" class="mb-4">
+        <!--form use:enhance={updateStatus} method="POST" class="mb-4">
           bu: {data.task.bu_status}
           ad: {data.task.ad_status}
           <Label>
@@ -168,14 +165,16 @@
           {:else}
             <Button on:click={doTutorial}>Completa el tutorial para editar</Button>
           {/if}
-        </form>
+        </form-->
       </div>
-      <!--FotosFachada
+      <div class="hidden">
+      <FotosFachada
         data={buildings.features}
         on:viewed={showBuilding}
         bind:scrollImage 
         bind:viewImage
-      /-->
+      />
+      </div>
       {data.task.history?.length}
       <ul>
         {#each data.task.history as h}
