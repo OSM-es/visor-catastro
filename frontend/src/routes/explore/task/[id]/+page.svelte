@@ -1,17 +1,19 @@
 <script>
-  import { Button, Select, Label } from 'flowbite-svelte'
+  import { Button } from 'flowbite-svelte'
   import { onMount } from 'svelte'
   import { goto } from '$app/navigation'
 	import { enhance } from '$app/forms'
   import { page } from '$app/stores'
 
-  import { TASK_TYPE_VALUES, TASK_DIFFICULTY_VALUES, TASK_STATUS_VALUES, TASK_UNDO_VALUES } from '$lib/config'
+  import { TASK_TYPE_VALUES, TASK_DIFFICULTY_VALUES, TASK_UNDO_VALUES } from '$lib/config'
   import FotosFachada from '$lib/components/FotosFachada.svelte'
   import Map from '$lib/components/maps/Map.svelte'
   import ConsLayer from '$lib/components/maps/ConsLayer.svelte'
   import FixmesLayer from '$lib/components/maps/FixmesLayer.svelte'
   import PartsLayer from '$lib/components/maps/PartsLayer.svelte'
   import StreetsLayer from '$lib/components/maps/StreetsLayer.svelte'
+  import Tabs from '$lib/components/tabs/Tabs.svelte'
+  import TabItem from '$lib/components/tabs/TabItem.svelte'
   import TaskActions from './TaskActions.svelte'
   import { currentTask } from '$lib/stores.js'
 
@@ -22,10 +24,9 @@
   let fixmes = data.task?.fixmes
   let scrollImage, viewImage
   let taskColor = 'text-success-500'
+  let tab = 'edicion'
   if (data.task.difficulty === 'MODERATE') taskColor = 'text-warning-500'
   if (data.task.difficulty === 'CHALLENGING') taskColor = 'text-danger-500'
-  
-  $: isEditor = data.user?.role && data.user.role != 'READ_ONLY'
   
   
   function centerMap(event) {
@@ -45,10 +46,6 @@
       await update({ reset: false })
       if (!data.task.is_locked) exit()
     }
-  }
-
-  function doTutorial() {
-    goto('/learn/' + (data?.user?.tutorial ? data.user.tutorial.next : 'login'))
   }
 
   function exit() {
@@ -75,18 +72,27 @@
       {#if fixmes}<FixmesLayer data={fixmes}/>{/if}
     </Map>
   </div>
-  <div class="md:max-w-md w-full flex-grow overflow-scroll px-4 pt-8 border-l-2 border-gray-200 dark:border-gray-600">
+  <div class="md:max-w-md w-full flex-grow overflow-scroll px-4 border-l-2 border-gray-200 dark:border-gray-600">
+    <div class="sticky top-0 z-10 bg-white dark:bg-neutral-900">
+      <div class="prose dark:prose-invert pt-4">
+        <h3>Catastro de {data.task.name} ({data.task.muncode}) · #{data.task.id}</h3>
+      </div>
+      <Tabs bind:tab>
+        <TabItem key={'edicion'}>Edición</TabItem>
+        <TabItem key={'fotos'}>Fotos</TabItem>
+        <TabItem key={'historial'}>Historial</TabItem>
+      </Tabs>
+    </div>
     <div class="h-full max-h-0">
-      <div class="prose dark:prose-invert">
+      <div class:hidden={tab !== 'edicion'} class="prose dark:prose-invert pt-4">
+        <p>
+          Tarea tipo
+          <span class="font-bold">{TASK_TYPE_VALUES[data.task.type]}</span>,
+          dificultad
+          <span class="font-bold {taskColor}">
+            {TASK_DIFFICULTY_VALUES[data.task.difficulty]}</span>.
+        </p>
         <form use:enhance={updateStatus} method="POST" class="mb-4">
-          <h3 class="mt-0">Catastro de {data.task.name} ({data.task.muncode}) · #{data.task.id}</h3>
-          <p>
-            Tarea tipo
-            <span class="font-bold">{TASK_TYPE_VALUES[data.task.type]}</span>,
-            dificultad
-            <span class="font-bold {taskColor}">
-              {TASK_DIFFICULTY_VALUES[data.task.difficulty]}</span>.
-          </p>
           {#if data.task.bu_status !== data.task.ad_status}
             <h4>Edificios:</h4>
           {/if}
@@ -129,58 +135,60 @@
             </ol>
           {/if}
         </form>
-        <!--form use:enhance={updateStatus} method="POST" class="mb-4">
-          bu: {data.task.bu_status}
-          ad: {data.task.ad_status}
-          <Label>
-            Estado:
-            <Select
-              name="status"
-              items={Object.entries(TASK_STATUS_VALUES).map(([value, name]) => ({ value, name }))}
-              placeholder=""
-              disabled={!isEditor}
+      </div>
+      <div class:hidden={tab !== 'fotos'}>
+        <FotosFachada
+          data={buildings.features}
+          on:viewed={showBuilding}
+          bind:scrollImage 
+          bind:viewImage
+        />
+      </div>
+      <div class:hidden={tab !== 'historial'} class="prose dark:prose-invert">
+        {data.task.history?.length}
+        <ul>
+          {#each data.task.history as h}
+          <li>{h.date} {h.user} {h.action} bu:{h.buildings} ad:{h.addresses}</li>
+          {/each}
+        </ul>
+      </div>
+      <!--form use:enhance={updateStatus} method="POST" class="mb-4">
+        bu: {data.task.bu_status}
+        ad: {data.task.ad_status}
+        <Label>
+          Estado:
+          <Select
+            name="status"
+            items={Object.entries(TASK_STATUS_VALUES).map(([value, name]) => ({ value, name }))}
+            placeholder=""
+            disabled={!isEditor}
+          />
+        </Label>
+        <div class="flex space-x-8 mb-8">
+          <label>
+            <input
+              type="radio"
+              name="buildings"
+              value="true"
             />
-          </Label>
-          <div class="flex space-x-8 mb-8">
-            <label>
-              <input
-                type="radio"
-                name="buildings"
-                value="true"
-              />
-              Edificios
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="addresses"
-                value="true"
-              />
-              Direcciones
-            </label>
-          </div>
-          <Button on:click={exit} color="alternative">Cancelar</Button>
-          {#if isEditor}
-            <Button type="submit">Guardar</Button>
-          {:else}
-            <Button on:click={doTutorial}>Completa el tutorial para editar</Button>
-          {/if}
-        </form-->
-      </div>
-      <div class="hidden">
-      <FotosFachada
-        data={buildings.features}
-        on:viewed={showBuilding}
-        bind:scrollImage 
-        bind:viewImage
-      />
-      </div>
-      {data.task.history?.length}
-      <ul>
-        {#each data.task.history as h}
-        <li>{h.date} {h.user} {h.action} bu:{h.buildings} ad:{h.addresses}</li>
-        {/each}
-      </ul>
+            Edificios
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="addresses"
+              value="true"
+            />
+            Direcciones
+          </label>
+        </div>
+        <Button on:click={exit} color="alternative">Cancelar</Button>
+        {#if isEditor}
+          <Button type="submit">Guardar</Button>
+        {:else}
+          <Button on:click={doTutorial}>Completa el tutorial para editar</Button>
+        {/if}
+      </form-->
     </div>
   </div>
 </div>
