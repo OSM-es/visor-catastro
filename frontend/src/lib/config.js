@@ -18,31 +18,24 @@ export const TASK_DIFFICULTY_VALUES = {
 
 export const TASK_STATUS_VALUES = {
   READY: 'Disponible',
-  LOCKED_FOR_MAPPING: 'Mapeando',
   MAPPED: 'Mapeada',
-  LOCKED_FOR_VALIDATION: 'Validando',
   VALIDATED: 'Validada',
   INVALIDATED: 'Se necesita más mapeo',
   NEED_UPDATE: 'Necesita actualizar',
-}
-
-export const TASK_UNDO_VALUES = {
-  READY: 'No, detener mapeo',
-  MAPPED: 'Detener validación',
-  INVALIDATED: 'No, detener mapeo',
-  NEED_UPDATE: 'No, detener mapeo',
+  MAPPING: 'Mapeando',
+  VALIDATION: 'Validando',
 }
 
 export const TASK_COLORS = {
   READY: '#FFFFFF66',
-  //READY_FOR_MAPPING: '#ADFF2F66',
-  LOCKED_FOR_MAPPING: '#80808099',
   MAPPED: '#1E90FF99',
-  LOCKED_FOR_VALIDATION: '#80808099',
   VALIDATED: '#00800099',
   INVALIDATED: '#FF450099',
   NEED_UPDATE: '#FFD70099',
 }
+
+export const TASK_LOCKED_COLOR = '#80808099'
+
 
 // https://sashamaps.net/docs/resources/20-colors/
 export const STREET_COLORS = [

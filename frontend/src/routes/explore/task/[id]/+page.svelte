@@ -5,7 +5,7 @@
 	import { enhance } from '$app/forms'
   import { page } from '$app/stores'
 
-  import { TASK_TYPE_VALUES, TASK_DIFFICULTY_VALUES, TASK_UNDO_VALUES } from '$lib/config'
+  import { TASK_TYPE_VALUES, TASK_DIFFICULTY_VALUES } from '$lib/config'
   import FotosFachada from '$lib/components/FotosFachada.svelte'
   import Map from '$lib/components/maps/Map.svelte'
   import ConsLayer from '$lib/components/maps/ConsLayer.svelte'
@@ -44,7 +44,7 @@
   function updateStatus() {
     return async ({ update }) => {
       await update({ reset: false })
-      if (!data.task.is_locked) exit()
+      if (!data.task.lock) exit()
     }
   }
 
@@ -111,9 +111,9 @@
               task={data.task}
             />
           {/if}
-          {#if data.task.undo_status}
-            <Button type="submit" name="undo_status" value={data.task.undo_status} color="alternative">
-              {TASK_UNDO_VALUES[data.task.undo_status]}
+          {#if data.task.lock}
+            <Button type="submit" name="lock" value="UNLOCK" color="alternative">
+              {data.task.lock.text === 'MAPPING' ? 'No, detener mapeo' : 'Detener validación'}
             </Button>
           {:else}
             <Button on:click={exit} color="alternative">Seleccionar otra tarea</Button>
@@ -148,7 +148,7 @@
         {data.task.history?.length}
         <ul>
           {#each data.task.history as h}
-          <li>{h.date} {h.user} {h.action} bu:{h.buildings} ad:{h.addresses}</li>
+          <li>{h.date} {h.user} {h.action} {h.text} bu:{h.buildings} ad:{h.addresses}</li>
           {/each}
         </ul>
       </div>

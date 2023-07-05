@@ -4,7 +4,7 @@
   import { goto } from '$app/navigation'
   import { GeoJSON } from 'svelte-leafletjs'
 
-  import { PUBLIC_API_URL, TASK_COLORS, TASK_DIFFICULTY_VALUES, TASK_STATUS_VALUES, TASK_TYPE_VALUES } from '$lib/config'
+  import { PUBLIC_API_URL, TASK_COLORS, TASK_LOCKED_COLOR, TASK_DIFFICULTY_VALUES, TASK_STATUS_VALUES, TASK_TYPE_VALUES } from '$lib/config'
   import Map from '$lib/components/maps/Map.svelte'
 
   export let data
@@ -87,7 +87,7 @@
     let style
     if (target(zoom) === 'tasks') {
       style = { 
-        fillColor: TASK_COLORS[feature.properties.status],
+        fillColor: feature.properties.lock_id ? TASK_LOCKED_COLOR : TASK_COLORS[feature.properties.status],
         fillOpacity: feature.properties.bu_status == feature.properties.ad_status ? 1 : 0.5,
         dashArray: null,
         weight: 1,
@@ -108,6 +108,16 @@
     return style
   }
 
+  function getStatus(feat) {
+    if (feat.lock_id) {
+      return 'Bloqueada'
+    } else if (feat.bu_status === feat.ad_status) {
+      return TASK_STATUS_VALUES[feat.bu_status]
+    } else {
+      return `${TASK_STATUS_VALUES[feat.bu_status]} (edificios), ${TASK_STATUS_VALUES[feat.ad_status]} (direcciones)`
+    }
+  }
+
   function featInfo(feat) {
     let info = ''
     if (feat.provcode) {
@@ -119,8 +129,7 @@
       info += `
         <li>Tipo: ${TASK_TYPE_VALUES[feat.type]}</li>
         <li>Dificultad: ${TASK_DIFFICULTY_VALUES[feat.difficulty]}</li>
-        <li>Estado edificios: ${TASK_STATUS_VALUES[feat.bu_status]}</li>
-        <li>Estado direcciones: ${TASK_STATUS_VALUES[feat.ad_status]}</li>
+        <li>Estado: ${getStatus(feat)}</li>
       `
     }
     info += '</ul>'

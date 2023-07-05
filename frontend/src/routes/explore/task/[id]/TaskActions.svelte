@@ -10,14 +10,9 @@
   export let task
 
   let streetsToValidate = task.streets?.filter(s => !s.validated) || []
-  let newStatus
+  let validationStatus = 'VALIDATED'
   let addresses = streetsToValidate.length === 0
   let buildings = true
-  $: {
-    if (status === 'LOCKED_FOR_VALIDATION') {
-      newStatus = 'VALIDATED'
-    }
-  }
   $: {
     if (!buildings && !addresses) {
       addresses = true
@@ -33,20 +28,20 @@
   <input name="addresses" value={addresses} hidden/>
   <input name="buildings" value={buildings} hidden/>
 {/if}
-{#if status.startsWith('LOCKED_')}
-  {#if task.owner?.id !== user?.id}
+{#if task.lock}
+  {#if ![task.lock.user.osm_id, task.lock.user.import_id].includes(user?.id)}
     <p>
       Tarea
       <span class="font-bold text-danger-500">bloqueada</span>, otro usuario la está
-      <span class="lowercase">{TASK_STATUS_VALUES[task.is_locked]}</span>.
+      <span class="lowercase">{TASK_STATUS_VALUES[task.lock.text]}</span>.
     </p>
-  {:else if status === 'LOCKED_FOR_MAPPING'}
+  {:else if task.lock.text === 'MAPPING'}
     <p>TODO: Aquí faltan enlaces para descargar el archivo de la tarea</p>
     <p>¿Esta tarea está completamente mapeada?</p>
     <Button type="submit" name="status" value="MAPPED" class="mr-4">
       Si, guardar
     </Button>
-  {:else if status === 'LOCKED_FOR_VALIDATION'}
+  {:else if task.lock.text === 'VALIDATION'}
     <p>TODO: Aquí faltan enlaces para descargar el archivo de la tarea,
       y el área.
     </p>
@@ -56,7 +51,7 @@
         type="radio"
         name="status"
         value="VALIDATED"
-        bind:group={newStatus}
+        bind:group={validationStatus}
       >
         Si
       </Radio>
@@ -64,13 +59,13 @@
         type="radio"
         name="status"
         value="INVALIDATED"
-        bind:group={newStatus}
+        bind:group={validationStatus}
       >
         No
     </Radio>
     </div>
     <Button type="submit" class="mr-4">
-      {newStatus === 'VALIDATED' ? 'Validar' : 'Invalidar' }
+      {validationStatus === 'VALIDATED' ? 'Validar' : 'Invalidar' }
     </Button>
   {/if}
 {:else if status === 'READY'}
@@ -79,7 +74,7 @@
     <ul class="mt-0">
       {#each task.streets as street}
         <li class="my-0">
-          <a href="/explore/{task.muncode}/street/{street.cat_name}">
+          <a href="/explore/{task.muncode}/street/{street.cat_name}" class:font-normal={street.validated}>
             {street.cat_name}
           </a>
           {street.validated ? 'Confirmado' : 'Pendiente'}
@@ -111,25 +106,25 @@
       bind:checked={addresses}
       disabled={!task.streets.length || streetsToValidate.length}
     >
-      Direcciones{!task.streets.length}
+      Direcciones
     </Checkbox>
   </p>
   <EditorButton {user} action={'validar'}>
-    <Button type="submit" name="status" value="LOCKED_FOR_MAPPING" class="mr-4">
+    <Button type="submit" name="lock" value="MAPPING" class="mr-4">
       Importar {buildings ? (addresses ? 'todo' : 'edificios') : 'direcciones'}
     </Button>
   </EditorButton>
 {:else if status === 'INVALIDATED'}
-  <p>need mor mapping</p>
+  <p>TODO: need mor mapping</p>
 {:else if status === 'MAPPED'}
   <p>
     Tarea <span class="text-success-500 font-bold">
       mapeada</span>{#if user && user.id === mapper?.id},
       otro usuario debe validarla.{/if}
   </p>
-  {#if !user || (user?.id !== mapper?.id && !task.is_locked)}
+  {#if !user || (user?.id !== mapper?.id && !task.lock)}
     <EditorButton {user} action={'validar'}>
-      <Button type="submit" name="status" value="LOCKED_FOR_VALIDATION" class="mr-4">
+      <Button type="submit" name="lock" value="VALIDATION" class="mr-4">
         Valídala
       </Button>
     </EditorButton>

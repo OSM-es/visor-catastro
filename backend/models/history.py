@@ -1,14 +1,33 @@
+from datetime import datetime
 from enum import Enum
 
+from sqlalchemy import column, func, or_
+from sqlalchemy.orm import declarative_mixin, declared_attr
 from sqlalchemy.sql import expression
 
-from models import db
+from models import db, OsmUser
+
+TASK_LOCK_TIMEOUT = 86400
 
 
-class History(db.Model):
+class HistoryMixin:
     id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.String, nullable=False)
     date = db.Column(db.DateTime, server_default=db.func.now(), index=True)
+
+
+@declarative_mixin
+class TaskHistoryMixin:
+    __table_args__ = (
+        db.CheckConstraint(or_(column('buildings'), column('addresses')), name='ck_bd_or_ad'),
+    )
+
+    text = db.Column(db.String)
+    buildings = db.Column(db.Boolean, nullable=False)
+    addresses = db.Column(db.Boolean, nullable=False)
+
+
+class History(HistoryMixin, db.Model):
+    type = db.Column(db.String, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('osm_user.id'), nullable=False)
     user = db.relationship('OsmUser', back_populates='history')
     action = db.Column(db.Integer, nullable=False)
@@ -20,38 +39,22 @@ class History(db.Model):
         return self.task if isinstance(self, TaskHistory) else self.street
 
 
-class TaskHistory(History):
+class TaskHistory(TaskHistoryMixin, History):
     class Action(Enum):
-        READY = 0
-        LOCKED_FOR_MAPPING = 1
-        MAPPED = 2
-        LOCKED_FOR_VALIDATION = 3
-        VALIDATED = 4
-        INVALIDATED = 5
-        NEED_UPDATE = 6
-        LOCK_CANCELLED = 7
+        LOCKED = 1
+        STATE_CHANGE = 2
+        COMMENT = 3
+        UNLOCKED = 4
+        AUTO_UNLOCKED = 5
+        EXTENDED = 6
 
         @staticmethod
         def from_status(status):
             return TaskHistory.Action(status)
 
-    lock_actions = [
-        Action.LOCKED_FOR_MAPPING.value,
-        Action.LOCKED_FOR_VALIDATION.value,
-    ]
-
-    status_change_actions = [
-        Action.READY.value,
-        Action.MAPPED.value,
-        Action.INVALIDATED.value,
-        Action.NEED_UPDATE.value,
-    ]
-
     id = db.Column(db.Integer, db.ForeignKey('history.id'), primary_key=True)
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
     task = db.relationship('Task', back_populates='history')
-    buildings = db.Column(db.Boolean, nullable=False, server_default=expression.false())
-    addresses = db.Column(db.Boolean, nullable=False, server_default=expression.false())
 
     __mapper_args__ = {'polymorphic_identity': 'TH'}
 
@@ -60,9 +63,48 @@ class TaskHistory(History):
             'date': self.date.isoformat(),
             'user': self.user.display_name,
             'action': TaskHistory.Action(self.action).name,
+            'text': self.text,
             'addresses': self.addresses,
             'buildings': self.buildings,
         }
+
+
+class TaskLock(HistoryMixin, TaskHistoryMixin, db.Model):
+    class Action(Enum):
+        UNLOCK = 0
+        MAPPING = 1
+        VALIDATION = 2
+
+    timeout = db.Column(db.Integer, nullable=False, default=TASK_LOCK_TIMEOUT)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, unique=True)
+    user = db.relationship('User', back_populates='lock')
+    task = db.relationship('Task', back_populates='lock', uselist=False)
+
+    def asdict(self):
+        return {
+            'date': self.date.isoformat(),
+            'user': self.user.asdict(),
+            'text': self.text,
+            'addresses': self.addresses,
+            'buildings': self.buildings,
+        }
+
+    @staticmethod
+    def update_locks():
+        timeout = func.make_interval(0, 0, 0, 0, 0, 0, TaskLock.timeout)
+        expired = TaskLock.query.filter(datetime.now() - TaskLock.date > timeout)
+        for lock in expired.all():
+            h = TaskHistory(
+                user=OsmUser.system_bot(),
+                action=TaskHistory.Action.AUTO_UNLOCKED.value,
+                text=lock.text,
+                buildings=lock.buildings,
+                addresses=lock.addresses,
+            )
+            lock.task.history.append(h)
+            db.session.delete(lock)
+            db.session.commit()
+
 
 class StreetHistory(History):
     class Action(Enum):

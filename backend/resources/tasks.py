@@ -22,6 +22,7 @@ class Tasks(Resource):
         if len(bounds) == 4:
             bb = f"LINESTRING({bounds[0]} {bounds[1]}, {bounds[2]} {bounds[3]})"
             q = q.filter(models.Task.geom.intersects(bb))
+        models.TaskLock.update_locks()
         sql = q.statement
         df = geopandas.GeoDataFrame.from_postgis(sql=sql, con=models.db.get_engine())
         get_status = lambda v: models.Task.Status(v).name
@@ -67,29 +68,24 @@ class Task(Resource):
         if not task:
             abort(404)
         user = auth.current_user()
-        if task.is_locked() and task.owner != user:
-            abort(403)
         data = request.json
         status = data.get('status')
-        undo_status = data.get('undo_status')
-        if undo_status: status = undo_status
-        status = status and models.Task.Status[status].value
+        status = status and models.Task.Status[status]
+        lock = data.get('lock')
+        lock = lock and models.TaskLock.Action[lock]
         addresses = data.get('addresses') == 'true'
         buildings = data.get('buildings') == 'true'
-        action = models.TaskHistory.Action.from_status(status).value
-        if not addresses and not buildings:
+        try:
+            if lock == models.TaskLock.Action.UNLOCK:
+                task.unlock(user)
+            elif lock:
+                task.set_lock(user, lock, buildings, addresses)
+            else:
+                task.change_status(user, status, buildings, addresses)
+        except PermissionError:
+            abort(403)
+        except ValueError:
             abort(400)
-        if addresses:
-            task.ad_status = status
-        if buildings:
-            task.bu_status = status
-        if undo_status:
-            action = models.TaskHistory.Action.LOCK_CANCELLED.value
-        h = models.TaskHistory(
-            user=user, action=action, buildings=buildings, addresses=addresses,
-        )
-        task.history.append(h)
-        models.db.session.commit()
 
 
 def isAddr(feature):

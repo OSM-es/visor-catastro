@@ -84,9 +84,5 @@ class StreetLock(Resource):
     def delete(self, mun_code, cat_name):
         user = auth.current_user()
         street = models.Street.get_by_name(mun_code, cat_name)
-        print(mun_code, cat_name)
-        print(user)
-        print(street)
-        print(street.owner)
         if street.owner == user:
             street.unlock()

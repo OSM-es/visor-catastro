@@ -25,6 +25,15 @@ class OsmUser(db.Model):
             'user': self.user.asdict() if self.user else None,
         }
 
+    @staticmethod
+    def system_bot():
+        user = OsmUser.query.get(0)
+        if not user:
+            user = OsmUser(id=0, display_name='SystemBot')
+            db.session.add(user)
+            db.session.commit()
+        return user
+
 
 class User(db.Model):
     __table_args__ = (
@@ -47,6 +56,7 @@ class User(db.Model):
     import_id = db.Column(db.Integer, db.ForeignKey('osm_user.id'), nullable=True)
     osm_user = db.relationship('OsmUser', foreign_keys=osm_id, back_populates='user')
     import_user = db.relationship('OsmUser', foreign_keys=import_id, back_populates='user')
+    lock = db.relationship('TaskLock', back_populates='user', uselist=False)
 
     def asdict(self):
         return {
@@ -56,3 +66,4 @@ class User(db.Model):
             'osm_id': self.osm_id,
             'import_id': self.import_id,
         }
+
