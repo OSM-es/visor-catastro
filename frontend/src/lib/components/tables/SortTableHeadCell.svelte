@@ -29,12 +29,12 @@
     </div>
     {#if $table.key === key}
       {#if $table.direction === 1}
-        <ArrowSmallUp size="14"/>
+        <ArrowSmallUp size="14" class="shrink-0"/>
       {:else}
-        <ArrowSmallDown size="14"/>
+        <ArrowSmallDown size="14" class="shrink-0"/>
       {/if}
     {:else}
-      <ArrowsUpDown size="14"/>
+      <ArrowsUpDown size="14" class="shrink-0"/>
     {/if}
   </div>
 </TableHeadCell>
