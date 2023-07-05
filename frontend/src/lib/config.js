@@ -24,6 +24,11 @@ export const TASK_STATUS_VALUES = {
   NEED_UPDATE: 'Necesita actualizar',
 }
 
+export const TASK_LOCK_VALUES = {
+  MAPPING: 'mapeando',
+  VALIDATION: 'validando',
+}
+
 export const TASK_COLORS = {
   READY: '#FFFFFF66',
   MAPPED: '#1E90FF99',

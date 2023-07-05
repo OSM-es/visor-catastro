@@ -1,14 +1,14 @@
 <script>
   import { Button, Checkbox, Radio } from 'flowbite-svelte'
 
-  import { TASK_STATUS_VALUES } from '$lib/config'
+  import { TASK_LOCK_VALUES } from '$lib/config'
   import EditorButton from './EditorButton.svelte'
 
   export let status
   export let user
   export let mapper
   export let task
-
+console.info(task.lock)
   let streetsToValidate = task.streets?.filter(s => !s.validated) || []
   let validationStatus = 'VALIDATED'
   let addresses = !['MAPPED', 'VALIDATED'].includes(task.ad_status) && streetsToValidate.length === 0
@@ -27,7 +27,7 @@
     <p>
       Tarea
       <span class="font-bold text-danger-500">bloqueada</span>, otro usuario la está
-      <span class="lowercase">{TASK_STATUS_VALUES[task.lock.text]}</span>.
+      {TASK_LOCK_VALUES[task.lock.text]}.
     </p>
   {:else if task.lock.text === 'MAPPING'}
     <p>TODO: Aquí faltan enlaces para descargar el archivo de la tarea</p>
@@ -108,7 +108,7 @@
     </Button>
   </EditorButton>
 {:else if status === 'INVALIDATED'}
-  <p>TODO: need mor mapping</p>
+  <p>TODO: need more mapping</p>
 {:else if status === 'MAPPED'}
   <p>
     Tarea <span class="text-success-500 font-bold">

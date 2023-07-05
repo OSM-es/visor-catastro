@@ -110,7 +110,7 @@
               task={data.task}
             />
           {/if}
-          {#if data.task.lock}
+          {#if data.user && data.task.lock}
             <Button type="submit" name="lock" value="UNLOCK" color="alternative">
               {data.task.lock.text === 'MAPPING' ? 'No, detener mapeo' : 'Detener validación'}
             </Button>

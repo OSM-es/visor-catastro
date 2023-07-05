@@ -61,7 +61,7 @@ class Task(Resource):
         data['parts'] = {'type': geojson['type'], 'features': parts}
         data['osmStreets'] = osm2geojson.xml2geojson(getOsmStreets(bb))
         data['streets'] = get_streets(buildings)
-        data['currentLock'] = user.user.lock.task.id if user.user and user.user.lock else None
+        data['currentLock'] = user.user.lock.task.id if user and user.user and user.user.lock else None
         return data
     
     @auth.login_required(role=[models.User.Role.MAPPER, models.User.Role.ADMIN])
