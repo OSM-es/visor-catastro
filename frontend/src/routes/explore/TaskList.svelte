@@ -67,8 +67,8 @@
           {/if}
           <TableBodyCell {tdClass}>{TASK_TYPE_VALUES[task.type]}</TableBodyCell>
           <TableBodyCell {tdClass}>{TASK_DIFFICULTY_VALUES[task.difficulty]}</TableBodyCell>
-          <TableBodyCell {tdClass}>{TASK_STATUS_VALUES[task.bu_status]}</TableBodyCell>
-          <TableBodyCell {tdClass}>{TASK_STATUS_VALUES[task.ad_status]}</TableBodyCell>
+          <TableBodyCell {tdClass}>{task.lock_id ? 'Bloqueada' : TASK_STATUS_VALUES[task.bu_status]}</TableBodyCell>
+          <TableBodyCell {tdClass}>{task.lock_id ? 'Bloqueada' : TASK_STATUS_VALUES[task.ad_status]}</TableBodyCell>
         </tr>
       {/each}
     </TableBody>

@@ -22,8 +22,6 @@ export const TASK_STATUS_VALUES = {
   VALIDATED: 'Validada',
   INVALIDATED: 'Se necesita más mapeo',
   NEED_UPDATE: 'Necesita actualizar',
-  MAPPING: 'Mapeando',
-  VALIDATION: 'Validando',
 }
 
 export const TASK_COLORS = {
