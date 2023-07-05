@@ -15,7 +15,6 @@
   let buildings = !['MAPPED', 'VALIDATED'].includes(task.bu_status)
   const canSelectImport = task.streets.length && !streetsToValidate.length && task.ad_status == task.bu_status
 </script>
-
 {#if status !== 'READY'}
   <input name="addresses" value={status === task.ad_status} hidden/>
   <input name="buildings" value={status === task.bu_status} hidden/>
@@ -97,7 +96,7 @@
       </Checkbox>
     </p>
   {/if}
-  <EditorButton {user} action={'importar'}>
+  <EditorButton {user} {task} action={'importar'}>
     <Button
       type="submit"
       name="lock"
@@ -117,7 +116,7 @@
       otro usuario debe validarla.{/if}
   </p>
   {#if !user || (![mapper.osm_id, mapper.import_id].includes(user?.id) && !task.lock)}
-    <EditorButton {user} action={'validar'}>
+    <EditorButton {user} {task} action={'validar'}>
       <Button type="submit" name="lock" value="VALIDATION" class="mr-4">
         Valídala
       </Button>

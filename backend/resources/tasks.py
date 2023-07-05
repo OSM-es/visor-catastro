@@ -7,7 +7,7 @@ import geopandas
 import osm2geojson
 
 import models
-from auth import auth
+from auth import auth, get_current_user
 from config import Config
 from overpass import getOsmStreets
 
@@ -42,6 +42,7 @@ class Task(Resource):
         task = models.Task.query.get(id)
         if not task:
             abort(404)
+        user = get_current_user()
         fn = UPDATE + task.muncode + '/tasks/' + task.localId + '.osm.gz'
         with gzip.open(fn) as fo:
             xml = fo.read()
@@ -60,6 +61,7 @@ class Task(Resource):
         data['parts'] = {'type': geojson['type'], 'features': parts}
         data['osmStreets'] = osm2geojson.xml2geojson(getOsmStreets(bb))
         data['streets'] = get_streets(buildings)
+        data['currentLock'] = user.user.lock.task.id if user.user and user.user.lock else None
         return data
     
     @auth.login_required(role=[models.User.Role.MAPPER, models.User.Role.ADMIN])
@@ -83,8 +85,10 @@ class Task(Resource):
             else:
                 task.change_status(user, status, buildings, addresses)
         except PermissionError:
+            print('per')
             abort(403)
         except ValueError:
+            print('val')
             abort(400)
 
 

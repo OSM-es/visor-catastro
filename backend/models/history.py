@@ -87,6 +87,7 @@ class TaskLock(HistoryMixin, TaskHistoryMixin, db.Model):
             'text': self.text,
             'addresses': self.addresses,
             'buildings': self.buildings,
+            'task': self.task.id,
         }
 
     @staticmethod

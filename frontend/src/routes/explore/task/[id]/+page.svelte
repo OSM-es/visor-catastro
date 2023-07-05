@@ -28,7 +28,6 @@
   if (data.task.difficulty === 'MODERATE') taskColor = 'text-warning-500'
   if (data.task.difficulty === 'CHALLENGING') taskColor = 'text-danger-500'
   
-  
   function centerMap(event) {
     const point = event.target.attributes.href.value.split(',')
     map.getMap().panTo([point[1], point[0]])
@@ -115,7 +114,7 @@
             <Button type="submit" name="lock" value="UNLOCK" color="alternative">
               {data.task.lock.text === 'MAPPING' ? 'No, detener mapeo' : 'Detener validación'}
             </Button>
-          {:else}
+          {:else if !data.task.currentLock}
             <Button on:click={exit} color="alternative">Seleccionar otra tarea</Button>
           {/if}
           {#if fixmes && data.task.bu_status !== 'VALIDATED'}
@@ -152,43 +151,6 @@
           {/each}
         </ul>
       </div>
-      <!--form use:enhance={updateStatus} method="POST" class="mb-4">
-        bu: {data.task.bu_status}
-        ad: {data.task.ad_status}
-        <Label>
-          Estado:
-          <Select
-            name="status"
-            items={Object.entries(TASK_STATUS_VALUES).map(([value, name]) => ({ value, name }))}
-            placeholder=""
-            disabled={!isEditor}
-          />
-        </Label>
-        <div class="flex space-x-8 mb-8">
-          <label>
-            <input
-              type="radio"
-              name="buildings"
-              value="true"
-            />
-            Edificios
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="addresses"
-              value="true"
-            />
-            Direcciones
-          </label>
-        </div>
-        <Button on:click={exit} color="alternative">Cancelar</Button>
-        {#if isEditor}
-          <Button type="submit">Guardar</Button>
-        {:else}
-          <Button on:click={doTutorial}>Completa el tutorial para editar</Button>
-        {/if}
-      </form-->
     </div>
   </div>
 </div>
