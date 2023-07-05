@@ -58,8 +58,8 @@ class Task(db.Model):
             'ad_status': Task.Status(self.ad_status).name,
             'bu_status': Task.Status(self.bu_status).name,
             'lock': self.lock.asdict() if self.lock else None,
-            'ad_mapper': self.ad_mapper.asdict() if self.ad_mapper else None,
-            'bu_mapper': self.bu_mapper.asdict() if self.bu_mapper else None,
+            'ad_mapper': self.ad_mapper.user.asdict() if self.ad_mapper else None,
+            'bu_mapper': self.bu_mapper.user.asdict() if self.bu_mapper else None,
             'history': [h.asdict() for h in self.history]
         }
 

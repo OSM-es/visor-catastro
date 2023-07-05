@@ -11,20 +11,15 @@
 
   let streetsToValidate = task.streets?.filter(s => !s.validated) || []
   let validationStatus = 'VALIDATED'
-  let addresses = streetsToValidate.length === 0
-  let buildings = true
-  $: {
-    if (!buildings && !addresses) {
-      addresses = true
-      buildings = true
-    }
-  }
+  let addresses = !['MAPPED', 'VALIDATED'].includes(task.ad_status) && streetsToValidate.length === 0
+  let buildings = !['MAPPED', 'VALIDATED'].includes(task.bu_status)
+  const canSelectImport = task.streets.length && !streetsToValidate.length && task.ad_status == task.bu_status
 </script>
 
 {#if status !== 'READY'}
   <input name="addresses" value={status === task.ad_status} hidden/>
   <input name="buildings" value={status === task.bu_status} hidden/>
-{:else if !task.streets.length || streetsToValidate.length}
+{:else if !canSelectImport}
   <input name="addresses" value={addresses} hidden/>
   <input name="buildings" value={buildings} hidden/>
 {/if}
@@ -91,27 +86,26 @@
       <p class="text-success-500">Revisión de nombres de calle completa.</p>
     {/if}
   {/if}
-  <p>Voy a importar
-    <Checkbox
-      name="buildings"
-      value="true"
-      bind:checked={buildings}
-      disabled={!task.streets.length || streetsToValidate.length}
+  {#if canSelectImport}
+    <p>
+      Voy a importar
+      <Checkbox name="buildings" value="true" bind:checked={buildings}>
+        Edificios
+      </Checkbox>
+      <Checkbox name="addresses" value="true" bind:checked={addresses}>
+        Direcciones
+      </Checkbox>
+    </p>
+  {/if}
+  <EditorButton {user} action={'importar'}>
+    <Button
+      type="submit"
+      name="lock"
+      value="MAPPING"
+      class="mr-4"
+      disabled={!buildings && !addresses}
     >
-      Edificios
-    </Checkbox>
-    <Checkbox
-      name="addresses"
-      value="true"
-      bind:checked={addresses}
-      disabled={!task.streets.length || streetsToValidate.length}
-    >
-      Direcciones
-    </Checkbox>
-  </p>
-  <EditorButton {user} action={'validar'}>
-    <Button type="submit" name="lock" value="MAPPING" class="mr-4">
-      Importar {buildings ? (addresses ? 'todo' : 'edificios') : 'direcciones'}
+      Importar {buildings ? (addresses ? 'todo' : 'edificios') : (addresses ? 'direcciones' : '')}
     </Button>
   </EditorButton>
 {:else if status === 'INVALIDATED'}
@@ -119,10 +113,10 @@
 {:else if status === 'MAPPED'}
   <p>
     Tarea <span class="text-success-500 font-bold">
-      mapeada</span>{#if user && user.id === mapper?.id},
+      mapeada</span>{#if user && [mapper.osm_id, mapper.import_id].includes(user?.id)},
       otro usuario debe validarla.{/if}
   </p>
-  {#if !user || (user?.id !== mapper?.id && !task.lock)}
+  {#if !user || (![mapper.osm_id, mapper.import_id].includes(user?.id) && !task.lock)}
     <EditorButton {user} action={'validar'}>
       <Button type="submit" name="lock" value="VALIDATION" class="mr-4">
         Valídala
