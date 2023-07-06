@@ -3,9 +3,10 @@
   import { writable } from 'svelte/store'
 
   export let key
+
   let activeClasses = 'px-4 py-2 bg-neutral-100 dark:bg-neutral-800 rounded-t-lg text-primary-600 border-b-2 border-primary-600 dark:text-primary-500 dark:border-primary-500 active'
   let inactiveClasses = 'px-4 py-2 hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded-t-lg border-b-2 border-transparent hover:text-neutral-600 hover:border-neutral-300 dark:hover:text-neutral-300 text-neutral-500 dark:text-neutral-400'
-  let defaultClass = 'inline-block text-sm font-medium text-center disabled:cursor-not-allowed '
+  let defaultClass = 'inline-block text-sm font-medium text-center disabled:cursor-not-allowed relative '
 
   const selected = getContext('selected') ?? writable()
 

@@ -62,6 +62,7 @@ class TaskHistory(TaskHistoryMixin, History):
         return {
             'date': self.date.isoformat(),
             'user': self.user.display_name,
+            'avatar': self.user.img,
             'action': TaskHistory.Action(self.action).name,
             'text': self.text,
             'addresses': self.addresses,

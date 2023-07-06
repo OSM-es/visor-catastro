@@ -96,6 +96,7 @@ def authorize():
 
     id = data['user']['id']
     display_name=data['user']['display_name']
+    img = data['user']['img'].get('href')
     osm_user = OsmUser.query.get(id)
     relogin = 'user' in session and session['user'].get('relogin', False)
     if relogin:
@@ -104,7 +105,7 @@ def authorize():
     else:
         user = osm_user.user if osm_user and osm_user.user else User()
     if not osm_user:
-        osm_user = OsmUser(id=id, display_name=display_name)
+        osm_user = OsmUser(id=id, display_name=display_name, img=img)
     if osm_user.isStated():
         user.import_user = osm_user
         passTutorial(user)

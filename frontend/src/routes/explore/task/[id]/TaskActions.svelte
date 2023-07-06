@@ -26,8 +26,8 @@ console.info(task.lock)
   {#if ![task.lock.user.osm_id, task.lock.user.import_id].includes(user?.id)}
     <p>
       Tarea
-      <span class="font-bold text-danger-500">bloqueada</span>, otro usuario la está
-      {TASK_LOCK_VALUES[task.lock.text]}.
+      <span class="font-bold text-danger-500">bloqueada</span> para
+      {TASK_LOCK_VALUES[task.lock.text]} por otro usuario.
     </p>
   {:else if task.lock.text === 'MAPPING'}
     <p>TODO: Aquí faltan enlaces para descargar el archivo de la tarea</p>

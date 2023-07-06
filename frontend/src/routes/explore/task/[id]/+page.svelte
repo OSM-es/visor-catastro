@@ -1,11 +1,11 @@
 <script>
-  import { Button } from 'flowbite-svelte'
+  import { Avatar, Button, Indicator, Listgroup, Tooltip } from 'flowbite-svelte'
   import { onMount } from 'svelte'
   import { goto } from '$app/navigation'
 	import { enhance } from '$app/forms'
   import { page } from '$app/stores'
 
-  import { TASK_TYPE_VALUES, TASK_DIFFICULTY_VALUES } from '$lib/config'
+  import { TASK_TYPE_VALUES, TASK_DIFFICULTY_VALUES, TASK_ACTION_VALUES, TASK_LOCK_VALUES } from '$lib/config'
   import FotosFachada from '$lib/components/FotosFachada.svelte'
   import Map from '$lib/components/maps/Map.svelte'
   import ConsLayer from '$lib/components/maps/ConsLayer.svelte'
@@ -27,7 +27,9 @@
   let tab = 'edicion'
   if (data.task.difficulty === 'MODERATE') taskColor = 'text-warning-500'
   if (data.task.difficulty === 'CHALLENGING') taskColor = 'text-danger-500'
-  
+
+  const rtf = new Intl.RelativeTimeFormat('es', {numeric: 'auto'})
+
   function centerMap(event) {
     const point = event.target.attributes.href.value.split(',')
     map.getMap().panTo([point[1], point[0]])
@@ -79,7 +81,14 @@
       <Tabs bind:tab>
         <TabItem key={'edicion'}>Edición</TabItem>
         <TabItem key={'fotos'}>Fotos</TabItem>
-        <TabItem key={'historial'}>Historial</TabItem>
+        <TabItem key={'historial'}>
+          Historial
+          <Indicator color="blue" size="lg" placement="center-right">
+            <span class="font-bold text-white dark:text-gray-800">
+              {data.task.history?.length}
+            </span>
+          </Indicator>
+        </TabItem>
       </Tabs>
     </div>
     <div class="h-full max-h-0">
@@ -143,13 +152,20 @@
           bind:viewImage
         />
       </div>
-      <div class:hidden={tab !== 'historial'} class="prose dark:prose-invert">
-        {data.task.history?.length}
-        <ul>
-          {#each data.task.history as h}
-          <li>{h.date} {h.user} {h.action} {h.text} bu:{h.buildings} ad:{h.addresses}</li>
-          {/each}
-        </ul>
+      <div class:hidden={tab !== 'historial'}>
+        <Listgroup items={data.task.history} let:item>
+          <div class="flex items-center space-x-4">
+            <Avatar src={item.avatar} data-name={item.user}/>
+            <p>
+              {TASK_ACTION_VALUES[item.action]}
+              {TASK_LOCK_VALUES[item.text]}
+              hace
+              {rtf.format((new Date(item.date) - new Date()) / 100000, 'seconds')}
+              {new Date()}
+            </p>
+          </div>
+        </Listgroup>
+        <Tooltip triggeredBy="[data-name]" on:show={e => name = e.target.dataset.name}>{name}</Tooltip>
       </div>
     </div>
   </div>

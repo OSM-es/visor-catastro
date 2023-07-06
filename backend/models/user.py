@@ -7,6 +7,7 @@ from models.utils import JSONEncodedDict, MutableDict
 class OsmUser(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     display_name = db.Column(db.String, nullable=False)
+    img = db.Column(db.String)
     user = db.relationship(
         'User',
         primaryjoin='or_(OsmUser.id==User.osm_id, OsmUser.id==User.import_id)',

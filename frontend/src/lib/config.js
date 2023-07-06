@@ -24,9 +24,17 @@ export const TASK_STATUS_VALUES = {
   NEED_UPDATE: 'Necesita actualizar',
 }
 
+export const TASK_ACTION_VALUES = {
+  LOCKED: 'bloqueado para',
+  STATE_CHANGE: 'marcado como',
+  COMMENT: 'comentó',
+  UNLOCKED: 'desbloquedo para',
+  AUTO_UNLOCKED: 'desbloquedo para',
+}
+
 export const TASK_LOCK_VALUES = {
-  MAPPING: 'mapeando',
-  VALIDATION: 'validando',
+  MAPPING: 'importar',
+  VALIDATION: 'validar',
 }
 
 export const TASK_COLORS = {
