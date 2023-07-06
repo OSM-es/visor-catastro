@@ -25,11 +25,11 @@ export const TASK_STATUS_VALUES = {
 }
 
 export const TASK_ACTION_VALUES = {
-  LOCKED: 'bloqueado para',
-  STATE_CHANGE: 'marcado como',
-  COMMENT: 'comentó',
-  UNLOCKED: 'desbloquedo para',
-  AUTO_UNLOCKED: 'desbloquedo para',
+  LOCKED: 'Bloqueado para',
+  STATE_CHANGE: 'Marcado como',
+  COMMENT: 'Comentó',
+  UNLOCKED: 'Desbloquedo para',
+  AUTO_UNLOCKED: 'Desbloquedo para',
 }
 
 export const TASK_LOCK_VALUES = {

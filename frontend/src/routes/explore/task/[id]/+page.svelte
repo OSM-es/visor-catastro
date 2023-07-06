@@ -1,5 +1,6 @@
 <script>
-  import { Avatar, Button, Indicator, Listgroup, Tooltip } from 'flowbite-svelte'
+  import { Avatar, Badge, Button, Indicator, Listgroup, Tooltip } from 'flowbite-svelte'
+  import { Clock } from 'svelte-heros-v2'
   import { onMount } from 'svelte'
   import { goto } from '$app/navigation'
 	import { enhance } from '$app/forms'
@@ -105,7 +106,7 @@
     </div>
     <div class="h-full max-h-0">
       <div class:hidden={tab !== 'edicion'} class="prose dark:prose-invert pt-4">
-        <p>
+          <p>
           Tarea tipo
           <span class="font-bold">{TASK_TYPE_VALUES[data.task.type]}</span>,
           dificultad
@@ -173,9 +174,10 @@
             <p>
               {TASK_ACTION_VALUES[item.action]}
               {TASK_LOCK_VALUES[item.text]}
-              hace
-              {rtf.format((new Date(item.date) - new Date()) / 100000, 'seconds')}
-              {new Date()}
+              <Badge color="black" border>
+                <Clock size=14 variation="solid" class="mr-1"/>
+                {rtf.format((new Date(item.date) - new Date()) / 100000, 'seconds')}
+              </Badge>
             </p>
           </div>
         </Listgroup>

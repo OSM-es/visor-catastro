@@ -1,5 +1,5 @@
 <script>
-  import { Button, Checkbox, Radio } from 'flowbite-svelte'
+  import { Button, Badge, Checkbox, Listgroup, Radio } from 'flowbite-svelte'
 
   import { TASK_LOCK_VALUES } from '$lib/config'
   import EditorButton from './EditorButton.svelte'
@@ -9,12 +9,18 @@
   export let mapper
   export let task
 
-  let streetsToValidate = task.streets?.filter(s => !s.validated) || []
+  const streets = task.streets.map(st => {
+    st.href = `/explore/${task.muncode}/street/${st.cat_name}`
+    return st
+  })
+  const streetsToValidate = task.streets?.filter(s => !s.validated) || []
+  const canSelectImport = task.streets.length && !streetsToValidate.length && task.ad_status == task.bu_status
+
   let validationStatus = 'VALIDATED'
   let addresses = !['MAPPED', 'VALIDATED'].includes(task.ad_status) && streetsToValidate.length === 0
   let buildings = !['MAPPED', 'VALIDATED'].includes(task.bu_status)
-  const canSelectImport = task.streets.length && !streetsToValidate.length && task.ad_status == task.bu_status
 </script>
+
 {#if status !== 'READY'}
   <input name="addresses" value={status === task.ad_status} hidden/>
   <input name="buildings" value={status === task.bu_status} hidden/>
@@ -65,16 +71,12 @@
 {:else if status === 'READY'}
   {#if task.streets?.length}
     <h5>Nombres de calle:</h5>
-    <ul class="mt-0">
-      {#each task.streets as street}
-        <li class="my-0">
-          <a href="/explore/{task.muncode}/street/{street.cat_name}" class:font-normal={street.validated}>
-            {street.cat_name}
-          </a>
-          {street.validated ? 'Confirmado' : 'Pendiente'}
-        </li>
-      {/each}
-    </ul>
+    <Listgroup active items={streets} let:item class="not-prose">
+      {item.cat_name}
+      <Badge color={item.validated ? 'green' : 'red'}>
+        {item.validated ? 'Confirmado' : 'Pendiente'}
+      </Badge>
+    </Listgroup>
     {#if streetsToValidate.length}
       <p class="text-danger-500">
         Falta revisar {streetsToValidate.length}
