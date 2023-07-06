@@ -25,11 +25,15 @@ Mapa:
 Edición tarea:
     ☐ Descarga de archivo de tarea sólo para editores. Eliminar fixmes/refs/addr:cat_name.
     ☐ Implementar estados INVALIDATED y NEED_UPDATE
+    ☐ Añadir comentarios en los cambios de estado MAPPED, VALIDATED e INVALIDATED
+    ☐ ¿Quién puede mapear qué, cualquiera o según nivel de mapeador/dificultad tarea?
+    ☐ ¿Quién puede validar, cualquiera o con perfil especial? ¿Asignar automático según nivel de mapeador?
     ☐ Cuando ya hay una tarea bloqueada y se intenta bloquear otra, el botón Complétala
       ha sido necesario usar window.location en lugar de goto para que se actualize
       el mapa. Estudiar por qué no ha funcionado la opción invalidateAll.
     Historial:
         ☐ Formulario añadir comentario.
+            ☐ En la api, depurar códigos raros
         ☐ Mostrar la fecha en formato hace... como gestor de tareas
         ☐ Poner enlaces como en gestor tareas
             Ver conjunto de cambios en OSMCha
@@ -43,6 +47,30 @@ Errores:
     ☐ Personalizar páginas not found y Error
     ☐ Poner un spiner durante carga de datos. Mirar si el de /explore se puede hacer general
     ☐ Revisar API y manejadores de formularios
+
+Ajustes usuario:
+    ☐ Formulario edición de ajustes, con al menos el correo
+    ☐ Tema claro/oscuro/sistema
+    ☐ Más adelante, idioma, notificaciones, qué se muestra en la página de usuario
+
+Página de usuario:
+    ☐ Estadísticas de contribuciones
+    ☐ Lista de taras
+    ☐ Clasificar nivel de mapeadores
+    ☐ Datos públicos
+
+Internacionalización:
+    ☐ Implementar internacionalización
+    ☐ Buscar traductores
+
+Estadísticas:
+    ☐ Página de estadísticas globales
+    ☐ por municipio
+    ☐ ¿otros?
+
+Página acerca de:
+    ☐ Convertir la página de aterrizaje actual / en /about.
+      Redirigir usuarios no registrados a ella.
 
 Actualización:
     ☐ Gestor de notificaciones por correo-e
