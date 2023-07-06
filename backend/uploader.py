@@ -21,8 +21,6 @@ import overpass
 from models import db, Municipality, Province, Street, Task
 from config import Config
 
-MODERATE_THRESHOLD = 10
-CHALLENGING_THRESHOLD = 20
 UPDATE = Config.UPDATE_PATH
 uploader = Blueprint('uploader', __name__, url_prefix='/')
 
@@ -72,13 +70,7 @@ def calc_difficulty(task):
         buildings += 1 if 'building' in tags else 0
         parts += 1 if 'building:part' in tags else 0
         addresses += 1 if 'addr:cat_name' in tags else 0
-    complexity = max(buildings, parts, addresses)
-    if complexity >= CHALLENGING_THRESHOLD:
-        difficulty = Task.Difficulty['CHALLENGING']
-    elif complexity >= MODERATE_THRESHOLD:
-        difficulty = Task.Difficulty['MODERATE']
-    else:
-        difficulty = Task.Difficulty['EASY']
+    difficulty = Task.Difficulty.get_from_complexity(buildings, parts, addresses)
     task.buildings = buildings
     task.parts = parts
     task.addresses = addresses
