@@ -8,7 +8,7 @@
   export let user
   export let mapper
   export let task
-console.info(task.lock)
+
   let streetsToValidate = task.streets?.filter(s => !s.validated) || []
   let validationStatus = 'VALIDATED'
   let addresses = !['MAPPED', 'VALIDATED'].includes(task.ad_status) && streetsToValidate.length === 0

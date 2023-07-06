@@ -16,11 +16,13 @@
   }
   const dispatch = createEventDispatcher()
 
+  let viewer, images
+
   export let data
   export let scrollImage
   export let viewImage
+  export let imageCount = 0
   
-  let viewer, images
   
   $: getImages(data)
   $: document.getElementById(`foto_${scrollImage}`)?.scrollIntoView()
@@ -73,6 +75,7 @@
     for (const im of images) {
       im.addrs = im.addrs.replace(/ 0+/g, ' ')
     }
+    imageCount = images.length
   }
 
   function viewed(event) {

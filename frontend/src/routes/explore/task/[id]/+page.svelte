@@ -22,13 +22,14 @@
   let map, center, zoom, initialCenter, initialZoom, getConsLayer, getUrl
   let buildings = data.task.buildings
   let fixmes = data.task?.fixmes
-  let scrollImage, viewImage
+  let scrollImage, viewImage, imageCount
   let taskColor = 'text-success-500'
   let tab = 'edicion'
   if (data.task.difficulty === 'MODERATE') taskColor = 'text-warning-500'
   if (data.task.difficulty === 'CHALLENGING') taskColor = 'text-danger-500'
 
   const rtf = new Intl.RelativeTimeFormat('es', {numeric: 'auto'})
+  const indicatorClass = 'font-bold text-white dark:text-gray-800 mb-0.5 '
 
   function centerMap(event) {
     const point = event.target.attributes.href.value.split(',')
@@ -80,14 +81,25 @@
       </div>
       <Tabs bind:tab>
         <TabItem key={'edicion'}>Edición</TabItem>
-        <TabItem key={'fotos'}>Fotos</TabItem>
+        {#if imageCount}
+          <TabItem key={'fotos'}>
+            Fotos
+            <Indicator color="blue" size="lg" placement="center-right">
+              <span class={indicatorClass + (imageCount < 10 ? 'text-xs' : 'text-[0.6rem]')}>
+                {#if imageCount < 100}{imageCount}{/if}
+              </span>
+            </Indicator>
+          </TabItem>
+        {/if}
         <TabItem key={'historial'}>
           Historial
-          <Indicator color="blue" size="lg" placement="center-right">
-            <span class="font-bold text-white dark:text-gray-800">
-              {data.task.history?.length}
-            </span>
-          </Indicator>
+          {#if data.task.history?.length}
+            <Indicator color="blue" size="lg" placement="center-right">
+              <span class={indicatorClass + (data.task.history.length < 10 ? 'text-xs' : 'text-[0.6rem]')}>
+                {#if data.task.history.length < 100}{data.task.history.length}{/if}
+              </span>
+            </Indicator>
+          {/if}
         </TabItem>
       </Tabs>
     </div>
@@ -150,9 +162,11 @@
           on:viewed={showBuilding}
           bind:scrollImage 
           bind:viewImage
+          bind:imageCount
         />
       </div>
       <div class:hidden={tab !== 'historial'}>
+        {#if data.task.history?.length}
         <Listgroup items={data.task.history} let:item>
           <div class="flex items-center space-x-4">
             <Avatar src={item.avatar} data-name={item.user}/>
@@ -165,7 +179,14 @@
             </p>
           </div>
         </Listgroup>
-        <Tooltip triggeredBy="[data-name]" on:show={e => name = e.target.dataset.name}>{name}</Tooltip>
+        <Tooltip triggeredBy="[data-name]" on:show={e => name = e.target.dataset.name}>
+          {name}
+        </Tooltip>
+        {:else}
+          <div class="prose dark:prose-invert pt-4">
+            <p>No ha habido actividad.</p>
+          </div>
+        {/if}
       </div>
     </div>
   </div>
