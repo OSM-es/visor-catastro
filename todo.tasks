@@ -9,12 +9,15 @@ Edición Callejero:
 
 Mapa:
     ☐ Guardar bounds del mapa. Osm recuerda el zoom de la última visita
+    ☐ Limitar el área visible
     ☐ Añadir fondo cartociudad
     ☐ Añadir PNOA en zooms grandes
+    ☐ Cuadro de búsqueda de municipios y otras localidades ¿dónde lo ponemos?
     ☐ En la vista de tareas mostrar una leyenda minimizable
     ☐ Ponerle icono de candado a tareas bloqueadas
     Vista de municipios:
         ☐ Al pasar el ratón en el panel lateral poner nombre y alguna estadística que sea rápido de obtener.
+        ☐ Se puede coger info de report.json #10
         ☐ Al hacer clic ruta /explore/[code] filtrar por municipio
             >>> Task.query.filter(Task.muncode=='02001')
     Vista de provincias:
@@ -59,21 +62,41 @@ Página de usuario:
     ☐ Clasificar nivel de mapeadores
     ☐ Datos públicos
 
-Internacionalización:
+Internacionalización #8:
     ☐ Implementar internacionalización
     ☐ Buscar traductores
+
+Tutorial #9:
+    ☐ Revisar vídeos existentes
+    ☐ Crear nuevos
+    ☐ Página configuración de Josm et al
+    ☐ Parte específica del visor
+    ☐ Edición de tareas
+
+Comprobador de diferencias #4:
+    ☐ Herramienta para comprobar dos archivos de tareas y comprobar las diferencias en los edificios/direcciones
 
 Estadísticas:
     ☐ Página de estadísticas globales
     ☐ por municipio
     ☐ ¿otros?
 
+Tasking manager:
+    ☐ Detectar proyectos existentes en TM, impedir edición, redirigir a ellos.
+    ☐ Contemplar importar proyecto
+
+Fixmes:
+    ☐ Añadir casilla de verificación para que el usuario pueda llevar la cuenta de los revisados.
+
 Página acerca de:
     ☐ Convertir la página de aterrizaje actual / en /about.
       Redirigir usuarios no registrados a ella.
 
+Gestor de notificaciones #3:
+    ☐ Implementar correo-e
+    ☐ Estudiar si se puede usar la api OSM para mandar mensajes
+    
 Actualización:
-    ☐ Gestor de notificaciones por correo-e
-        ☐ Notificar por correo nuevos municipios
+    ☐ Notificar por correo nuevos municipios
     ☐ Al terminar de cargar en bd, mover archivos de update a dist para que no
       colisionen con próxima actualización

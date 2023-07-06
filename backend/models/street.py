@@ -9,19 +9,34 @@ STREET_LOCK_TIMEOUT = 3600
 
 
 class Street(db.Model):
+    """
+    Hay que comprobar la traducción de nombres de calle en Catastro a OSM. El
+    programa registra los nombres de calle de cada municipio a partir de la
+    salida de la conversión por CatAtom2OSM. Antes de poder importar una tarea
+    hay que comprobar los nombres de las calles de las direcciones que aparezcan
+    en ella. Al descargar el archivo, se sustituyen los que sea necesario.
+    """
+    
     class Source(Enum):
         CAT = 0
         OSM = 1
 
     id = db.Column(db.Integer, primary_key=True)
     mun_code = db.Column(db.String, index=True)
+    # Nombre en catastro, debería ser único en el municipio y se puede repetir en otros.
     cat_name = db.Column(db.String, index=True)
+    # Nombre propuesto por CatAtom2Osm
     osm_name = db.Column(db.String, index=True)
+    # Si el nombre propuesto es a partir de un nombre OSM existe (OSM) o una modificación del original (CAT)
     source = db.Column(db.Integer)
+    # Si ha sido confirmado por un usuario
     validated = db.Column(db.Boolean, nullable=False, server_default=expression.false())
-    history = db.relationship('StreetHistory', back_populates='street')
-    lock = db.relationship('StreetLock', back_populates='street', uselist=False)
+    # Nomre definitivo asignado por un usuario
     name = db.Column(db.String)
+    # Historial de modificaciones
+    history = db.relationship('StreetHistory', back_populates='street')
+    # Un usuario reserva el derecho de edición
+    lock = db.relationship('StreetLock', back_populates='street', uselist=False)    
 
     @staticmethod
     def get_by_name(mun_code, name):

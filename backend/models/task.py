@@ -7,35 +7,72 @@ from models import db, TaskHistory, TaskLock
 
 
 class Task(db.Model):
-    class Status(Enum):
-        READY = 0
-        MAPPED = 2
-        VALIDATED = 4
-        INVALIDATED = 5
-        NEED_UPDATE = 6
+    """
+    Es la unidad mínima de trabajo de la importación. Está representada por la
+    geometría de un área delimitadora. Tiene asociado un archivo conteniendo las
+    direcciones y edificios a importar.
 
-        @staticmethod
-        def from_action(action):
-            return Task.Status(action)
+    Se corresponde con una parcela catastral pero no existe una relación uno a
+    uno. El programa de conversión, para intentar mantener una dificultad 
+    uniforme, agrupa en una tarea algunas parcelas adyacentes pequeñas,
+    mientras que intenta dividir las parcelas más grandes.
+    La limitación es que los edificios con paredes colindantes se mantienen en
+    la misma tarea.
+    """
+    class Status(Enum):
+        READY = 0  # Disponible para importar.
+        MAPPED = 2  # El usuario terminó de importar.
+        VALIDATED = 4  # Un usuario (diferente al mapeador) da la tarea por buena.
+        INVALIDATED = 5  # Un usuario (diferente al mapeador) cree que hace falta mapeo adicional.
+        NEED_UPDATE = 6  # Se ha producido una actualización de Catastro, hay cambios que es necesario mapear.
 
     class Difficulty(Enum):
-        EASY = 1
-        MODERATE = 2
-        CHALLENGING = 3
+        """Se calcula a partir del máximo de parts (valor original), buildings y addresses"""
+        EASY = 1  # 0-9
+        MODERATE = 2  # 10-19
+        CHALLENGING = 3  # >= 20
+
+        @staticmethod
+        def get_from_complexity(buildings, parts, addresses):
+            complexity = max(buildings, parts, addresses)
+            difficulty = Task.Difficulty['EASY']
+            if complexity >= Task.CHALLENGING_THRESHOLD:
+                difficulty = Task.Difficulty['CHALLENGING']
+            elif complexity >= Task.MODERATE_THRESHOLD:
+                difficulty = Task.Difficulty['MODERATE']
+            return difficulty
+
+    MODERATE_THRESHOLD = 10
+    CHALLENGING_THRESHOLD = 20
 
     id = db.Column(db.Integer, primary_key=True)
+    # Código de Catastro del municipio. Coincide en ocasiones con el código postal o código INE, pero no siempre.
     muncode = db.Column(db.String, index=True)
+    # Identificador asignado por el programa conversor a partir de la referencia catastral de la parcela.
+    # Puede repetirse en otro municipio.
+    # No es inmutable por que las parcelas pueden segregarse o agregarse.
     localId = db.Column('localid', db.String, index=True)
-    zone = db.Column(db.String)
-    type = db.Column(db.String)
+    zone = db.Column(db.String)  # relic
+    type = db.Column(db.String)  # Urbana / Rústica
+    # Ver Status. Si coinciden, se están importando conjuntamente, si no,
+    # se ha elegido importar cada subconjunto de datos por separado.
     ad_status = db.Column(db.Integer, default=Status.READY.value)
     bu_status = db.Column(db.Integer, default=Status.READY.value)
+    # Número de partes de edificio (secciones diferenciadas por número de alturas). 
+    # En origen existe al menos una parte para cada edificio, en los archivos 
+    # de tareas convertidos, si sólo existe una parte desaparece y su altura se
+    # pasa al edificio.
     parts = db.Column(db.Integer)
+    # Número de edificios
     buildings = db.Column(db.Integer)
+    # Número de direcciones. Algunas están en un nodo (entrada), otras en un edificio.
     addresses = db.Column(db.Integer)
-    difficulty = db.Column(db.Integer)
+    difficulty = db.Column(db.Integer)  # Ver Difficulty
+    # Es usado por la consulta get del recurso tasks para saber el estado sin hacer join
     lock_id = db.Column(db.Integer, db.ForeignKey('task_lock.id'), nullable=True)
+    # Bloqueo para mapear o validar. Tendrán un tiempo de caducidad.
     lock = db.relationship('TaskLock', viewonly=True)
+    # Registro de los cambios realizados en la tarea más comentarios.
     history = db.relationship('TaskHistory', back_populates='task')
     geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
     __table_args__ = (Index('codes_index', 'localid', 'muncode'), )

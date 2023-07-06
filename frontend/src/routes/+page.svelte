@@ -21,7 +21,7 @@
       <p>
         Prototipo para la importación directa de los archivos.
         Por el momento es una simple maqueta con la parte de la interacción
-        del usuario. No almacena información ni guarda estados de las tareas.
+        del usuario.
       </p> 
       <p>
         El objetivo es poder colaborar sin pasos intermedios: compruébalo en
