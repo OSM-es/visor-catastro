@@ -1,0 +1,51 @@
+Edición Callejero:
+    ☐ Navegar a calles haciendo clic en el mapa.
+    ☐ Botón editar en JOSM
+    ☐ Botones ver en OSM / Mapillary / Kartaview
+    ☐ Botón recargar de osm?
+    ☐ Filtrar por calles que estén en la tarea actual
+    ☐ Puede que falle la limitación de tiempo del bloqueo de calles
+    ☐ Que pasa con el botón de regresar cuando currentTask es nulo
+
+Mapa:
+    ☐ Guardar bounds del mapa. Osm recuerda el zoom de la última visita
+    ☐ Añadir fondo cartociudad
+    ☐ Añadir PNOA en zooms grandes
+    ☐ En la vista de tareas mostrar una leyenda minimizable
+    ☐ Ponerle icono de candado a tareas bloqueadas
+    Vista de municipios:
+        ☐ Al pasar el ratón en el panel lateral poner nombre y alguna estadística que sea rápido de obtener.
+        ☐ Al hacer clic ruta /explore/[code] filtrar por municipio
+            >>> Task.query.filter(Task.muncode=='02001')
+    Vista de provincias:
+        ☐ Al pasar el ratón en el panel lateral poner nombre y alguna estadística que sea rápido de obtener.
+        ☐ Al hacer clic ruta /explore/[code] filtrar por provincia
+            >>> Task.query.filter(Task.muncode.startswith('02'))
+
+Edición tarea:
+    ☐ Descarga de archivo de tarea sólo para editores. Eliminar fixmes/refs/addr:cat_name.
+    ☐ Implementar estados INVALIDATED y NEED_UPDATE
+    ☐ Cuando ya hay una tarea bloqueada y se intenta bloquear otra, el botón Complétala
+      ha sido necesario usar window.location en lugar de goto para que se actualize
+      el mapa. Estudiar por qué no ha funcionado la opción invalidateAll.
+    Historial:
+        ☐ Formulario añadir comentario.
+        ☐ Mostrar la fecha en formato hace... como gestor de tareas
+        ☐ Poner enlaces como en gestor tareas
+            Ver conjunto de cambios en OSMCha
+            Visualizar con Overpass?
+            Descargar desde Overpass?
+
+Registro:
+    ☐ Error se duplican usuarios al vincular cuenta de importación que ya existe
+
+Errores:
+    ☐ Personalizar páginas not found y Error
+    ☐ Poner un spiner durante carga de datos. Mirar si el de /explore se puede hacer general
+    ☐ Revisar API y manejadores de formularios
+
+Actualización:
+    ☐ Gestor de notificaciones por correo-e
+        ☐ Notificar por correo nuevos municipios
+    ☐ Al terminar de cargar en bd, mover archivos de update a dist para que no
+      colisionen con próxima actualización
