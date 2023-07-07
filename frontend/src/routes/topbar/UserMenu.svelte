@@ -19,7 +19,7 @@
 {#if user}
 <Button pill color="light" id="avatar-menu" class={btnClass}>
   <Chevron>
-    <Avatar src="{user.img.href}" size="sm" class="mr-2"/>
+    <Avatar src="{user?.img?.href}" size="sm" class="mr-2"/>
     <span class="max-md:hidden">{user.display_name}</span>
   </Chevron>
 </Button>

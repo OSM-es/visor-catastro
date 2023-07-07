@@ -96,7 +96,7 @@ def authorize():
 
     id = data['user']['id']
     display_name=data['user']['display_name']
-    img = data['user']['img'].get('href')
+    img = data['user'].get('img', {}).get('href')
     osm_user = OsmUser.query.get(id)
     relogin = 'user' in session and session['user'].get('relogin', False)
     if relogin:
