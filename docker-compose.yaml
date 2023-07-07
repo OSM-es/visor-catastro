@@ -83,6 +83,7 @@ services:
     container_name: frontend
     profiles:
       - production
+      - stage
     depends_on:
       - backend
     restart: always
@@ -111,6 +112,8 @@ services:
 
   traefik:
     container_name: traefik
+    profiles:
+      - production
     image: traefik:v3.0
     restart: always
     ports:
@@ -119,4 +122,18 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     command:
       - --entrypoints.web.address=:80
+      - --providers.docker=true
+
+  traefik-stage:
+    container_name: traefik
+    profiles:
+      - stage
+    image: traefik:v3.0
+    restart: always
+    ports:
+      - 81:81
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command:
+      - --entrypoints.web.address=:81
       - --providers.docker=true
