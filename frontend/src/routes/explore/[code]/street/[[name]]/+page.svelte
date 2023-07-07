@@ -59,8 +59,10 @@
   })
 
   beforeNavigate(() => {
-    const url = `/papi/street/${$street.mun_code}/${$street.cat_name}/lock`
-		fetch(url, {method: 'DELETE'})
+    if (data.user) {
+      const url = `/papi/street/${$street.mun_code}/${$street.cat_name}/lock`
+      fetch(url, {method: 'DELETE'})
+    }
   })
 
 
