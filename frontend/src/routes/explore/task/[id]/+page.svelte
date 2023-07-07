@@ -6,7 +6,7 @@
 	import { enhance } from '$app/forms'
   import { page } from '$app/stores'
 
-  import { TASK_TYPE_VALUES, TASK_DIFFICULTY_VALUES, TASK_ACTION_VALUES, TASK_LOCK_VALUES } from '$lib/config'
+  import { TASK_TYPE_VALUES, TASK_DIFFICULTY_VALUES, TASK_ACTION_VALUES, TASK_ACTION_TEXT } from '$lib/config'
   import FotosFachada from '$lib/components/FotosFachada.svelte'
   import Map from '$lib/components/maps/Map.svelte'
   import ConsLayer from '$lib/components/maps/ConsLayer.svelte'
@@ -173,7 +173,7 @@
             <Avatar src={item.avatar} data-name={item.user}/>
             <p>
               {TASK_ACTION_VALUES[item.action]}
-              {TASK_LOCK_VALUES[item.text]}
+              {TASK_ACTION_TEXT[item.text]}
               <Badge color="black" border>
                 <Clock size=14 variation="solid" class="mr-1"/>
                 {rtf.format((new Date(item.date) - new Date()) / 100000, 'seconds')}

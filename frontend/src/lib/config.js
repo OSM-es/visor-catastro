@@ -36,9 +36,12 @@ export const TASK_ACTION_VALUES = {
   AUTO_UNLOCKED: 'Desbloquedo para',
 }
 
-export const TASK_LOCK_VALUES = {
+export const TASK_ACTION_TEXT = {
   MAPPING: 'importar',
   VALIDATION: 'validar',
+  MAPPED: 'mapeada',
+  VALIDATED: 'validada',
+  INVALIDATED: 'se necesita más mapeo',
 }
 
 export const TASK_COLORS = {

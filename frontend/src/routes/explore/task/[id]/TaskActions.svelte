@@ -1,7 +1,7 @@
 <script>
   import { Button, Badge, Checkbox, Listgroup, Radio } from 'flowbite-svelte'
 
-  import { TASK_LOCK_VALUES } from '$lib/config'
+  import { TASK_ACTION_TEXT } from '$lib/config'
   import EditorButton from './EditorButton.svelte'
 
   export let status
@@ -33,7 +33,7 @@
     <p>
       Tarea
       <span class="font-bold text-danger-500">bloqueada</span> para
-      {TASK_LOCK_VALUES[task.lock.text]} por otro usuario.
+      {TASK_ACTION_TEXT[task.lock.text]} por otro usuario.
     </p>
   {:else if task.lock.text === 'MAPPING'}
     <p>TODO: Aquí faltan enlaces para descargar el archivo de la tarea</p>
