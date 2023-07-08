@@ -60,7 +60,7 @@ class Task(Resource):
         data['buildings'] = {'type': geojson['type'], 'features': buildings}
         data['parts'] = {'type': geojson['type'], 'features': parts}
         data['osmStreets'] = osm2geojson.xml2geojson(getOsmStreets(bb))
-        data['streets'] = get_streets(buildings)
+        data['streets'] = get_streets(buildings, task.muncode)
         data['currentLock'] = user.user.lock.task.id if user and user.user and user.user.lock else None
         data['isOwner'] = False
         if user and user.user and user.user.lock:
@@ -100,7 +100,7 @@ def isAddr(feature):
 def getStreet(tags):
     return tags.get('addr:street') or tags.get('addr:place') or ''
 
-def get_streets(buildings):
+def get_streets(buildings, muncode):
     names = {
         f['properties'].get('tags', {}).get('addr:cat_name', '')
         for f in buildings
@@ -109,6 +109,7 @@ def get_streets(buildings):
     return [
         st.asdict()
         for st in models.Street.query.filter(
+            models.Street.mun_code == muncode,
             models.Street.cat_name.in_(names)
         ).order_by(models.Street.source, models.Street.osm_name).all()
     ]
