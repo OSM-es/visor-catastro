@@ -1,5 +1,6 @@
 <script>
   import {
+    DarkMode,
     Navbar,
     NavBrand,
     NavLi,
@@ -66,7 +67,8 @@
     </NavLi>
   </NavUl>
 
-  <div id="usermenu" class="flex md:order-2" on:invalidateuser={invalidateUser}>
+  <div id="usermenu" class="flex md:order-2 gap-2" on:invalidateuser={invalidateUser}>
+    <DarkMode/>
     <UserMenu {user}/>
     <NavHamburger on:click={toggle} />
   </div>

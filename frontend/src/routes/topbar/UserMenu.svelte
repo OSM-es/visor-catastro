@@ -3,7 +3,6 @@
     Avatar,
     Button,
     Chevron,
-    DarkMode,
     Dropdown,
     DropdownItem,
   } from 'flowbite-svelte'
@@ -24,10 +23,6 @@
   </Chevron>
 </Button>
 <Dropdown placement="bottom-end" triggeredBy="#avatar-menu" class="dark:bg-neutral-700">
-  <DropdownItem>
-    Tema:
-    <DarkMode/>
-  </DropdownItem>
   <DropdownItem><a href="/settings">Ajustes</a></DropdownItem>
   <DropdownItem on:click={logout}>Cerrar sesión</DropdownItem>
 </Dropdown>
