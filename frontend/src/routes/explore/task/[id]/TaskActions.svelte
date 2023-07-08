@@ -68,9 +68,11 @@
     {:else if task.lock?.text === 'MAPPING'}
         <p>TODO: Aquí faltan enlaces para descargar el archivo de la tarea</p>
         <p>¿Esta tarea está completamente mapeada?</p>
-        <Button type="submit" name="status" value="MAPPED" class="mr-4">
-          Si, guardar
-        </Button>
+        <EditorButton {user} {task} action={'guardar'}>
+          <Button type="submit" name="status" value="MAPPED" class="mr-4">
+            Si, guardar
+          </Button>
+        </EditorButton>
     {:else if task.lock?.text === 'VALIDATION'}
       <p>TODO: Aquí faltan enlaces para descargar el archivo de la tarea,
         y el área.
@@ -94,9 +96,11 @@
           No
       </Radio>
       </div>
-      <Button type="submit" class="mr-4">
-        {validationStatus === 'VALIDATED' ? 'Validar' : 'Invalidar' }
-      </Button>
+      <EditorButton {user} {task} action={'validar'}>
+        <Button type="submit" class="mr-4">
+          {validationStatus === 'VALIDATED' ? 'Validar' : 'Invalidar' }
+        </Button>
+      </EditorButton>
     {:else if needMapping}
       {#if status === 'INVALIDATED'}
         <p>Tarea marcada como que <span class="text-danger-500">necesita más mapeo</span>.</p>
