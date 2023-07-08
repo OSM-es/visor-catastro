@@ -46,7 +46,6 @@ Edición tarea:
 
 Registro:
     ☐ Error se duplican usuarios al vincular cuenta de importación que ya existe
-    ☐ Cuando se entra primero con la cuenta osm y luego se vincula, vuelve a ofrecer vincular la osm. Se crea un segundo usuario en lugar de atarlo al primero.
 
 Errores:
     ☐ Personalizar páginas not found y Error

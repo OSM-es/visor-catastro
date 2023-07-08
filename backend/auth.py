@@ -102,21 +102,21 @@ def authorize():
     if relogin:
         last_user = OsmUser.query.get(session['user']['id'])
         user = last_user.user
+    elif osm_user and osm_user.user:
+        user = osm_user.user 
     else:
-        user = osm_user.user if osm_user and osm_user.user else User()
+        user = User()
     if not osm_user:
         osm_user = OsmUser(id=id, display_name=display_name, img=img)
     if osm_user.isStated():
         user.import_user = osm_user
         passTutorial(user)
-        db.session.add(user)
     elif relogin:
         if user.import_user:
             user.osm_user = osm_user
         elif user.osm_user:
             user.import_user = osm_user
         passTutorial(user)
-        db.session.add(user)
     db.session.add(osm_user)
     db.session.commit()
 
