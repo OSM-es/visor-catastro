@@ -3,6 +3,7 @@
   import { Clock } from 'svelte-heros-v2'
   import { onMount } from 'svelte'
   import { page } from '$app/stores'
+  import RelativeTime from 'svelte-relative-time'
 
   import { TASK_TYPE_VALUES, TASK_DIFFICULTY_VALUES, TASK_ACTION_VALUES, TASK_ACTION_TEXT } from '$lib/config'
   import FotosFachada from '$lib/components/FotosFachada.svelte'
@@ -165,7 +166,8 @@
               {/if}
               <Badge color="black" border>
                 <Clock size=14 variation="solid" class="mr-1"/>
-                {rtf.format((new Date(item.date) - new Date()) / 100000, 'seconds')}
+                <RelativeTime date={new Date(item.date)}/>
+                {item.date}
               </Badge>
             </p>
           </div>

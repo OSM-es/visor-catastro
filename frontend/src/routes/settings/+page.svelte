@@ -1,5 +1,6 @@
 <script>
 	import { enhance } from '$app/forms'
+  import RelativeTime from 'svelte-relative-time'
   import {
     Avatar,
     Button,
@@ -50,7 +51,7 @@
             Cuenta creada
           </dt>
           <dd>
-            {user.account_created}
+            <RelativeTime date={new Date(user.account_created)}/>
           </dd>
           <dt class="font-medium">
             Conjuntos de cambios

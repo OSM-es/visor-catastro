@@ -30,6 +30,7 @@
     "flowbite-svelte": "^0.34.9",
     "leaflet": "^1.9.2",
     "lodash": "^4.17.21",
+    "svelte-relative-time": "^0.0.3",
     "viewerjs": "^1.11.3"
   },
   "type": "module"
