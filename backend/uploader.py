@@ -31,10 +31,13 @@ def get_geometry(*ql, search=None, level=6):
     if not text:
         abort(500)
     shapes = osm2geojson.xml2shapes(text)
-    shape = [
+    shapes = [
         s for s in shapes 
         if s['properties'].get('tags', {}).get('admin_level', '') == level
-    ][0]
+    ]
+    if not shapes:
+        abort(500)
+    shape = shapes[0]
     geom = GeometryCollection(shape['shape'])
     return shape, from_shape(geom)
 
@@ -158,8 +161,13 @@ def upload(mun_code):
 
 @uploader.route("/province/<prov_code>", methods=["PUT"])
 def province(prov_code):
-    ql = f'wr["boundary"="administrative"]["ine:provincia"="{prov_code}"]'
-    shape, geom = get_geometry(ql, level='6')
+    if prov_code in ['55', '56']:  # Ceuta y Melilla
+        prov_code = str(int(prov_code) - 4)
+        ql = f'wr["boundary"="administrative"]["ine:provincia"="{prov_code}"]'
+        shape, geom = get_geometry(ql, level='4')
+    else:
+        ql = f'wr["boundary"="administrative"]["ine:provincia"="{prov_code}"]'
+        shape, geom = get_geometry(ql, level='6')
     name = shape['properties']['tags']['name']
     prov = Province.get_by_code(prov_code)
     if prov is None:

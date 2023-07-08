@@ -48,6 +48,8 @@ class Config:
         self.read_int('WORKERS', 4)
         self.read_int('MAX_RETRIES', 10)
         self.read_int('RETRAY_DELAY', 3)
+        # Estas no se corresponden a provincias
+        self.read_list('PROV_SUBOFFICES', '51, 52, 53, 54, 55, 56')
 
     def read_int(self, key, default):
         self.__dict__[key.lower()] = int(os.getenv(key, default))
@@ -116,6 +118,9 @@ def upload_provs(provincias):
     """Solcita cargar provincias en la base de datos."""
     retries = 0
     while provincias and retries < config.max_retries:
+        if provincias[0] in config.prov_suboffices:
+            provincias.pop(0)
+            continue
         try:
             url = config.uploader_url + 'province/' + provincias[0]
             req = requests.put(url)
