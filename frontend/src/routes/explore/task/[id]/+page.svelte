@@ -167,7 +167,6 @@
               <Badge color="black" border>
                 <Clock size=14 variation="solid" class="mr-1"/>
                 <RelativeTime date={new Date(item.date)}/>
-                {item.date}
               </Badge>
             </p>
           </div>

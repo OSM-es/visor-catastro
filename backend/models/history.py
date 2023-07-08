@@ -12,7 +12,11 @@ TASK_LOCK_TIMEOUT = 86400
 
 class HistoryMixin:
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime, server_default=db.func.now(), index=True)
+    date = db.Column(
+        db.DateTime(timezone=True),
+        server_default=db.func.now(), 
+        index=True,
+    )
 
 
 @declarative_mixin

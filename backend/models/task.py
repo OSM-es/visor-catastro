@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+from pytz import UTC
 
 from geoalchemy2 import Geometry, Index
 
@@ -102,7 +103,7 @@ class Task(db.Model):
 
     def update_lock(self):
         if self.lock:
-            age = (datetime.now() - self.lock.date).total_seconds()
+            age = (datetime.now(tz=UTC) - self.lock.date).total_seconds()
             if age > self.lock.timeout:
                 # Añadir AUTO_UNLOCKED a historial
                 db.session.delete(self.lock)
