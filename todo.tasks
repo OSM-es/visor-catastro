@@ -27,7 +27,6 @@ Mapa:
 
 Edición tarea:
     ☐ Descarga de archivo de tarea sólo para editores. Eliminar fixmes/refs/addr:cat_name.
-    ☐ Implementar estados INVALIDATED y NEED_UPDATE
     ☐ Añadir comentarios en los cambios de estado MAPPED, VALIDATED e INVALIDATED
     ☐ ¿Quién puede mapear qué, cualquiera o según nivel de mapeador/dificultad tarea?
     ☐ ¿Quién puede validar, cualquiera o con perfil especial? ¿Asignar automático según nivel de mapeador?

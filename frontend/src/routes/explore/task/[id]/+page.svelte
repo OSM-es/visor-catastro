@@ -2,8 +2,6 @@
   import { Avatar, Badge, Button, Indicator, Listgroup, Tooltip } from 'flowbite-svelte'
   import { Clock } from 'svelte-heros-v2'
   import { onMount } from 'svelte'
-  import { goto } from '$app/navigation'
-	import { enhance } from '$app/forms'
   import { page } from '$app/stores'
 
   import { TASK_TYPE_VALUES, TASK_DIFFICULTY_VALUES, TASK_ACTION_VALUES, TASK_ACTION_TEXT } from '$lib/config'
@@ -44,21 +42,16 @@
     building.layer.openPopup()
   }
 
-  function updateStatus() {
-    return async ({ update }) => {
-      await update({ reset: false })
-      if (!data.task.lock) exit()
+  function isSplitted(task) {
+    const needMapping = ['READY', 'INVALIDATED', 'NEED_UPDATE']
+    if (task.bu_status !== task.ad_status) {
+      return !needMapping.includes(task.bu_status) || !needMapping.includes(task.ad_status)
     }
+    return false
   }
 
-  function exit() {
-    currentTask.set(null)
-    goto(`/explore?map=${getUrl(-1)}`)
-  }
-
-  currentTask.set(data.task.id)
-  
   onMount(() => {
+    currentTask.set(data.task.id)
     map.getMap().fitBounds(getConsLayer().getBounds())
     initialZoom = zoom
     initialCenter = center
@@ -106,56 +99,49 @@
     </div>
     <div class="h-full max-h-0">
       <div class:hidden={tab !== 'edicion'} class="prose dark:prose-invert pt-4">
-          <p>
+        <p>
           Tarea tipo
           <span class="font-bold">{TASK_TYPE_VALUES[data.task.type]}</span>,
           dificultad
           <span class="font-bold {taskColor}">
             {TASK_DIFFICULTY_VALUES[data.task.difficulty]}</span>.
         </p>
-        <form use:enhance={updateStatus} method="POST" class="mb-4">
-          {#if data.task.bu_status !== data.task.ad_status}
-            <h4>Edificios:</h4>
-          {/if}
+        {#if !data.task.lock || data.task.lock?.buildings}
           <TaskActions
+            title={'buildings'}
             status={data.task.bu_status}
-            user={data.user}
             mapper={data.task.bu_mapper}
+            user={data.user}
             task={data.task}
+            exitUrl={getUrl}
           />
-          {#if data.task.bu_status !== data.task.ad_status}
-            <h4>Direcciones:</h4>
-            <TaskActions
-              status={data.task.ad_status}
-              user={data.user}
-              mapper={data.task.ad_mapper}
-              task={data.task}
-            />
-          {/if}
-          {#if data.user && data.task.lock}
-            <Button type="submit" name="lock" value="UNLOCK" color="alternative">
-              {data.task.lock.text === 'MAPPING' ? 'No, detener mapeo' : 'Detener validación'}
-            </Button>
-          {:else if !data.task.currentLock}
-            <Button on:click={exit} color="alternative">Seleccionar otra tarea</Button>
-          {/if}
-          {#if fixmes && data.task.bu_status !== 'VALIDATED'}
-            <h4>Anotaciones:</h4>
-            <ol class="mt-0">
-              {#each fixmes?.features as fixme}
-                <li class="my-0">
-                  <a
-                    href="{fixme.geometry.coordinates}"
-                    on:click={centerMap}
-                    data-sveltekit-preload-data="off"
-                  >
-                    {fixme.properties.fixme}
-                  </a>
-                </li>
-              {/each}
-            </ol>
-          {/if}
-        </form>
+        {/if}
+        {#if isSplitted(data.task) || (data.task.lock?.addresses && !data.task.lock?.buildings)}
+          <TaskActions
+            title={'addresses'}
+            status={data.task.ad_status}
+            mapper={data.task.ad_mapper}
+            user={data.user}
+            task={data.task}
+            exitUrl={getUrl}
+          />
+        {/if}
+        {#if fixmes && data.task.bu_status !== 'VALIDATED'}
+          <h4>Anotaciones:</h4>
+          <ol class="mt-0">
+            {#each fixmes?.features as fixme}
+              <li class="my-0">
+                <a
+                  href="{fixme.geometry.coordinates}"
+                  on:click={centerMap}
+                  data-sveltekit-preload-data="off"
+                >
+                  {fixme.properties.fixme}
+                </a>
+              </li>
+            {/each}
+          </ol>
+        {/if}
       </div>
       <div class:hidden={tab !== 'fotos'}>
         <FotosFachada
@@ -174,6 +160,9 @@
             <p>
               {TASK_ACTION_VALUES[item.action]}
               {TASK_ACTION_TEXT[item.text]}
+              {#if item.addresses != item.buildings}
+                {item.buildings ? 'edificios' : 'direcciones'}
+              {/if}
               <Badge color="black" border>
                 <Clock size=14 variation="solid" class="mr-1"/>
                 {rtf.format((new Date(item.date) - new Date()) / 100000, 'seconds')}

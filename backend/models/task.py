@@ -111,6 +111,8 @@ class Task(db.Model):
     def set_lock(self, user, action, buildings, addresses):
         if self.lock or user.user.lock:
             raise PermissionError
+        if not buildings and not addresses:
+            raise ValueError("Se debe especificar al menos edificios o direcciones")
         if action == TaskLock.Action.UNLOCK:
             return self.unlock()
         lock = TaskLock(
@@ -127,8 +129,8 @@ class Task(db.Model):
             buildings=buildings,
             addresses=addresses,
         )
-        self.history.append(h)
         db.session.add(lock)
+        self.history.append(h)
         db.session.commit()
     
     def unlock(self, user):
@@ -149,7 +151,7 @@ class Task(db.Model):
         if not self.lock or self.lock.user != user.user:
             raise PermissionError
         if not buildings and not addresses:
-            raise ValueError
+            raise ValueError("Se debe especificar al menos edificios o direcciones")
         if addresses:
             self.validate_status('ad_status', status)
         if buildings:
@@ -180,7 +182,7 @@ class Task(db.Model):
         ):
             setattr(self, key, status.value)
             return
-        raise ValueError
+        raise ValueError(f"Valores erróneos {old} => {status}")
 
     def last_action(self, target, action, text):
         i = len(self.history) - 1

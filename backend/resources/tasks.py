@@ -62,6 +62,9 @@ class Task(Resource):
         data['osmStreets'] = osm2geojson.xml2geojson(getOsmStreets(bb))
         data['streets'] = get_streets(buildings)
         data['currentLock'] = user.user.lock.task.id if user and user.user and user.user.lock else None
+        data['isOwner'] = False
+        if user and user.user and user.user.lock:
+            data['isOwner'] = user.id in [task.lock.user.osm_id, task.lock.user.import_id]
         return data
     
     @auth.login_required(role=[models.User.Role.MAPPER, models.User.Role.ADMIN])
@@ -85,10 +88,9 @@ class Task(Resource):
             else:
                 task.change_status(user, status, buildings, addresses)
         except PermissionError:
-            print('per')
             abort(403)
-        except ValueError:
-            print('val')
+        except ValueError as e:
+            print(str(e))
             abort(400)
 
 

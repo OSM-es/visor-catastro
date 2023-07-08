@@ -1,7 +1,6 @@
 import * as env from '$env/static/public'
 
 export const PUBLIC_API_URL = env.PUBLIC_API_URL
-console.info(PUBLIC_API_URL)
 if (!PUBLIC_API_URL) {
   throw new Error("Hay que configurar PUBLIC_API_URL en .env.local")
 }
