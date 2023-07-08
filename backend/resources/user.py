@@ -1,3 +1,4 @@
+from email_validator import validate_email, EmailNotValidError
 from flask import abort, request, session
 from flask_restful import Resource
 
@@ -19,7 +20,7 @@ class User(Resource):
         models.db.session.commit()
         session['user'].update(user.asdict())
         session.modified = True
-        return {'errors': []}
+        return {}
 
     @auth.login_required
     def put(self):
@@ -27,9 +28,15 @@ class User(Resource):
         user = osm_user.user
         if not user:
             abort(400)
-        user.email = request.json.get('email', None)
+        email = request.json.get('email', None)
+        try:
+            emailinfo = validate_email(email, check_deliverability=False)
+        except EmailNotValidError as e:
+            print(str(e))
+            return({'errors': {'email': str(e)}})
+        user.email = emailinfo.normalized
         models.db.session.add(user)
         models.db.session.commit()
         session['user'].update(user.asdict())
         session.modified = True
-        return {'errors': []}
+        return {}

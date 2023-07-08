@@ -5,11 +5,13 @@
     Avatar,
     Button,
     Card,
+    Helper,
     Input,
     Label,
   } from 'flowbite-svelte'
 
   export let data
+  export let form
 
   $: user = data.user
 
@@ -35,8 +37,18 @@
           action="?/save"
           class="pt-8 space-y-4"
         >
-          <Label for="email">Correo electrónico</Label>
+          <Label for="email" color={form?.errors?.email ? 'red' : ''}>
+            Correo electrónico
+          </Label>
           <Input id="email" type="email" name="email" value={user.email}/>
+          <Helper color="red">{form?.errors?.email || ''}</Helper>
+          {#if !form?.errors}
+            <Helper>
+              Su dirección de correo electrónico se utilizará únicamente para
+              enviarle notificaciones y actualizaciones sobre visor-catastro.
+              No se compartirá con otros usuarios u organizaciones.
+            </Helper>
+          {/if}
           <Button type="submit">Enviar</Button>
         </form>
       {:else}
@@ -51,7 +63,7 @@
             Cuenta creada
           </dt>
           <dd>
-            <RelativeTime date={new Date(user.account_created)}/>
+            <RelativeTime date={new Date(user.account_created)} locale={'es-ES'}/>
           </dd>
           <dt class="font-medium">
             Conjuntos de cambios

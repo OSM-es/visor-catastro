@@ -166,7 +166,7 @@
               {/if}
               <Badge color="black" border>
                 <Clock size=14 variation="solid" class="mr-1"/>
-                <RelativeTime date={new Date(item.date)}/>
+                <RelativeTime date={new Date(item.date)} locale={'es-ES'}/>
               </Badge>
             </p>
           </div>
