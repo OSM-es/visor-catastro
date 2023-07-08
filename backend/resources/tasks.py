@@ -63,7 +63,7 @@ class Task(Resource):
         data['streets'] = get_streets(buildings, task.muncode)
         data['currentLock'] = user.user.lock.task.id if user and user.user and user.user.lock else None
         data['isOwner'] = False
-        if user and user.user and user.user.lock:
+        if user and user.user and task.lock:
             data['isOwner'] = user.id in [task.lock.user.osm_id, task.lock.user.import_id]
         return data
     

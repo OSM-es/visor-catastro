@@ -24,6 +24,8 @@ Mapa:
         ☐ Al pasar el ratón en el panel lateral poner nombre y alguna estadística que sea rápido de obtener.
         ☐ Al hacer clic ruta /explore/[code] filtrar por provincia
             >>> Task.query.filter(Task.muncode.startswith('02'))
+    Vista de tareas:
+        ☐ En chrome la lista de tareas sale con barras de desplazamiento no necesarias
 
 Edición tarea:
     ☐ Descarga de archivo de tarea sólo para editores. Eliminar fixmes/refs/addr:cat_name.
@@ -33,10 +35,10 @@ Edición tarea:
     ☐ Cuando ya hay una tarea bloqueada y se intenta bloquear otra, el botón Complétala
       ha sido necesario usar window.location en lugar de goto para que se actualize
       el mapa. Estudiar por qué no ha funcionado la opción invalidateAll.
+    ☐ No estaría de más, que al importar, se diera un recordatorio de usar la cuenta de importación si se está logueado con la normal.
     Historial:
         ☐ Formulario añadir comentario.
             ☐ En la api, depurar códigos raros
-        ☐ Mostrar la fecha en formato hace... como gestor de tareas
         ☐ Poner enlaces como en gestor tareas
             Ver conjunto de cambios en OSMCha
             Visualizar con Overpass?
@@ -44,6 +46,7 @@ Edición tarea:
 
 Registro:
     ☐ Error se duplican usuarios al vincular cuenta de importación que ya existe
+    ☐ Cuando se entra primero con la cuenta osm y luego se vincula, vuelve a ofrecer vincular la osm. Se crea un segundo usuario en lugar de atarlo al primero.
 
 Errores:
     ☐ Personalizar páginas not found y Error
@@ -51,9 +54,10 @@ Errores:
     ☐ Revisar API y manejadores de formularios
 
 Ajustes usuario:
-    ☐ Formulario edición de ajustes, con al menos el correo
-    ☐ Tema claro/oscuro/sistema
-    ☐ Más adelante, idioma, notificaciones, qué se muestra en la página de usuario
+    ☐ Idioma, notificaciones, qué se muestra en la página de usuario
+    ☐ Cuentas vinculadas (normal / importación)
+    ☐ Rol de usuario
+    ☐ Nivel de mapeo
 
 Página de usuario:
     ☐ Estadísticas de contribuciones
