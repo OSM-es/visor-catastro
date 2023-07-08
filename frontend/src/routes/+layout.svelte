@@ -9,7 +9,7 @@
   $: headerClass = $page.url.pathname.startsWith('/explore') ? 'h-screen' : 'min-h-screen'
 </script>
 
-<div class="{headerClass} flex flex-col dark:bg-neutral-900">
+<div class="{headerClass} flex flex-col dark:bg-neutral-900 dark:text-neutral-100">
   <header
     class="sticky top-0 z-40 w-full drop-shadow-md"
   >
