@@ -6,6 +6,7 @@ from authlib.jose.errors import JoseError
 from authlib.integrations.flask_client import OAuth, OAuthError
 from flask import Blueprint, abort, current_app, redirect, session, url_for
 from flask_httpauth import HTTPTokenAuth
+from sqlalchemy.exc import IntegrityError
 
 from models import OsmUser, User, db
 
@@ -117,12 +118,17 @@ def authorize():
         elif user.osm_user:
             user.import_user = osm_user
         passTutorial(user)
+    if user.osm_user or user.import_user:
+        db.session.add(user)
     db.session.add(osm_user)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except IntegrityError as e:
+        print(str(e))
+        abort(400, 'La cuenta que intentas vincular ya ha sido registrada, elimina una de ellas')
 
     if osm_user.user:
         data['user'].update(osm_user.user.asdict())
-
     s = jwt.encode({'alg': 'HS256'}, token, current_app.secret_key)
     data['user']['token'] = s.decode('utf-8')
     data['user']['stated'] = (

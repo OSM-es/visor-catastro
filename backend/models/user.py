@@ -53,8 +53,18 @@ class User(db.Model):
         default={'passed': [], 'next': 'login'},
     )
     email = db.Column(db.String, nullable=True)
-    osm_id = db.Column(db.Integer, db.ForeignKey('osm_user.id'), nullable=True)
-    import_id = db.Column(db.Integer, db.ForeignKey('osm_user.id'), nullable=True)
+    osm_id = db.Column(
+        db.Integer,
+        db.ForeignKey('osm_user.id'),
+        nullable=True,
+        unique=True,
+    )
+    import_id = db.Column(
+        db.Integer,
+        db.ForeignKey('osm_user.id'),
+        nullable=True,
+        unique=True,
+    )
     osm_user = db.relationship('OsmUser', foreign_keys=osm_id, back_populates='user')
     import_user = db.relationship('OsmUser', foreign_keys=import_id, back_populates='user')
     lock = db.relationship('TaskLock', back_populates='user', uselist=False)

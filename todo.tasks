@@ -44,9 +44,6 @@ Edición tarea:
             Visualizar con Overpass?
             Descargar desde Overpass?
 
-Registro:
-    ☐ Error se duplican usuarios al vincular cuenta de importación que ya existe
-
 Errores:
     ☐ Personalizar páginas not found y Error
     ☐ Poner un spiner durante carga de datos. Mirar si el de /explore se puede hacer general
@@ -57,6 +54,7 @@ Ajustes usuario:
     ☐ Cuentas vinculadas (normal / importación)
     ☐ Rol de usuario
     ☐ Nivel de mapeo
+    ☐ Posibilidad de eliminar cuenta si no tiene ediciones.
 
 Página de usuario:
     ☐ Estadísticas de contribuciones
