@@ -4,6 +4,8 @@
 
   import { goto } from '$app/navigation'
 
+  export let user
+
   function next() {
     goto('/learn/login')
   }
@@ -19,7 +21,10 @@ Visualiza este vídeo para conocer el proyecto.
 
 <Video src="/src/lib/videos/1intro-catastro.webm" controls trackSrc="1intro-catastro.webm" />
 
+{#if !user}
 Conoce como debes registrarte para participar
+
+{/if}
 <Button color="primary" on:click={next}>
   Continuar <ChevronRight/>
 </Button>
