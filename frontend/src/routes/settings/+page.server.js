@@ -3,6 +3,7 @@ import { redirect } from '@sveltejs/kit'
 export function load({ depends, locals }) {
   depends('data:user')
 
+  console.info(locals)
   if (!locals.user) throw redirect(302, '/')
 }
 

@@ -13,7 +13,9 @@
   import { getContext } from 'svelte'
   import { invalidate } from '$app/navigation'
   import { page } from '$app/stores'
+  import { t } from '$lib/translations'
 
+  import LocaleMenu from '$lib/components/LocaleMenu.svelte'
   import Logo from './Logo.svelte'
   import UserMenu from './UserMenu.svelte'
 
@@ -60,16 +62,26 @@
 
   <NavUl {hidden} {ulClass} {activeClass} {nonActiveClass} class="order-1">
     <DarkMode class="invisible max-sm:visible absolute right-4"/>
+    {#if !user}
+      <div class="mt-2 invisible max-sm:visible absolute left-4">
+        <LocaleMenu/>
+      </div>
+    {/if}
     <NavLi href="/learn" active={activeUrl.startsWith('/learn')} class={_liClass}>
-      <BookOpen class="w-5 m-1"/> Aprende
+      <BookOpen class="w-5 m-1"/> {$t('menu.learn')}
     </NavLi>
     <NavLi href="/explore" active={activeUrl.startsWith('/explore')} class={_liClass}>
-      <Map class="w-5 m-1"/> Explora
+      <Map class="w-5 m-1"/> {$t('menu.explore')}
     </NavLi>
   </NavUl>
 
   <div id="usermenu" class="flex md:order-2" on:invalidateuser={invalidateUser}>
     <DarkMode class="max-sm:hidden"/>
+    {#if !user}
+      <div class="h-10 mr-2 max-sm:hidden">
+        <LocaleMenu/>
+      </div>
+    {/if}
     <UserMenu {user}/>
     <NavHamburger on:click={toggle} />
   </div>

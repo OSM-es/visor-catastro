@@ -10,6 +10,8 @@
     Label,
   } from 'flowbite-svelte'
 
+  import LocaleMenu from '$lib/components/LocaleMenu.svelte'
+
   export let data
   export let form
 
@@ -22,6 +24,7 @@
   }
 </script>
 
+{#if user}
 <article class="mx-8 mt-8">
 	<div class="flex items-center space-x-8 mb-8">
     <Avatar src="{user?.img?.href}" size="xl" rounded/>
@@ -37,7 +40,11 @@
           action="?/save"
           class="pt-8 space-y-4"
         >
-          <Label for="email" color={form?.errors?.email ? 'red' : ''}>
+          <div class="flex flex-row w-full items-center place-content-between gap-8">
+            <Label>Idioma</Label>
+            <div class="w-48"><LocaleMenu/></div>
+          </div>
+          <Label for="email" color={form?.errors?.email ? 'red' : 'gray'}>
             Correo electrónico
           </Label>
           <Input id="email" type="email" name="email" value={user.email}/>
@@ -76,3 +83,4 @@
     </Card>
   </div>
 </article>
+{/if}

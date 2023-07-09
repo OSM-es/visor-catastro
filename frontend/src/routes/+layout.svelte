@@ -1,8 +1,8 @@
 <script>
+  import { page } from '$app/stores'
+  
   import '../app.postcss'
   import Topbar from './topbar/TopBar.svelte'
-
-  import { page } from '$app/stores'
   
   export let data
 

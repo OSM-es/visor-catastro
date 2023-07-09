@@ -1,10 +1,16 @@
+import { parseAcceptLanguage } from 'intl-parse-accept-language'
 import decode from '$lib/flaskSession'
 import Api from '$lib/api'
 
 export async function handle({ event, resolve }) {
+  const { locals, request } = event
+
   const session = await decode(event.cookies.get('session'))
-  event.locals.user = session.user || null
-  event.locals.api = new Api(event)
+  locals.user = session.user || null
+  locals.api = new Api(event)
+  
+  const locales = parseAcceptLanguage(event.request.headers.get('accept-language') || '')
+  locals.locale = locales.length ? locales[0] : 'es'
 
   return await resolve(event)
 }
