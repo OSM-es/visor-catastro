@@ -59,6 +59,7 @@
   </div>
 
   <NavUl {hidden} {ulClass} {activeClass} {nonActiveClass} class="order-1">
+    <DarkMode class="invisible max-sm:visible absolute right-4"/>
     <NavLi href="/learn" active={activeUrl.startsWith('/learn')} class={_liClass}>
       <BookOpen class="w-5 m-1"/> Aprende
     </NavLi>
@@ -67,8 +68,8 @@
     </NavLi>
   </NavUl>
 
-  <div id="usermenu" class="flex md:order-2 gap-2" on:invalidateuser={invalidateUser}>
-    <DarkMode/>
+  <div id="usermenu" class="flex md:order-2" on:invalidateuser={invalidateUser}>
+    <DarkMode class="max-sm:hidden"/>
     <UserMenu {user}/>
     <NavHamburger on:click={toggle} />
   </div>
