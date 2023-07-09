@@ -235,7 +235,12 @@
   <div class="flex flex-row flex-grow">
     <div class="w-full flex-grow z-0">
       <Map bind:map bind:zoom bind:center>
-        <ConsLayer data={data.addresses} bind:getConsLayer bind:imageRef={scrollImage}/>
+        <ConsLayer
+          data={data.addresses}
+          api={data.api}
+          bind:getConsLayer
+          bind:imageRef={scrollImage}
+        />
         <StreetsLayer data={data.osmStreets}/>
       </Map>
     </div>
@@ -243,6 +248,7 @@
       <div class="h-full max-h-0">
         <FotosFachada
           data={data.addresses.features}
+          api={data.api}
           on:viewed={showEntrance}
           bind:scrollImage 
           bind:viewImage

@@ -4,7 +4,7 @@
   import { goto } from '$app/navigation'
   import { GeoJSON } from 'svelte-leafletjs'
 
-  import { PUBLIC_API_URL, TASK_COLORS, TASK_LOCKED_COLOR, TASK_DIFFICULTY_VALUES, TASK_STATUS_VALUES, TASK_TYPE_VALUES } from '$lib/config'
+  import { TASK_COLORS, TASK_LOCKED_COLOR, TASK_DIFFICULTY_VALUES, TASK_STATUS_VALUES, TASK_TYPE_VALUES } from '$lib/config'
   import Map from '$lib/components/maps/Map.svelte'
 
   export let data
@@ -18,7 +18,7 @@
 
   const tasksThreshold = 15
   const munThreshold = 8
-  const geojsonUrl = (target, bounds) => `${PUBLIC_API_URL}/${target}?bounds=${bounds}`
+  const geojsonUrl = (target, bounds) => `${data.api}/${target}?bounds=${bounds}`
   const rightBarClass = 'md:max-w-md w-full flex-grow overflow-scroll px-4 pt-8 '
     + 'border-l-2 border-neutral-300 dark:border-neutral-500 dark:bg-neutral-800'
 

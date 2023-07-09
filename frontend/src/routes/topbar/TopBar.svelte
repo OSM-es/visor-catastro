@@ -18,7 +18,7 @@
   import UserMenu from './UserMenu.svelte'
 
   export let user
-
+  
   const ulClass = 'flex flex-col md:flex-row md:space-x-8 items-center bg-transparent dark:bg-transparent border-0 sm:max-md:text-sm font-medium'
   const activeClass = 'bg-transparent text-primary-700 dark:text-white md:dark:bg-transparent'
   const nonActiveClass = 'text-gray-700 hover:text-primary-500 dark:text-gray-400 dark:hover:text-gray-300'

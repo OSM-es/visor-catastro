@@ -2,9 +2,8 @@
   import { getContext } from 'svelte'
   import { GeoJSON } from 'svelte-leafletjs'
 
-  import { PUBLIC_API_URL } from '$lib/config'
-
   export let data
+  export let api
   export let imageRef
   export let getConsLayer
 
@@ -19,7 +18,7 @@
       const tags = JSON.stringify(feature.properties.tags, null, '<br/>')?.replace(/[\"{}]/g, '')
       if (tags) {
         const ref = feature.properties.tags.ref
-        const url = `${PUBLIC_API_URL}/photo/${ref}`
+        const url = `${api}/photo/${ref}`
         layer.bindPopup(`<a href="?ref=${ref}"><img src="${url}"/></a>` + tags)
         layer.on('popupopen', ({ target }) => imageRef = target.feature.properties?.tags?.ref)
         feature.layer = layer

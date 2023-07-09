@@ -1,9 +1,7 @@
 import * as env from '$env/static/public'
+import { dev } from '$app/environment'
 
-export const PUBLIC_API_URL = env.PUBLIC_API_URL
-if (!PUBLIC_API_URL) {
-  throw new Error("Hay que configurar PUBLIC_API_URL en .env.local")
-}
+export const PUBLIC_API_URL = env.PUBLIC_API_URL || (dev ? ':5000/api' : '/api')
 export const PUBLIC_INITIAL_VIEW = env.PUBLIC_INITIAL_VIEW.split(',') || [36, 1]
 PUBLIC_INITIAL_VIEW.forEach((x, i) => PUBLIC_INITIAL_VIEW[i] = Number(x).toFixed(4))
 export const PUBLIC_INITIAL_ZOOM = Number(env.PUBLIC_INITIAL_ZOOM) || 5

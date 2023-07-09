@@ -65,7 +65,12 @@
     <Map bind:map bind:center bind:zoom bind:getUrl minZoom=15>
       <StreetsLayer data={data.task.osmStreets}/>
       <PartsLayer data={data.task.parts}/>
-      <ConsLayer data={buildings} bind:getConsLayer bind:imageRef={scrollImage}/>
+      <ConsLayer
+        data={buildings}
+        api={data.api}
+        bind:getConsLayer
+        bind:imageRef={scrollImage}
+      />
       {#if fixmes}<FixmesLayer data={fixmes}/>{/if}
     </Map>
   </div>
@@ -147,6 +152,7 @@
       <div class:hidden={tab !== 'fotos'}>
         <FotosFachada
           data={buildings.features}
+          api={data.api}
           on:viewed={showBuilding}
           bind:scrollImage 
           bind:viewImage

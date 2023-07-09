@@ -68,11 +68,7 @@ Reabre la sesión
 
     sudo make install
 
-Configura en frontend/.env.local
-
-PUBLIC_API_URL=https://visor-catastro.cartobase.es/api
-
-Configura en .env.production.local las claves a usar.
+git Configura en .env.production.local las claves a usar.
 
 En https://www.openstreetmap.org/oauth2/applications/new
 hay que obtener OSM_CLIENT_ID, OSM_CLIENT_SECRET y registrar la redirección a

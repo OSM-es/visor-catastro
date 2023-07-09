@@ -2,6 +2,7 @@ export async function load({ depends, locals }) {
   depends('data:user')
 
   return { 
-    user: locals.user 
+    user: locals.user,
+    api: locals.api.base,
   }
 }

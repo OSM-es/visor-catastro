@@ -4,9 +4,10 @@ import { error } from '@sveltejs/kit'
 import { parse as cookieParser } from 'cookie'
 
 export default class Api {
-  static base = PUBLIC_API_URL
+  static getBase = (url) => `${url.protocol}//${url.hostname}${PUBLIC_API_URL}`
 
   constructor(event) {
+    this.base = Api.getBase(event.url)
     this.event = event
     this.fetch = event.fetch
   }
@@ -22,7 +23,7 @@ export default class Api {
       opts.headers['Authorization'] = `Bearer ${token}`
     }
   
-    const resp = await this.fetch(`${Api.base}/${path}`, opts)
+    const resp = await this.fetch(`${this.base}/${path}`, opts)
     if (resp.ok || resp.status === 422) {
       const cookie = resp.headers.get('set-cookie')
       if (cookie) {

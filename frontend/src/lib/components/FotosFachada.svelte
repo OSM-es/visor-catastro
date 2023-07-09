@@ -6,8 +6,6 @@
   import { createEventDispatcher, onMount } from 'svelte'
   import { afterNavigate, goto } from '$app/navigation'
 
-  import { PUBLIC_API_URL } from '$lib/config'
-
   const options = {
     navbar: false,
     rotatable: false,
@@ -19,6 +17,7 @@
   let viewer, images
 
   export let data
+  export let api
   export let scrollImage
   export let viewImage
   export let imageCount = 0
@@ -88,7 +87,7 @@
   }
 
   async function getDate(ref) {
-    const tags = await ExifReader.load(`${PUBLIC_API_URL}/photo/${ref}`)
+    const tags = await ExifReader.load(`${api}/photo/${ref}`)
     const imageDate = tags?.DateTimeOriginal?.description
     return imageDate?.split(':')[0]
   }
@@ -100,7 +99,7 @@
       <div>
         <img
           id="foto_{im.ref}"
-          src="{PUBLIC_API_URL}/photo/{im.ref}"
+          src="{api}/photo/{im.ref}"
           alt="{im.addrs ? im.addrs : im.ref}"
         />
       </div>
