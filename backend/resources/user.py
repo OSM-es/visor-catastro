@@ -28,7 +28,9 @@ class User(Resource):
         user = osm_user.user
         if not user:
             abort(400)
-        email = request.json.get('email', None)
+        data = request.json
+        user.locale = data.get('locale', None)
+        email = data.get('email', None)
         try:
             emailinfo = validate_email(email, check_deliverability=False)
         except EmailNotValidError as e:

@@ -2,7 +2,7 @@ import { locale, locales, loadTranslations } from '$lib/translations'
 
 export async function load({ data, url }) {
   const _locales = locales.get()
-  let defaultLocale = data.locale
+  let defaultLocale = data?.user?.locale || data.locale
 
   if (typeof localStorage !== 'undefined') {
     defaultLocale = localStorage.locale || defaultLocale

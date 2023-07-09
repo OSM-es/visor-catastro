@@ -4,7 +4,7 @@
   import { t, locale, locales } from '$lib/translations'
 </script>
 
-<Select size="sm" bind:value="{$locale}" placeholder={false}>
+<Select name="locale" bind:value="{$locale}" size="sm" placeholder={false}>
   {#each $locales as value}
     <option value="{value}">{$t(`lang.${value}`)}</option>
   {/each}

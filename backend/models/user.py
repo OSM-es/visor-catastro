@@ -47,6 +47,7 @@ class User(db.Model):
         ADMIN = 1
 
     id = db.Column(db.Integer, primary_key=True)
+    locale = db.Column(db.String)
     role = db.Column(db.Integer, default=Role.READ_ONLY.value)
     tutorial = db.Column(
         MutableDict.as_mutable(JSONEncodedDict),
@@ -73,6 +74,7 @@ class User(db.Model):
         return {
             'tutorial': self.tutorial,
             'email': self.email,
+            'locale': self.locale,
             'role': User.Role(self.role).name,
             'osm_id': self.osm_id,
             'import_id': self.import_id,
