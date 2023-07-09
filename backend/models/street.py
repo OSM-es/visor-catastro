@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+from pytz import UTC
 
 from sqlalchemy.sql import expression
 
@@ -56,7 +57,7 @@ class Street(db.Model):
     
     def is_locked(self):
         if self.lock:
-            age = (datetime.now() - self.lock.date).total_seconds()
+            age = (datetime.now(tz=UTC) - self.lock.date).total_seconds()
             if age < STREET_LOCK_TIMEOUT:
                 return True
             self.unlock()
