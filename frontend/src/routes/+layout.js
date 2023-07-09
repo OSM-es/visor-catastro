@@ -15,4 +15,6 @@ export async function load({ data, url }) {
   const initLocale = locale.get() || defaultLocale
 
   await loadTranslations(initLocale, url.pathname)
+
+  return data
 }

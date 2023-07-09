@@ -10,6 +10,4 @@ export function load({ locals }) {
       throw redirect(302, '/explore')
     }
   }
-
-  return locals.data
 }
