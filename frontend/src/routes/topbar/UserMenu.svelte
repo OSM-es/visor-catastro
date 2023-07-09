@@ -18,7 +18,7 @@
 {#if user}
 <Button pill color="light" id="avatar-menu" class={btnClass}>
   <Chevron>
-    <Avatar src="{user?.img?.href}" size="sm" class="mr-2"/>
+    <Avatar src="{user?.img?.href}" size="sm"/>
     <span class="max-md:hidden">{user.display_name}</span>
   </Chevron>
 </Button>
@@ -27,7 +27,7 @@
   <DropdownItem on:click={logout}>Cerrar sesión</DropdownItem>
 </Dropdown>
 {:else}
-<Button outline size="sm" color="light" class="max-md:hidden mr-2" on:click={signup}>
+<Button outline size="sm" color="light" class="max-md:hidden" on:click={signup}>
   Registrarse
 </Button>
 <Button id="login" outline size="sm" on:click={login}>Iniciar sesión</Button>

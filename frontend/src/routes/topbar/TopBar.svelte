@@ -14,7 +14,8 @@
   import { invalidate } from '$app/navigation'
   import { page } from '$app/stores'
   import { t } from '$lib/translations'
-
+  
+  import ResponsiveIcon from '$lib/components/ResponsiveIcon.svelte'
   import LocaleMenu from '$lib/components/LocaleMenu.svelte'
   import Logo from './Logo.svelte'
   import UserMenu from './UserMenu.svelte'
@@ -68,14 +69,18 @@
       </div>
     {/if}
     <NavLi href="/learn" active={activeUrl.startsWith('/learn')} class={_liClass}>
-      <BookOpen class="w-5 m-1"/> {$t('menu.learn')}
+      <ResponsiveIcon title={$t('menu.learn')} max="md:max-lg" min="max-sm:hidden lg">
+        <BookOpen class="w-5 m-1"/>
+      </ResponsiveIcon>
     </NavLi>
     <NavLi href="/explore" active={activeUrl.startsWith('/explore')} class={_liClass}>
-      <Map class="w-5 m-1"/> {$t('menu.explore')}
+      <ResponsiveIcon title={$t('menu.explore')} max="md:max-lg" min="max-sm:hidden lg">
+        <Map class="w-5 m-1"/>
+      </ResponsiveIcon>
     </NavLi>
   </NavUl>
 
-  <div id="usermenu" class="flex md:order-2" on:invalidateuser={invalidateUser}>
+  <div id="usermenu" class="flex md:order-2 space-x-2" on:invalidateuser={invalidateUser}>
     <DarkMode class="max-sm:hidden"/>
     {#if !user}
       <div class="h-10 mr-2 max-sm:hidden">

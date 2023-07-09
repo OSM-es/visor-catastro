@@ -11,7 +11,7 @@
   import { page } from '$app/stores'
 
   import { login } from '$lib/user'
-  import ResponsiveButton from '$lib/components/ResponsiveButton.svelte'
+  import ResponsiveIcon from '$lib/components/ResponsiveIcon.svelte'
   import Map from '$lib/components/maps/Map.svelte'
   import FotosFachada from '$lib/components/FotosFachada.svelte'
   import ConsLayer from '$lib/components/maps/ConsLayer.svelte'
@@ -144,13 +144,11 @@
             </Listgroup>
           {/if}
         </Popover>
-        <ResponsiveButton
-          btnClass="!px-2"
-          title="Regresar a la tarea"
-          href="/explore/task/{$currentTask}"
-        >
-          <ArrowUturnDown size=18/>
-        </ResponsiveButton>
+        <Button href="/explore/task/{$currentTask}" class="!px-2">
+          <ResponsiveIcon title="Regresar a la tarea">
+            <ArrowUturnDown size=18/>
+          </ResponsiveIcon>
+        </Button>
         <Button
           class="!px-2"
           on:click={() => (centerMap() || focusEditor())}
