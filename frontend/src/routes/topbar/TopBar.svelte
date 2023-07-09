@@ -69,12 +69,12 @@
       </div>
     {/if}
     <NavLi href="/learn" active={activeUrl.startsWith('/learn')} class={_liClass}>
-      <ResponsiveIcon title={$t('menu.learn')} max="md:max-lg" min="max-sm:hidden lg">
+      <ResponsiveIcon title={$t('menu.learn')} max={'md:max-lg'} min={'max-sm:hidden lg'}>
         <BookOpen class="w-5 m-1"/>
       </ResponsiveIcon>
     </NavLi>
     <NavLi href="/explore" active={activeUrl.startsWith('/explore')} class={_liClass}>
-      <ResponsiveIcon title={$t('menu.explore')} max="md:max-lg" min="max-sm:hidden lg">
+      <ResponsiveIcon title={$t('menu.explore')} max={'md:max-lg'} min={'max-sm:hidden lg'}>
         <Map class="w-5 m-1"/>
       </ResponsiveIcon>
     </NavLi>
