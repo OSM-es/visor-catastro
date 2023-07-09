@@ -1,5 +1,6 @@
-export async function load({ depends, locals, url }) {
+export async function load({ depends, locals }) {
   depends('data:user')
+  depends('data:locale')
 
   return { 
     user: locals.user,

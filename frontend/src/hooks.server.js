@@ -10,7 +10,7 @@ export async function handle({ event, resolve }) {
   locals.api = new Api(event)
   
   const locales = parseAcceptLanguage(event.request.headers.get('accept-language') || '')
-  locals.locale = locales.length ? locales[0] : 'es'
+  locals.locale = locales.length ? locales[0].split('-', 1)[0] : ''
 
   return await resolve(event)
 }

@@ -3,20 +3,20 @@ import lang from './lang.json'
 
 export const config = {
   translations: {
-    en: { lang },
     es: { lang },
+    en: { lang },
   },
   loaders: [
-    {
-      locale: 'en',
-      key: 'menu',
-      loader: async () => (await import('./en/menu.json')).default,
-    }, 
     {
       locale: 'es',
       key: 'menu',
       loader: async () => (await import('./es/menu.json')).default,
     },
+    {
+      locale: 'en',
+      key: 'menu',
+      loader: async () => (await import('./en/menu.json')).default,
+    }, 
   ]
 }
 
