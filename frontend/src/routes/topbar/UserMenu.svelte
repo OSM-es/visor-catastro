@@ -19,7 +19,7 @@
 <Button pill color="light" id="avatar-menu" class={btnClass}>
   <Chevron>
     <Avatar src="{user?.img?.href}" size="sm"/>
-    <span class="max-md:hidden">{user.display_name}</span>
+    <span class="max-md:hidden ml-2">{user.display_name}</span>
   </Chevron>
 </Button>
 <Dropdown placement="bottom-end" triggeredBy="#avatar-menu" class="dark:bg-neutral-700">
