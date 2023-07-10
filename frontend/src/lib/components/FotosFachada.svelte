@@ -70,7 +70,7 @@
     images = Object.entries(addresses).map(([ref, addrs]) => {
       return { ref, addrs }
     })
-    images.sort((first, second) => first.addrs > second.addrs)
+    images.sort((a, b) => a.addrs > b.addrs ? 1 : (a.addrs < b.addrs ? -1 : 0))
     for (const im of images) {
       im.addrs = im.addrs.replace(/ 0+/g, ' ')
     }
