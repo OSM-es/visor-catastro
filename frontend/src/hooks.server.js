@@ -5,8 +5,12 @@ import Api from '$lib/api'
 export async function handle({ event, resolve }) {
   const { locals, request } = event
 
-  const session = await decode(event.cookies.get('session'))
-  locals.user = session.user || null
+  try {
+    const session = await decode(event.cookies.get('session'))
+    locals.user = session.user || null
+  } catch (e) {
+    console.info(e)
+  }
   locals.api = new Api(event)
   
   const locales = parseAcceptLanguage(event.request.headers.get('accept-language') || '')
