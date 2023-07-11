@@ -1,5 +1,6 @@
 import json
 
+from geoalchemy2.shape import to_shape
 from sqlalchemy.types import TypeDecorator, VARCHAR
 from sqlalchemy.ext.mutable import Mutable
 
@@ -33,5 +34,34 @@ class MutableDict(Mutable, dict):
         self.changed()
 
     def __delitem__(self, key):
-        dict.__delitem__(self, key)
+        dict.__delitem__(self, dbkey)
         self.changed()
+
+class MutableList(Mutable, list):
+    @classmethod
+    def coerce(cls, key, value):
+        if not isinstance(value, MutableList):
+            if isinstance(value, list):
+                return MutableList(value)
+            return Mutable.coerce(key, value)
+        else:
+            return value
+
+    def __setitem__(self, key, value):
+        list.__setitem__(self, key, value)
+        self.changed()
+
+    def __delitem__(self, key):
+        list.__delitem__(self, key)
+        self.changed()
+
+def get_by_area(model, geom, porcentaje=0.1):
+    s = to_shape(geom)
+    candidates = model.query.filter(model.geom.intersects(geom)).all()
+    candidates = [
+        s 
+        for c in frozenset(candidates)
+        if s.intersects(to_shape(c.geom)) 
+        and s.intersection(to_shape(c.geom)).area / s.area > porcentaje
+    ]
+    return candidates

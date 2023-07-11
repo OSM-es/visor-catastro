@@ -48,7 +48,7 @@ class Task(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     # Código de Catastro del municipio. Coincide en ocasiones con el código postal o código INE, pero no siempre.
-    muncode = db.Column(db.String, index=True)
+    muncode = db.Column(db.String, db.ForeignKey('municipality.muncode'), index=True, nullable=False)
     # Identificador asignado por el programa conversor a partir de la referencia catastral de la parcela.
     # Puede repetirse en otro municipio.
     # No es inmutable por que las parcelas pueden segregarse o agregarse.
@@ -73,6 +73,8 @@ class Task(db.Model):
     lock_id = db.Column(db.Integer, db.ForeignKey('task_lock.id'), nullable=True)
     # Bloqueo para mapear o validar. Tendrán un tiempo de caducidad.
     lock = db.relationship('TaskLock', viewonly=True)
+    # Municipio al que pertenece la tarea
+    municipality = db.relationship('Municipality', back_populates='tasks', uselist=False)
     # Registro de los cambios realizados en la tarea más comentarios.
     history = db.relationship('TaskHistory', back_populates='task')
     geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
@@ -87,6 +89,7 @@ class Task(db.Model):
 
     def asdict(self):
         self.update_lock()
+        lock = 'system' if self.municipality.lock else self.lock.asdict() if self.lock else None
         return {
             'id': self.id,
             'localId': self.localId,
@@ -95,7 +98,7 @@ class Task(db.Model):
             'difficulty': Task.Difficulty(self.difficulty).name,
             'ad_status': Task.Status(self.ad_status).name,
             'bu_status': Task.Status(self.bu_status).name,
-            'lock': self.lock.asdict() if self.lock else None,
+            'lock': lock,
             'ad_mapper': self.ad_mapper.user.asdict() if self.ad_mapper else None,
             'bu_mapper': self.bu_mapper.user.asdict() if self.bu_mapper else None,
             'history': [h.asdict() for h in self.history]
