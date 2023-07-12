@@ -1,26 +1,56 @@
 <script>
   import 'leaflet/dist/leaflet.css'
-	import { beforeUpdate, createEventDispatcher, onMount, setContext } from 'svelte'
+  import { beforeUpdate, createEventDispatcher, onMount, setContext } from 'svelte'
   import { LeafletMap, ScaleControl, TileLayer } from 'svelte-leafletjs'
   import { PUBLIC_INITIAL_VIEW, PUBLIC_INITIAL_ZOOM, PUBLIC_MAX_SW, PUBLIC_MAX_NE } from '$lib/config'
   import { STREET_COLORS, STREET_COLORS_TEXT, DEFAULT_STREET_COLOR } from '$lib/config'
+  import Layout from '../../../routes/+layout.svelte';
   
   export let map
   export let center = PUBLIC_INITIAL_VIEW
   export let zoom = PUBLIC_INITIAL_ZOOM
   export let minZoom = 5
 
+  let pnoaLayer, scneLayer, osmLayer, layerControl
+
   const dispatch = createEventDispatcher()
   
-  const attribution = `&copy; <a href="https://www.openstreetmap.org/copyright"`
-  + `target="_blank">OpenStreetMap</a>`
-  const mapOptions = { center, zoom, maxBounds: [PUBLIC_MAX_SW, PUBLIC_MAX_NE] }
-  const tileUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-  const tileLayerOptions = { minZoom, maxZoom: 19, attribution }
+  const ortoThreshold = 19
+  const mapOptions = { 
+    center,
+    zoom,
+    maxBounds: [PUBLIC_MAX_SW, PUBLIC_MAX_NE],
+    minZoom: 5,
+    maxZoom: 22,
+  }
+  const osmAttribution = `&copy; <a href="https://www.openstreetmap.org/copyright"`
+  + ` target="_blank">OpenStreetMap</a>`
+  const osmUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+  const osmLayerOptions = { minZoom, maxZoom: ortoThreshold, attribution: osmAttribution }
+  const scneAttribution = `&copy; <a href="https://www.scne.es"`
+  + ` target="_blank">Sistema Cartográfico Nacional</a>`
+  const scneUrl = "https://www.ign.es/wms-inspire/ign-base"
+  const scneLayerOptions = { minZoom, maxZoom: ortoThreshold, attribution: scneAttribution, layers: 'IGNBaseTodo' }
+  const pnoaUrl = "https://www.ign.es/wms-inspire/pnoa-ma"
+  const pnoaLayerOptions = { minZoom:ortoThreshold + 1, maxZoom: 22, attribution: scneAttribution, layers: 'OI.OrthoimageCoverage' }
   const scaleControlOptions = { maxWidth: 200, imperial: false }
 
   let streetNames = []
- 
+  
+  $: {
+    if (map) {
+      if (layerControl) layerControl.remove()
+      let layers
+      if (zoom > ortoThreshold && pnoaLayer) {
+        layers = {'PNOA': pnoaLayer()}
+      } else if (scneLayer && osmLayer) {
+        layers = {'IGN-Base': scneLayer(), 'OSM': osmLayer()}
+        map.getMap().attributionControl.removeAttribution(scneAttribution)
+      }
+      layerControl = L.control.layers(layers).addTo(map.getMap())
+    }
+  }
+   
   function handleMoveEnd() {
     const latlng = map.getMap().getCenter()
     center = [latlng.lat, latlng.lng]
@@ -73,7 +103,26 @@
   events={['moveend']}
   on:moveend={handleMoveEnd}
 >
-  <TileLayer url={tileUrl} options={tileLayerOptions}/>
+  {#if zoom > ortoThreshold}
+    <TileLayer 
+      wms={true}
+      url={pnoaUrl}
+      options={pnoaLayerOptions}
+      bind:getTileLayer={pnoaLayer}
+    />
+  {:else}
+    <TileLayer 
+      wms={true}
+      url={scneUrl}
+      options={scneLayerOptions}
+      bind:getTileLayer={scneLayer}
+    />
+    <TileLayer
+      url={osmUrl}
+      options={osmLayerOptions}
+      bind:getTileLayer={osmLayer}
+    />
+  {/if}
   <ScaleControl position="bottomleft" options={scaleControlOptions}/>
   <slot></slot>
 </LeafletMap>

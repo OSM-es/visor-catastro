@@ -2,7 +2,6 @@
   import { Avatar, Badge, Indicator, Listgroup, Tooltip } from 'flowbite-svelte'
   import { Clock } from 'svelte-heros-v2'
   import { afterNavigate } from '$app/navigation'
-  import { page } from '$app/stores'
   import RelativeTime from 'svelte-relative-time'
 
   import { TASK_TYPE_VALUES, TASK_DIFFICULTY_VALUES, TASK_ACTION_VALUES, TASK_ACTION_TEXT } from '$lib/config'

@@ -8,9 +8,8 @@ Edición Callejero:
     ☐ Que pasa con el botón de regresar cuando currentTask es nulo
 
 Mapa:
+    ☐ Capas wms según zona
     ☐ Guardar bounds del mapa. Osm recuerda el zoom de la última visita
-    ☐ Añadir fondo cartociudad
-    ☐ Añadir PNOA en zooms grandes
     ☐ Cuadro de búsqueda de municipios y otras localidades ¿dónde lo ponemos?
     ☐ En la vista de tareas mostrar una leyenda minimizable
     ☐ Ponerle icono de candado a tareas bloqueadas
