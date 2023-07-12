@@ -31,9 +31,6 @@ Edición tarea:
     ☐ Añadir comentarios en los cambios de estado MAPPED, VALIDATED e INVALIDATED
     ☐ ¿Quién puede mapear qué, cualquiera o según nivel de mapeador/dificultad tarea?
     ☐ ¿Quién puede validar, cualquiera o con perfil especial? ¿Asignar automático según nivel de mapeador?
-    ☐ Cuando ya hay una tarea bloqueada y se intenta bloquear otra, el botón Complétala
-      ha sido necesario usar window.location en lugar de goto para que se actualize
-      el mapa. Estudiar por qué no ha funcionado la opción invalidateAll.
     ☐ No estaría de más, que al importar, se diera un recordatorio de usar la cuenta de importación si se está logueado con la normal.
     Historial:
         ☐ Formulario añadir comentario.

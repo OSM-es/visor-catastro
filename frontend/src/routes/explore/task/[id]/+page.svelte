@@ -1,7 +1,7 @@
 <script>
-  import { Avatar, Badge, Button, Indicator, Listgroup, Tooltip } from 'flowbite-svelte'
+  import { Avatar, Badge, Indicator, Listgroup, Tooltip } from 'flowbite-svelte'
   import { Clock } from 'svelte-heros-v2'
-  import { onMount } from 'svelte'
+  import { afterNavigate } from '$app/navigation'
   import { page } from '$app/stores'
   import RelativeTime from 'svelte-relative-time'
 
@@ -19,8 +19,9 @@
 
   export let data
 
+  $: buildings = data.task.buildings
+
   let map, center, zoom, initialCenter, initialZoom, getConsLayer, getUrl
-  let buildings = data.task.buildings
   let fixmes = data.task?.fixmes
   let scrollImage, viewImage, imageCount
   let taskColor = 'text-success-500'
@@ -51,12 +52,14 @@
     return false
   }
 
-  onMount(() => {
-    currentTask.set(data.task.id)
-    map.getMap().fitBounds(getConsLayer().getBounds())
-    initialZoom = zoom
-    initialCenter = center
-    page.subscribe(page => viewImage = page.url.searchParams.get('ref'))
+  afterNavigate(({to}) => {
+    if (to.route.id === '/explore/task/[id]') {
+      viewImage = to.url.searchParams.get('ref')
+      currentTask.set(data.task.id)
+      map.getMap().fitBounds(getConsLayer().getBounds())
+      initialZoom = zoom
+      initialCenter = center
+    }
   })
 </script>
 

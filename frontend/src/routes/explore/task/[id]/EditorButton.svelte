@@ -14,7 +14,7 @@
   }
 
   function gotoCurrentTask() {
-    window.location = `/explore/task/${task.currentLock}`
+    goto(`/explore/task/${task.currentLock}`)
   }
 </script>
 
