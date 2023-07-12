@@ -130,20 +130,14 @@ def status():
 
 @uploader.route("/update/<mun_code>", methods=["PUT"])
 def update(mun_code):
-    try:
-        src_date = request.args.get('src_date')
-    except Exception as e:
-        print(e)
-    print(data)
     log = current_app.logger
-    osmid = request.args.get('osmid', '')
-    if not osmid:
-        msg = f"Se requiere el identificador de la geometría del municipio {mun_code}"
-        log.info(msg)
-        abort(422, msg)
-    __, mun_geom = get_geometry('wr', search=osmid, level='8')
-    candidates = Municipality.get_by_area(mun_geom)
-    print(candidates)
+    src_date = request.args.get('src_date')
+    fn = UPDATE + mun_code + '/' + mun_code + '.geojson'
+    with open(fn) as fo:
+        data = json.load(fo)
+    mun_geom = None
+    geoms = [shape(feat['geometry']) for feat in data['features']]
+    mun_geom = GeometryCollection(geoms)
     msg = f"Registrada geometría de {mun_code}"
     log.info(msg)
     return msg
