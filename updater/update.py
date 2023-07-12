@@ -113,6 +113,7 @@ def daily_check():
         check_mun_diff(municipios)
         upload_provs(config.include_provs.copy())
         update(list(municipios.keys()))
+        # upload(list(municipios.keys()))
 
 def upload_provs(provincias):
     """Solcita cargar provincias en la base de datos."""
@@ -156,7 +157,7 @@ def check_prov(prov_code, municipios):
     return True
 
 def check_mun_diff(municipios):
-    "Compara la lista de municipios con de la anterior actualización."
+    "Compara la lista de municipios con la de la anterior actualización."
     if os.path.exists('municipios.json'):
         with open('municipios.json', 'r') as fo:
             mun_prev = json.load(fo)
@@ -174,7 +175,56 @@ def check_mun_diff(municipios):
         json.dump(municipios, fo, indent=2)
 
 def update(municipios):
-    "Aplica multiproceso a la lista de municipios."
+    "Registra la geometría de los municipios."
+    src_date = get_date(municipios[0])
+    retries = 0
+    while municipios and retries < config.max_retries:
+        mun_code = municipios[0]
+        url = config.uploader_url + 'update/' + mun_code
+        url += f'?src_date={src_date}'
+        try:
+            req = requests.put(url)
+            if req.status_code == requests.codes.ok and mun_code in req.text:
+                municipios.pop(0)
+        except RequestException as e:
+            print(str(e))
+            time.sleep(config.retray_delay)
+            retries += 1
+    return len(municipios)
+
+def update2(municipios):
+    "Registra la geometría de los municipios."
+    src_date = get_date(municipios[0])
+    len_mun = len(municipios)
+    start_len_mun = len_mun
+    retries = 0
+    qgs = QgsSingleton()
+    while municipios and retries < config.max_retries:
+        print(f"Registrando {len_mun} municipios")
+        with Pool(config.workers) as pool:
+            if retries > 0:
+                print("Reintento nro", retries)
+            for mun_code in pool.imap_unordered(process(True), municipios):
+                if mun_code is not None:
+                    url = config.uploader_url + 'update/' + mun_code
+                    url += f'?src_date={src_date}'
+
+
+    #     osmid = csvtools.get_key(fn, mun_code)[1:2]
+    #     if osmid:
+    #         url += f'?osmid={osmid[0]}'
+    #     try:
+    #         req = requests.put(url, data={'src_date': src_date.isoformat()})
+    #         if req.status_code == requests.codes.ok and mun_code in req.text:
+    #             municipios.pop(0)
+    #     except RequestException as e:
+    #         print(str(e))
+    #         time.sleep(config.retray_delay)
+    #         retries += 1
+    # return len(municipios)
+
+def upload(municipios):
+    "Aplica multiproceso para registrar la lista de municipios."
     src_date = get_date(municipios[0])
     len_mun = len(municipios)
     start_len_mun = len_mun
@@ -203,14 +253,14 @@ def update(municipios):
                 len_mun = len(municipios)
                 retries = 0
     if (municipios):
-        print(f"Actualización {src_date} pendientes {len_mun} municipios de {start_len_mun}")
+        print(f"Actualización de tareas {src_date} pendientes {len_mun} municipios de {start_len_mun}")
     else:
-        print(f"Actualización {src_date} completados {start_len_mun} municipios")
+        print(f"Actualización de tareas {src_date} completados {start_len_mun} municipios")
         with open('src_date.txt', 'w') as fo:
             fo.write(src_date)
     qgs.exitQgis()
 
-def process(mun_code):
+def process(mun_code, municipality=False):
     "Procesa un municipio individual."
     if status(mun_code) is not None:
         return mun_code
@@ -224,9 +274,10 @@ def process(mun_code):
     catconfig.set_config({'language': get_lang(mun_code)})
     options.path = [mun_code]
     options.args = mun_code
+    options.municipality = municipality
     try:
         CatAtom2Osm.create_and_run(mun_code, options)
-        CatAtom2Osm.create_and_run(mun_code, options)
+        if not municipality: CatAtom2Osm.create_and_run(mun_code, options)
         log.info('Procesado ' + mun_code)
     except (BadZipfile, CatException, RequestException) as e:
         if os.path.exists(mun_code):

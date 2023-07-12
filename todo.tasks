@@ -38,7 +38,7 @@ Edición tarea:
     ☐ No estaría de más, que al importar, se diera un recordatorio de usar la cuenta de importación si se está logueado con la normal.
     Historial:
         ☐ Formulario añadir comentario.
-            ☐ En la api, depurar códigos raros
+            ☐ En la api, depurar entrada usuario
         ☐ Poner enlaces como en gestor tareas
             Ver conjunto de cambios en OSMCha
             Visualizar con Overpass?
@@ -47,10 +47,10 @@ Edición tarea:
 Errores:
     ☐ Personalizar páginas not found y Error
     ☐ Poner un spiner durante carga de datos. Mirar si el de /explore se puede hacer general
-    ☐ Revisar API y manejadores de formularios
+    ☐ @high Revisar API y manejadores de formularios
 
 Ajustes usuario:
-    ☐ Idioma, notificaciones, qué se muestra en la página de usuario
+    ☐ notificaciones, qué se muestra en la página de usuario
     ☐ Cuentas vinculadas (normal / importación)
     ☐ Rol de usuario
     ☐ Nivel de mapeo
@@ -74,7 +74,7 @@ Tutorial #9:
     ☐ Edición de tareas
 
 Comprobador de diferencias #4:
-    ☐ Herramienta para comprobar dos archivos de tareas y comprobar las diferencias en los edificios/direcciones
+    ☐ @critical Herramienta para comprobar dos archivos de tareas y comprobar las diferencias en los edificios/direcciones
 
 Estadísticas:
     ☐ Página de estadísticas globales
@@ -82,8 +82,8 @@ Estadísticas:
     ☐ ¿otros?
 
 Tasking manager:
-    ☐ Detectar proyectos existentes en TM, impedir edición, redirigir a ellos.
-    ☐ Contemplar importar proyecto
+    ☐ @high Detectar proyectos existentes en TM, impedir edición, redirigir a ellos.
+    ☐ @high Contemplar importar proyecto. Depende comprobador de diferencias.
 
 Fixmes:
     ☐ Añadir casilla de verificación para que el usuario pueda llevar la cuenta de los revisados.
@@ -98,5 +98,5 @@ Gestor de notificaciones #3:
     
 Actualización:
     ☐ Notificar por correo nuevos municipios
-    ☐ Al terminar de cargar en bd, mover archivos de update a dist para que no
+    ☐ @high Al terminar de cargar en bd, mover archivos de update a dist para que no
       colisionen con próxima actualización

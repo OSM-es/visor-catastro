@@ -128,25 +128,41 @@ def upload_streets(mun_code):
 def status():
     return "ok"
 
+@uploader.route("/update/<mun_code>", methods=["PUT"])
+def update(mun_code):
+    try:
+        src_date = request.args.get('src_date')
+    except Exception as e:
+        print(e)
+    print(data)
+    log = current_app.logger
+    osmid = request.args.get('osmid', '')
+    if not osmid:
+        msg = f"Se requiere el identificador de la geometría del municipio {mun_code}"
+        log.info(msg)
+        abort(422, msg)
+    __, mun_geom = get_geometry('wr', search=osmid, level='8')
+    candidates = Municipality.get_by_area(mun_geom)
+    print(candidates)
+    msg = f"Registrada geometría de {mun_code}"
+    log.info(msg)
+    return msg
+
+
 @uploader.route("/municipality/<mun_code>", methods=["PUT"])
 def upload(mun_code):
-    log = current_app.logger
+    mun = Municipality.get_by_code(mun_code)
     filename = UPDATE + mun_code + '/' + 'report.json'
     with open(filename, 'r') as fo:
         report = json.load(fo)
     mun_name = report['mun_name']
     src_date = datetime.date.fromisoformat(report['building_date'].replace('/', '-'))
-    mun = Municipality.get_by_code(mun_code)
     if mun is None:
         mun = Municipality(muncode=mun_code, name=mun_name, date=src_date)
     elif mun.date == src_date:
         msg = f"{mun_code} ya está registrado"
         log.info(msg)
         return msg
-    osmid = request.args.get('osmid', '')
-    if osmid:
-        __, mun.geom = get_geometry('wr', search=osmid, level='8')
-        log.info(f"Registrada geometría de {mun_code} {mun_name}")
     db.session.add(mun)
     zoning = UPDATE + mun_code + '/' + 'zoning.geojson'
     tasks = merge_tasks(zoning)

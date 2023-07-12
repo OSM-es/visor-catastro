@@ -112,6 +112,11 @@
           <span class="font-bold {taskColor}">
             {TASK_DIFFICULTY_VALUES[data.task.difficulty]}</span>.
         </p>
+        {#if data.task.lock === 'system'}
+          <p class="font-bold text-danger-500">
+            Municipio bloqueado para actualizar por el sistema.
+          </p>
+        {/if}  
         {#if !data.task.lock || data.task.lock?.buildings}
           <TaskActions
             title={'buildings'}

@@ -1,0 +1,61 @@
+Existe un conjunto de tareas con su geometría en la base de datos y el archivo en data/dist/<mun_code>/tasks/<task>.osm.gz
+Llega un nuevo conjunto en data/update/<mun_code>/tasks/<task>.osm.gz
+
+Suposición: Cuando se segrega un municipio, cada parcela termina en uno de ellos, no se segregan parcelas terminando en distinto municipio.
+Suposición: Una parcela se segrega o agrega, pero no ambas cosas a la vez.
+
+Se cargan las tareas por municipio.
+
+Se buscan las coincidencias de todas las tareas del municipio para poder comparar diferencias.
+
+Una coincidencia es un conjunto de tareas antiguas que ocupa la misma región que un conjunto de tareas nuevas.
+
+Match
+    old = {a, b,... m}
+    new = {1, 2,... n}
+    pairs = {a: 1, b: 2,... }
+
+    def init(list old, new)
+        añade list old, new
+
+    def añadir(list old, new)
+        une this.old con old
+        añade new a this.new
+        para cada n de new
+            pairs[n] = new
+
+len(old) = len(new) = 1 es el caso normal
+len(old) = 1, len(new) > 1 una segregación
+len(old) > 1, len(new) = 1 una agregación
+len(old) > 1, len(new) > 1 poco probable
+
+Claves: Todos los archivos de dist desaparecen, se sustituyen por los de update
+Claves: Si el municipio contiene tareas invalidadas o bloqueadas, no se podrá actualizar, habrá que esperar
+
+Claves: Si las tareas se agregan, la nueva puede recoger el historial de cada una, pero habría que diferenciarlos de alguna forma (id?)
+Claves: Si las tareas se segregan, habrá que poner el historial viejo en una de ellas y una entrada de registro de historial indicándolo en las demás.
+
+Para cada tarea nueva task 1, 2...:
+    Busca en la base de datos candidatos a coincidir:
+        Se excluyen los que el porcentaje de área intersectada con task.geom es inferior a un umbral
+    Si no tiene candidatos, la tarea es nueva, la añade a la bd (como hasta ahora). Siguiente.
+    Para cada candidato,
+        Si no está importado (ad_status=READY y bu_status=READY), no necesita comparar,
+            reemplazar
+            se quita el candidato
+        Si está importado (cualquier otro estado), hay que comparar.
+    Para cada match en la lista de matches,
+        Si algún candidato está en match.old,
+            le añade candidatos, task
+            Finaliza para
+    Si no se añadió a algún match, crea uno nuevo candidatos, task
+
+reemplazar
+    se reemplaza mv update -> dist
+    podría pasarse el historial a task
+    podría añadirse un registro al historial 
+    se elimina la tarea vieja de la bd
+
+Para cada match en la lista de matches,
+    Saca diferencias match.old, match.new
+    Si no hay fixmes, se puede reemplazar
