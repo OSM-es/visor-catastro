@@ -1,3 +1,7 @@
+export async function load({ depends, locals }) {
+  return({locale: locals.locale})
+}
+
 export const actions = {
   default: async ({ locals, request }) => {
     const formData = await request.formData()

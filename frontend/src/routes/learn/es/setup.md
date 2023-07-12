@@ -5,12 +5,12 @@
 ## Preparación
 
 {#if user?.tutorial?.passed?.includes('login')}
-El tutorial contendrá más contenido interactivo desarrollando la guía de
+TODO: El tutorial contendrá más contenido interactivo desarrollando la guía de
 importación.
 
 Al completarlo se consigue el nivel para [comenzar a mapear](/explore).
 
 {:else}
-Completa el [registro](/learn/login)
+Completa el [tutorial de registro](/learn/login)
 
 {/if}

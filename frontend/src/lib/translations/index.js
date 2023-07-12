@@ -16,7 +16,17 @@ export const config = {
       locale: 'en',
       key: 'menu',
       loader: async () => (await import('./en/menu.json')).default,
-    }, 
+    },
+    {
+      locale: 'es',
+      key: 'learn',
+      loader: async () => (await import('./es/learn.json')).default,
+    },
+    {
+      locale: 'en',
+      key: 'learn',
+      loader: async () => (await import('./en/learn.json')).default,
+    },
   ]
 }
 

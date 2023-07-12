@@ -34,16 +34,16 @@
   <div class="grid grid-cols-2 gap-8 place-content-stretch">
     <Card padding="xl" size="lg">
       <h5 class="pb-4 text-lg font-medium border-b border-neutral-200 dark:border-neutral-700">Ajustes</h5>
-      {#if user.stated}
-        <form use:enhance={updateForm} 
-          method="POST"
-          action="?/save"
-          class="pt-8 space-y-4"
-        >
-          <div class="flex flex-row w-full items-center place-content-between gap-8">
-            <Label>Idioma</Label>
-            <div class="w-48"><LocaleMenu/></div>
-          </div>
+      <form use:enhance={updateForm} 
+        method="POST"
+        action="?/save"
+        class="pt-8 space-y-4"
+      >
+        <div class="flex flex-row w-full items-center place-content-between gap-8">
+          <Label>Idioma</Label>
+          <div class="w-48"><LocaleMenu/></div>
+        </div>
+        {#if user.stated}
           <Label for="email" color={form?.errors?.email ? 'red' : 'gray'}>
             Correo electrónico
           </Label>
@@ -57,10 +57,10 @@
             </Helper>
           {/if}
           <Button type="submit">Enviar</Button>
-        </form>
-      {:else}
-        <Button href="/learn/login">Completa el tutorial para editar</Button>
-      {/if}
+        {:else}
+          <Button href="/learn/login">Completa el tutorial para editar</Button>
+        {/if}
+      </form>
     </Card>
     <Card padding="xl" size="md">
       <h5 class="pb-4 text-lg font-medium border-b border-neutral-200 dark:border-neutral-700">Detalles de OpenStreetMap</h5>
