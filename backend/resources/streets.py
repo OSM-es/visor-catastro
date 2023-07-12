@@ -1,3 +1,4 @@
+import gzip
 import json
 
 import osm2geojson
@@ -11,23 +12,40 @@ from auth import auth, get_current_user
 from config import Config
 from overpass import getOsmStreets
 
+UPDATE = Config.UPDATE_PATH
+
 
 def getStreet(tags):
     return tags.get('addr:street') or tags.get('addr:place') or ''
 
 
 class Streets(Resource):
-    def get(self, mun_code):
-        mun = models.Municipality.get_by_code(mun_code)
-        bounds = to_shape(mun.geom).bounds
-        cat_name = request.args.get('name', '')
+    def get(self, id, cat_name):
+        task = models.Task.query.get(id)
+        if not task: abort(404)
+        mun_code = task.municipality.muncode
+
+        fn = UPDATE + task.muncode + '/tasks/' + task.localId + '.osm.gz'
+        with gzip.open(fn) as fo:
+            xml = fo.read()
+        geojson = osm2geojson.xml2geojson(xml, filter_used_refs=False)
+        task_streets = {
+            f['properties'].get('tags', {}).get('addr:cat_name', '')
+            for f in geojson['features']
+            if f['properties'].get('tags', {}).get('addr:cat_name', '')
+        }
+
+        bounds = to_shape(task.municipality.geom).bounds
         streets = []
         street = None
         for st in models.Street.query.filter(
             models.Street.mun_code == mun_code
-        ).order_by(models.Street.source, models.Street.osm_name).all():
+        ).order_by(
+            models.Street.source, models.Street.osm_name
+        ).all():
             streets.append(st.asdict())
-            if not cat_name or cat_name == st.cat_name:
+            streets[-1]['in_task'] = st.cat_name in task_streets
+            if cat_name == st.cat_name:
                 cat_name = st.cat_name
                 street = st
         if not street: abort(404)
@@ -54,7 +72,6 @@ class Streets(Resource):
             'addresses': addresses,
             'osmStreets': osm_streets,
         }
-
         return data
 
 

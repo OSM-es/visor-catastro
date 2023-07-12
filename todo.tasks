@@ -3,8 +3,6 @@ Edición Callejero:
     ☐ Botón editar en JOSM
     ☐ Botones ver en OSM / Mapillary / Kartaview
     ☐ Botón recargar de osm?
-    ☐ Filtrar por calles que estén en la tarea actual
-    ☐ Puede que falle la limitación de tiempo del bloqueo de calles
     ☐ Que pasa con el botón de regresar cuando currentTask es nulo
 
 Mapa:

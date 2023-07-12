@@ -14,8 +14,7 @@
   import Tabs from '$lib/components/tabs/Tabs.svelte'
   import TabItem from '$lib/components/tabs/TabItem.svelte'
   import TaskActions from './TaskActions.svelte'
-  import { currentTask } from '$lib/stores.js'
-
+  
   export let data
 
   $: buildings = data.task.buildings
@@ -54,7 +53,6 @@
   afterNavigate(({to}) => {
     if (to.route.id === '/explore/task/[id]') {
       viewImage = to.url.searchParams.get('ref')
-      currentTask.set(data.task.id)
       map.getMap().fitBounds(getConsLayer().getBounds())
       initialZoom = zoom
       initialCenter = center

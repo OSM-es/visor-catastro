@@ -4,7 +4,6 @@
 	import { enhance } from '$app/forms'
   import { goto } from '$app/navigation'
   import { TASK_ACTION_TEXT } from '$lib/config'
-  import { currentTask } from '$lib/stores.js'
   import EditorButton from './EditorButton.svelte'
 
   export let title
@@ -15,7 +14,7 @@
   export let exitUrl
 
   const streets = task.streets.map(st => {
-    st.href = `/explore/${task.muncode}/street/${st.cat_name}`
+    st.href = `/explore/task/${task.id}/street/${st.cat_name}`
     return st
   })
   const streetsToValidate = task.streets?.filter(s => !s.validated) || []
@@ -37,7 +36,6 @@
   }
 
   function exit() {
-    currentTask.set(null)
     goto(`/explore?map=${exitUrl(-1)}`)
   }
 </script>

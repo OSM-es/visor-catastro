@@ -2,11 +2,24 @@
   import { onMount, setContext } from 'svelte'
   import { writable } from 'svelte/store'
 	import { enhance } from '$app/forms'
-  import { Button, ButtonGroup, Input, Listgroup, ListgroupItem, Popover, TableBody, TableBodyCell, TableBodyRow, TableHead } from 'flowbite-svelte'
+  import {
+    Badge,
+    Button,
+    ButtonGroup,
+    Checkbox,
+    Input,
+    Label,
+    Listgroup,
+    ListgroupItem,
+    Popover,
+    TableBody,
+    TableBodyCell,
+    TableBodyRow,
+    TableHead
+  } from 'flowbite-svelte'
   import { ArrowLeft, ArrowRight, ArrowUturnDown, ArrowsPointingIn, Check, LockClosed, MagnifyingGlass, PencilSquare, XMark } from 'svelte-heros-v2'
   import debounce from 'lodash/debounce'
 
-  import { currentTask } from '$lib/stores.js'
   import { afterNavigate, beforeNavigate, goto, invalidateAll } from '$app/navigation'
   import { page } from '$app/stores'
 
@@ -31,12 +44,13 @@
   setContext('street', street)
 
   let map, getConsLayer, scrollImage, viewImage, center, zoom
-  let filter, items = [], getTable
+  let filter, items = [], getTable, filterTask=true
   
-  $: streets = filterStreets(data.streets.slice(), filter, $street.cat_name)
+  $: streets = filterStreets(data.streets.slice(), filter, $street.cat_name, filterTask)
   $: index = items.findIndex((st) => st.cat_name === $street.cat_name)
   $: street.set(data.street)
-  
+  $: streetsToValidate = streets?.filter(s => s.validated) || []
+
   const focusEditor = debounce(() => {
     const editor = document.getElementById('editor')
     editor?.scrollIntoView({ block: 'center', behavior: 'smooth' })
@@ -71,12 +85,14 @@
     map.getMap().fitBounds(getConsLayer().getBounds())
   }, 100)
 
-  function filterStreets(streets, filter, cat_name) {
+  function filterStreets(streets, filter, cat_name, filterTask) {
     return streets.filter((street) => {
       return (
-        street.cat_name === cat_name || 
-        street.cat_name.toLowerCase().includes(filter?.toLowerCase()) ||
-        street.osm_name.toLowerCase().includes(filter?.toLowerCase())
+        (!filterTask || street.in_task === filterTask) && (
+          street.cat_name === cat_name || 
+          street.cat_name.toLowerCase().includes(filter?.toLowerCase()) ||
+          street.osm_name.toLowerCase().includes(filter?.toLowerCase())
+        )
       )
     })
   }
@@ -88,7 +104,7 @@
   }
 
   function viewStreet(name) {
-    goto(`/explore/${$street.mun_code}/street/${name}`)
+    goto(`/explore/task/${$page.params?.id}/street/${name}`)
   }
 
   function gotoOsm() {
@@ -98,7 +114,7 @@
   }
 
   function gotoNextStreet(next) {
-    const url = `/explore/${$street.mun_code}/street/${items[index + next]?.cat_name}`
+    const url = `/explore/task/${$page.params?.id}/street/${items[index + next]?.cat_name}`
     goto(url)
   }
 
@@ -116,54 +132,64 @@
 
 <div class="flex flex-col flex-grow">
   <div class="border-b border-neutral-200 dark:border-neutral-700">
-    <div class="flex flex-row px-4 pt-1 pb-0.5 space-x-2 bg-neutral-200 dark:bg-neutral-600 h-10">
-      <div class="lg:w-96">
-        <Input size="sm" bind:value={filter} class="max-md:text-xs">
-          <MagnifyingGlass slot="left" size=20/>
-          <XMark slot="right" size=16 on:click={() => (filter = '')}/>
-        </Input>
+    <div class="flex flex-row max-sm:flex-col px-4 pt-1 pb-0.5 space-x-6 bg-neutral-200 dark:bg-neutral-600 h-10 max-sm:h-20 items-center">
+      <div class="flex flex-row space-x-2">
+        <div class="lg:w-96">
+          <Input size="sm" bind:value={filter} class="max-md:text-xs">
+            <MagnifyingGlass slot="left" size=20/>
+            <XMark slot="right" size=16 on:click={() => (filter = '')}/>
+          </Input>
+        </div>
+        <div class="flex flex-row space-x-1 items-center">
+          <Checkbox id="filterTask" bind:checked={filterTask}/>
+          <Label for="filterTask">En la tarea</Label>
+        </div>
       </div>
-      <ButtonGroup>
-        <Button
-          class="!px-2"
-          on:click={() => gotoNextStreet(-1)}
-          disabled={index <= 0}
-        >
-          <ArrowLeft size=14/>
-        </Button>
-        <Button id="edit" class="!px-2" disabled={zoom < 19}>
-          <PencilSquare size=18/>
-        </Button>
-        <Popover triggeredBy="#edit" placement="bottom-start" arrow={false} offset=2 class="flex flex-row" defaultClass="p-0 w-48">
-          {#if zoom < 19}
-            <p class="text-sm mx-3 my-2 whitespace-nowrap">Haz zoom en el mapa para editar</p>
-          {:else}
-            <Listgroup class="divide-none" active>
-              <ListgroupItem on:click={gotoOsm}>Editar en OSM</ListgroupItem>
-              <ListgroupItem>Editar con JOSM</ListgroupItem>
-            </Listgroup>
-          {/if}
-        </Popover>
-        <Button href="/explore/task/{$currentTask}" class="!px-2">
-          <ResponsiveIcon title="Regresar a la tarea">
-            <ArrowUturnDown size=18/>
-          </ResponsiveIcon>
-        </Button>
-        <Button
-          class="!px-2"
-          on:click={() => (centerMap() || focusEditor())}
-          disabled={index < 0 || index >= (streets.length - 1)}
-        >
-          <ArrowsPointingIn size=20/>
-        </Button>
-        <Button
-          class="!px-2"
-          on:click={() => gotoNextStreet(1)}
-          disabled={index < 0 || index >= (streets.length - 1)}
-        >
-          <ArrowRight size=14/>
-        </Button>
-      </ButtonGroup>
+        <div>
+          <Badge large color={streetsToValidate.length === streets.length ? 'green' : 'dark'}>
+            {streetsToValidate.length} / {streets.length}
+          </Badge>
+          <ButtonGroup>
+          <Button
+            class="!px-2"
+            on:click={() => gotoNextStreet(-1)}
+            disabled={index <= 0}
+          >
+            <ArrowLeft size=14/>
+          </Button>
+          <Button id="edit" class="!px-2" disabled={zoom < 19}>
+            <PencilSquare size=18/>
+          </Button>
+          <Popover triggeredBy="#edit" placement="bottom-start" arrow={false} offset=2 class="flex flex-row" defaultClass="p-0">
+            {#if zoom < 19}
+              <p class="text-sm mx-3 my-2 whitespace-nowrap">Haz zoom para editar</p>
+            {:else}
+              <Listgroup class="divide-none w-36" active>
+                <ListgroupItem on:click={gotoOsm}>Editar en OSM</ListgroupItem>
+                <ListgroupItem>Editar con JOSM</ListgroupItem>
+              </Listgroup>
+            {/if}
+          </Popover>
+          <Button href="/explore/task/{$page.params?.id}" class="!px-2">
+            <ResponsiveIcon title="Regresar a la tarea">
+              <ArrowUturnDown size=18/>
+            </ResponsiveIcon>
+          </Button>
+          <Button
+            class="!px-2"
+            on:click={() => (centerMap() || focusEditor())}
+          >
+            <ArrowsPointingIn size=20/>
+          </Button>
+          <Button
+            class="!px-2"
+            on:click={() => gotoNextStreet(1)}
+            disabled={index < 0 || index >= (streets.length - 1)}
+          >
+            <ArrowRight size=14/>
+          </Button>
+        </ButtonGroup>
+      </div>
     </div>
     <form method="POST" use:enhance={dontReset}>
       <SortTable data={streets} bind:items bind:getTable divClass="relative overflow-scroll h-40" striped>
