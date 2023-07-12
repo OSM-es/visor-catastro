@@ -25,7 +25,7 @@ class Municipality(db.Model):
     def __str__(self):
         return f"{self.muncode} {self.name}"
 
-    def lock():
+    def set_lock():
         # TODO: si no hay ninguna tarea bloqueada
         # y no hay ninguna tarea invalidada
         # bloquea municipio
