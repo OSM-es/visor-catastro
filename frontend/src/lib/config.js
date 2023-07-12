@@ -5,6 +5,8 @@ export const PUBLIC_API_URL = env.PUBLIC_API_URL || (dev ? ':5000/api' : '/api')
 export const PUBLIC_INITIAL_VIEW = env.PUBLIC_INITIAL_VIEW.split(',') || [36, 1]
 PUBLIC_INITIAL_VIEW.forEach((x, i) => PUBLIC_INITIAL_VIEW[i] = Number(x).toFixed(4))
 export const PUBLIC_INITIAL_ZOOM = Number(env.PUBLIC_INITIAL_ZOOM) || 5
+export const PUBLIC_MAX_SW = env.PUBLIC_MAX_SW.split(',') || [20, -35]
+export const PUBLIC_MAX_NE = env.PUBLIC_MAX_NE.split(',') || [50, 20]
 
 export const TASK_TYPE_VALUES = {
   Urbana: 'Urbana',

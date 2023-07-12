@@ -2,7 +2,7 @@
   import 'leaflet/dist/leaflet.css'
 	import { beforeUpdate, createEventDispatcher, onMount, setContext } from 'svelte'
   import { LeafletMap, ScaleControl, TileLayer } from 'svelte-leafletjs'
-  import { PUBLIC_INITIAL_VIEW, PUBLIC_INITIAL_ZOOM } from '$lib/config'
+  import { PUBLIC_INITIAL_VIEW, PUBLIC_INITIAL_ZOOM, PUBLIC_MAX_SW, PUBLIC_MAX_NE } from '$lib/config'
   import { STREET_COLORS, STREET_COLORS_TEXT, DEFAULT_STREET_COLOR } from '$lib/config'
   
   export let map
@@ -14,7 +14,7 @@
   
   const attribution = `&copy; <a href="https://www.openstreetmap.org/copyright"`
   + `target="_blank">OpenStreetMap</a>`
-  const mapOptions = { center, zoom }
+  const mapOptions = { center, zoom, maxBounds: [PUBLIC_MAX_SW, PUBLIC_MAX_NE] }
   const tileUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
   const tileLayerOptions = { minZoom, maxZoom: 19, attribution }
   const scaleControlOptions = { maxWidth: 200, imperial: false }

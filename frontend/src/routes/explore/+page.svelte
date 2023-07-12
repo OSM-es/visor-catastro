@@ -3,7 +3,7 @@
   import TaskList from './TaskList.svelte'
   import { goto } from '$app/navigation'
   import { GeoJSON } from 'svelte-leafletjs'
-
+  
   import { TASK_COLORS, TASK_LOCKED_COLOR, TASK_DIFFICULTY_VALUES, TASK_STATUS_VALUES, TASK_TYPE_VALUES } from '$lib/config'
   import Map from '$lib/components/maps/Map.svelte'
 
