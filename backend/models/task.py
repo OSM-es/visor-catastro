@@ -5,6 +5,7 @@ from pytz import UTC
 from geoalchemy2 import Geometry, Index
 
 from models import db, TaskHistory, TaskLock
+from models.utils import get_by_area
 
 
 class Task(db.Model):
@@ -83,6 +84,11 @@ class Task(db.Model):
     @staticmethod
     def get_by_code(mun_code, local_id):
         return Task.query.filter(Task.muncode == mun_code, Task.localId == local_id).one_or_none()
+
+    @staticmethod
+    def get_by_area(geom):
+        return get_by_area(Task, geom)
+
 
     def __str__(self):
         return f"{self.muncode} {self.localId} {self.type} {self.parts}"

@@ -1,7 +1,7 @@
 from geoalchemy2 import Geometry
 
-from models import db, utils
-from models.utils import JSONEncodedDict, MutableList
+from models import db
+from models.utils import JSONEncodedDict, MutableList, get_by_area
 
 
 class Municipality(db.Model):
@@ -20,7 +20,7 @@ class Municipality(db.Model):
 
     @staticmethod
     def get_by_area(geom):
-        return utils.get_by_area(Municipality, geom)
+        return get_by_area(Municipality, geom)
 
     def __str__(self):
         return f"{self.muncode} {self.name}"
