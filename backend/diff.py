@@ -35,7 +35,7 @@ class Diff():
         """Read osm.gz file to geojson shapes"""
         with gzip.open(fn) as fo:
             xml = fo.read()
-        return osm2geojson.xml2shapes(xml)
+        return osm2geojson.xml2shapes(xml, filter_used_refs=False)
 
     @staticmethod
     def dataframe():
@@ -46,8 +46,9 @@ class Diff():
         """Convert geojson to dataframe"""
         for feat in data:
             geom = feat['shape']
-            tags = feat['properties']['tags']
-            df.loc[len(df)] = [mun_code, task, tags, geom]
+            tags = feat['properties'].get('tags')
+            if tags:
+                df.loc[len(df)] = [mun_code, task, tags, geom]
 
     @staticmethod
     def get_match(geom, candidates):
@@ -79,7 +80,6 @@ class Diff():
         matches1 = []
         for i in df2.index:
             g = df2.geometry[i]
-            # TODO: si g es un nodo, habrá que hacer un buffer y filtrar candidatos por tipo
             candidates = nx.query(g, predicate="intersects")
             match = Diff.get_match(g, [df1.iloc[c].geometry for c in candidates])
             if match is not None:
@@ -94,12 +94,15 @@ class Diff():
         return matches
 
     def get_fixme(self, feat, text):
+        msg = text + ' ' + feat.geometry.geom_type
+        tags = {k: v for k, v in feat.tags.items() if k not in ('fixme', 'ref', 'addr:cat_name')}
+        msg += str(tags)
         return {
             'geom': feat.geometry,
             'node': feat.geometry.point_on_surface(),
             'mun_code': feat.mun_code,
             'task': feat.task,
-            'fixme': text,
+            'fixme': msg,
         }
 
     def update_matches(self, matches):
@@ -109,10 +112,10 @@ class Diff():
             demolished = False
             if i1 is None:
                 feat = self.df2.loc[i2]
-                fixme = 'Creado o agregado'
+                fixme = 'Creado' if feat.geometry.geom_type == 'Point' else 'Creado o agregado'
             elif i2 is None:
                 feat = self.df1.loc[i1]
-                fixme = 'Eliminado o segregado'
+                fixme = 'Eliminado' if feat.geometry.geom_type == 'Point' else 'Eliminado o segregado'
                 demolished = True
             else:
                 feat1 = self.df1.loc[i1]
@@ -129,12 +132,10 @@ class Diff():
                 elif tags_diff:
                     fixme = "Varia las etiquetas de"
             if fixme:
-                msg = fixme + ' ' + feat.geometry.geom_type
-                if feat.tags: msg += str(feat.tags)
                 if demolished:
-                    self.demolished.append(self.get_fixme(feat, msg))
+                    self.demolished.append(self.get_fixme(feat, fixme))
                 else:
-                    self.fixmes.append(self.get_fixme(feat, msg))
+                    self.fixmes.append(self.get_fixme(feat, fixme))
 
 
     def run(self):
@@ -155,6 +156,7 @@ def command(old, new):
     print('----------------------')
     for f in diff.demolished:
         print(f['task'], f['fixme'])
+
 
 if __name__ == '__main__':
     command()
