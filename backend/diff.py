@@ -11,14 +11,23 @@ update_path = '/data/update/'
 
 
 class Diff():
-    "Compares two osm datasets"
-    def __init__(self, mun_code1, task1, data1, mun_code2, task2, data2):
-        columns = ['mun_code', 'task', 'tags', 'geometry']
-        self.df1 = gpd.GeoDataFrame(columns=columns)
-        self.df2 = gpd.GeoDataFrame(columns=columns)
-        Diff.shapes_to_dataframe(self.df1, data1, mun_code1, task1)
-        Diff.shapes_to_dataframe(self.df2, data2, mun_code2, task2)
+    "Class to compare two osm datasets"
+    def __init__(self, df1, df2):
+        self.df1 = df1
+        self.df2 = df2
         self.fixmes = []
+
+    @staticmethod
+    def parse_args(source_path, args):
+        """Read command args to geojson shapes.
+        args is a list of <mun_code>-<taskfilename>
+        """
+        for mun_code, task in [arg.split('-') for arg in args]:
+            fn = source_path + mun_code + '/tasks/' + task + '.osm.gz'
+            data = Diff.get_shapes(fn)
+            df = Diff.dataframe()
+            Diff.shapes_to_dataframe(df, data, mun_code, task)
+        return df
 
     @staticmethod
     def get_shapes(fn):
@@ -26,6 +35,10 @@ class Diff():
         with gzip.open(fn) as fo:
             xml = fo.read()
         return osm2geojson.xml2shapes(xml)
+
+    @staticmethod
+    def dataframe():
+        return gpd.GeoDataFrame(columns=['mun_code', 'task', 'tags', 'geometry'])
 
     @staticmethod
     def shapes_to_dataframe(df, data, mun_code, task):
@@ -124,17 +137,12 @@ class Diff():
 
 
 @click.command()
-@click.argument('old')
-@click.argument('new')
+@click.argument('old', nargs=-1)
+@click.option('--new', '-n', multiple=True)
 def command(old, new):
-    mun_code1, task1 = old.split('-')
-    mun_code2, task2 = new.split('-')
-    fn1 = dist_path + mun_code1 + '/tasks/' + task1 + '.osm.gz'
-    fn2 = update_path + mun_code2 + '/tasks/' + task2 + '.osm.gz'
-    data1 = Diff.get_shapes(fn1)
-    data2 = Diff.get_shapes(fn2)
-
-    diff = Diff(mun_code1, task1, data1, mun_code2, task2, data2)
+    df1 = Diff.parse_args(dist_path, old)
+    df2 = Diff.parse_args(update_path, new)
+    diff = Diff(df1, df2)
     diff.run()
     for f in diff.fixmes:
         print(f['task'], f['fixme'])
