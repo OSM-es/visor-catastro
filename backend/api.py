@@ -30,8 +30,8 @@ def getPhoto(ref):
         resp = requests.get(url, stream=True)
     except requests.RequestException:
         resp = False
-    if resp and resp.ok and int(resp.headers['Content-Length']) > 0:
-        contentType = resp.headers['content-type']
+    contentType = resp.headers.get('content-type')
+    if resp and resp.ok and contentType and int(resp.headers['Content-Length']) > 0:
         data = resp.raw.read()
     else:
         contentType = 'image/png'
