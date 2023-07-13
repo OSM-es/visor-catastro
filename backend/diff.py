@@ -16,6 +16,7 @@ class Diff():
         self.df1 = df1
         self.df2 = df2
         self.fixmes = []
+        self.demolished = []
 
     @staticmethod
     def parse_args(source_path, args):
@@ -92,25 +93,27 @@ class Diff():
                 matches.append((i, None))
         return matches
 
-    def add_fixme(self, feat, text):
-        fixme = {
-            'geom': feat.geometry.point_on_surface(),
+    def get_fixme(self, feat, text):
+        return {
+            'geom': feat.geometry,
+            'node': feat.geometry.point_on_surface(),
             'mun_code': feat.mun_code,
             'task': feat.task,
             'fixme': text,
         }
-        self.fixmes.append(fixme)
 
     def update_matches(self, matches):
         for i1, i2 in matches:
             fixme = None
             feat = None
+            demolished = False
             if i1 is None:
                 feat = self.df2.loc[i2]
                 fixme = 'Creado o agregado'
             elif i2 is None:
                 feat = self.df1.loc[i1]
                 fixme = 'Eliminado o segregado'
+                demolished = True
             else:
                 feat1 = self.df1.loc[i1]
                 feat = self.df2.loc[i2]
@@ -128,7 +131,10 @@ class Diff():
             if fixme:
                 msg = fixme + ' ' + feat.geometry.geom_type
                 if feat.tags: msg += str(feat.tags)
-                self.add_fixme(feat, msg)
+                if demolished:
+                    self.demolished.append(self.get_fixme(feat, msg))
+                else:
+                    self.fixmes.append(self.get_fixme(feat, msg))
 
 
     def run(self):
@@ -145,6 +151,9 @@ def command(old, new):
     diff = Diff(df1, df2)
     diff.run()
     for f in diff.fixmes:
+        print(f['task'], f['fixme'])
+    print('----------------------')
+    for f in diff.demolished:
         print(f['task'], f['fixme'])
 
 if __name__ == '__main__':
