@@ -7,8 +7,6 @@ import geopandas
 import models
 from config import Config
 
-UPDATE = Config.UPDATE_PATH
-
 
 def convertDate(o):
     if isinstance(o, datetime.datetime):

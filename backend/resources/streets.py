@@ -12,7 +12,7 @@ from auth import auth, get_current_user
 from config import Config
 from overpass import getOsmStreets
 
-UPDATE = Config.UPDATE_PATH
+DIST = Config.DIST_PATH
 
 
 def getStreet(tags):
@@ -25,7 +25,7 @@ class Streets(Resource):
         if not task: abort(404)
         mun_code = task.municipality.muncode
 
-        fn = UPDATE + task.muncode + '/tasks/' + task.localId + '.osm.gz'
+        fn = DIST + task.muncode + '/tasks/' + task.localId + '.osm.gz'
         with gzip.open(fn) as fo:
             xml = fo.read()
         geojson = osm2geojson.xml2geojson(xml, filter_used_refs=False)
@@ -54,7 +54,7 @@ class Streets(Resource):
         if not street.is_locked() and user:
             street.set_lock(user)
 
-        fn = Config.UPDATE_PATH + mun_code + '/tasks/address.osm'
+        fn = Config.DIST_PATH + mun_code + '/tasks/address.osm'
         with open(fn) as fo:
             xml = fo.read()
         addresses = osm2geojson.xml2geojson(xml)

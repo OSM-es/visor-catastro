@@ -6,15 +6,15 @@ Transfiere a /data/dist.
 """
 import datetime
 import json
+import shutil
 
 import csv
 import geojson
 import gzip
 import osm2geojson
-import requests
-from flask import Blueprint, abort, current_app, request
+from flask import Blueprint, abort, current_app
 from shapely.geometry import shape
-from shapely import GeometryCollection
+from shapely import GeometryCollection, is_valid, make_valid
 from geoalchemy2.shape import from_shape
 
 import overpass
@@ -22,6 +22,7 @@ from models import db, Municipality, Province, Street, Task
 from config import Config
 
 UPDATE = Config.UPDATE_PATH
+DIST = Config.DIST_PATH
 uploader = Blueprint('uploader', __name__, url_prefix='/')
 
 
@@ -45,18 +46,21 @@ def upload(mun_code):
         log.info(msg)
         return msg
     mun_geom = get_mun_limits(mun_code)
-    # TODO: Comprobar si hay cambios
+    # if not is_valid(mun_geom):
+    #     mun_geom = make_valid(mun_geom)
+    # TODO: Mantener un historial de cambios de geometría o nombre
     mun.geom = from_shape(mun_geom)
     log.info(f"Registrada geometría de {mun_code} {mun_name}")
     db.session.add(mun)
     zoning = UPDATE + mun_code + '/' + 'zoning.geojson'
     tasks = merge_tasks(zoning)
-    load_tasks(mun_code, tasks)
+    load_tasks(mun_code, tasks.values())
     mun.name = mun_name
     mun.date = src_date
     db.session.commit()
     msg = f"Registradas {len(tasks)} tareas en {mun_code} {mun_name}"
     upload_streets(mun_code)
+    shutil.move(UPDATE + mun_code, DIST + mun_code)
     log.info(msg)
     return msg
 
@@ -142,12 +146,24 @@ def load_tasks(mun_code, tasks):
     TODO: debe buscar si existe por la forma de la tarea, no
     TODO: por códigos. Falta el código para comprobar si hay diferencias.
     """
-    Task.query.filter(Task.muncode == mun_code).delete()
-    for feat in tasks.values():
+    #Task.query.filter(Task.muncode == mun_code).delete()
+    for feat in tasks:
         task = Task(**feat['properties'])
-        task.geom = from_shape(feat['geometry'])
+        geom = feat['geometry']
+        # if not is_valid(geom):
+        #     geom = make_valid(geom)
+        task.geom = from_shape(geom)
         calc_difficulty(task)
         db.session.add(task)
+        candidates = Task.get_by_area(task.geom)
+        if not candidates:
+            db.session.add(task)
+    #         continue
+    #     # Para cada candidato,
+    #     #     Si no está importado (ad_status=READY y bu_status=READY), no necesita comparar,
+    #     #         reemplazar
+    #     #     Si está importado (cualquier otro estado), hay que comparar.
+    #     #         Al comparar, coger únicamente edificios que espacialmente estén dentro de la tarea nueva
 
 def upload_streets(mun_code):
     """Registra el callejero del municipio.

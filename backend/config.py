@@ -45,6 +45,7 @@ class Config:
 
     # Datos catatom
     UPDATE_PATH = '/data/update/'
+    DIST_PATH = '/data/dist/'
 
     # OSM3S
     OSM3S_URLS = [
