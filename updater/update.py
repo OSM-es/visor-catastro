@@ -18,12 +18,11 @@ import requests
 import shutil
 import schedule
 import time
-import yaml
 from multiprocessing import Pool, current_process
 from requests.exceptions import RequestException
 from zipfile import BadZipfile
 
-from catatom2osm import catatom, csvtools
+from catatom2osm import catatom
 from catatom2osm import config as catconfig
 from catatom2osm.app import CatAtom2Osm, QgsSingleton
 from catatom2osm.boundary import get_municipalities
@@ -80,7 +79,6 @@ options = argparse.Namespace(
     parcel=[],
     split=None,
     zoning=False,
-    municipality=True,
 )
 
 
@@ -226,7 +224,9 @@ def process(mun_code):
     options.path = [mun_code]
     options.args = mun_code
     try:
+        options.municipality=True,
         CatAtom2Osm.create_and_run(mun_code, options)
+        options.municipality=False,
         CatAtom2Osm.create_and_run(mun_code, options)
         log.info('Procesado ' + mun_code)
     except (BadZipfile, CatException, RequestException) as e:

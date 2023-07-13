@@ -14,7 +14,7 @@ import gzip
 import osm2geojson
 from flask import Blueprint, abort, current_app
 from shapely.geometry import shape
-from shapely import GeometryCollection, is_valid, make_valid
+from shapely import GeometryCollection
 from geoalchemy2.shape import from_shape
 
 import overpass
