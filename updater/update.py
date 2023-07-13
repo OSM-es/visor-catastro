@@ -80,6 +80,7 @@ options = argparse.Namespace(
     parcel=[],
     split=None,
     zoning=False,
+    municipality=True,
 )
 
 
@@ -189,9 +190,6 @@ def update(municipios):
                 if mun_code is not None:
                     url = config.uploader_url + 'municipality/' + mun_code
                     fn = os.path.join(catconfig.app_path, "municipalities.csv")
-                    osmid = csvtools.get_key(fn, mun_code)[1:2]
-                    if osmid:
-                        url += f'?osmid={osmid[0]}'
                     req = requests.put(url)
                     if req.status_code == requests.codes.ok:
                         if mun_code in req.text:
@@ -208,6 +206,9 @@ def update(municipios):
         print(f"Actualización {src_date} completados {start_len_mun} municipios")
         with open('src_date.txt', 'w') as fo:
             fo.write(src_date)
+            # TODO: comunicar a upload que ha terminado la actualización
+            # para que limpie cosas como municipios que hayan desaparecido
+            # (no tienen tareas)
     qgs.exitQgis()
 
 def process(mun_code):
