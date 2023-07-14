@@ -50,10 +50,7 @@ def upload(mun_code):
     #     mun_geom = make_valid(mun_geom)
     # TODO: Mantener un historial de cambios de geometría o nombre
     candidates = Municipality.get_by_area(from_shape(mun_geom))
-    if candidates:
-        if len(candidates) > 1 or candidates[0].muncode != mun_code:
-            log.info(f"Detectada modificación de {mun_code} {mun_name}")
-            abort(422)
+    print(mun_code, 'match', candidates[0].muncode)
     mun.geom = from_shape(mun_geom)
     log.info(f"Registrada geometría de {mun_code} {mun_name}")
     db.session.add(mun)
@@ -190,8 +187,7 @@ def load_tasks(mun_code, tasks):
             for f in diff.fixmes:
                 print(f['task'], f['fixme'])
             print('----------------------')
-            for f in diff.demolished:
-                print(f['task'], f['fixme'])
+            print(len(diff.demolished))
         # si old no es vacio, ejecutar
         # mover
         # recorrer fixmes
