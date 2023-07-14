@@ -170,7 +170,7 @@ def load_tasks(mun_code, tasks):
         diff = Diff(demolished=demolished)
         fn = Diff.get_filename(UPDATE, mun_code, task.localId)
         data = Diff.get_shapes(fn)
-        Diff.shapes_to_dataframe(diff.df2, data, mun_code, task.localId)
+        Diff.shapes_to_dataframe(diff.df2, data, mun_code, task.localId, task.id)
         for c in candidates:
             fn = Diff.get_filename(DIST, c.muncode, c.localId)
             for feat in Diff.get_shapes(fn):
@@ -184,7 +184,7 @@ def load_tasks(mun_code, tasks):
                     c.ad_status != Task.Status.READY.value
                     or c.bu_status != Task.Status.READY.value
                 ):
-                    Diff.add_row(diff.df1, c.muncode, c.localId, feat)
+                    Diff.add_row(diff.df1, c.muncode, c.localId, c.id, feat)
         if len(diff.df1.index):
             diff.get_fixmes()
             for f in diff.fixmes:

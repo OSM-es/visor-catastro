@@ -14,8 +14,8 @@ DIST = Config.DIST_PATH
 class Diff():
     "Class to compare two osm datasets"
     def __init__(self, df1=None, df2=None, demolished=[]):
-        self.df1 = df1 or Diff.dataframe()
-        self.df2 = df2 or Diff.dataframe()
+        self.df1 = Diff.dataframe() if df1 is None else df1
+        self.df2 = Diff.dataframe() if df2 is None else df2
         self.fixmes = []
         self.demolished = demolished
 
@@ -44,20 +44,21 @@ class Diff():
 
     @staticmethod
     def dataframe():
-        return gpd.GeoDataFrame(columns=['mun_code', 'task', 'tags', 'geometry'])
+        columns = ['mun_code', 'task', 'task_id', 'tags', 'geometry']
+        return gpd.GeoDataFrame(columns=columns)
 
     @staticmethod
-    def shapes_to_dataframe(df, data, mun_code, task):
+    def shapes_to_dataframe(df, data, mun_code, task, task_id=None):
         """Convert geojson to dataframe"""
         for feat in data:
-            Diff.add_row(df, mun_code, task, feat)
+            Diff.add_row(df, mun_code, task, task_id, feat)
 
     @staticmethod
-    def add_row(df, mun_code, task, feature):
+    def add_row(df, mun_code, task, task_id, feature):
         geom = feature['shape']
         tags = feature['properties'].get('tags')
         if tags:
-            df.loc[len(df)] = [mun_code, task, tags, geom]
+            df.loc[len(df)] = [mun_code, task, task_id, tags, geom]
 
     @staticmethod
     def get_match(geom, candidates):
@@ -79,8 +80,8 @@ class Diff():
             fixme = None
             feat = None
             if i1 is None:
-                feat1 = None
                 feat = self.df2.loc[i2]
+                feat1 = feat
                 fixme = 'Creado' if feat.geometry.geom_type == 'Point' else 'Creado o agregado'
             elif i2 is None:
                 feat = self.df1.loc[i1]
@@ -101,9 +102,9 @@ class Diff():
                     fixme = "Varia las etiquetas de"
             if fixme:
                 if i2 is None:
-                    self.demolished.append(self.get_fixme(feat, feat, fixme))
+                    self.demolished.append(self.new_fixme(feat, feat, fixme))
                 else:
-                    self.fixmes.append(self.get_fixme(feat, feat1, fixme))
+                    self.fixmes.append(self.new_fixme(feat, feat1, fixme))
 
     def get_fixmes(self):
         """
@@ -137,7 +138,7 @@ class Diff():
             if self.demolished[i]['geom'] == geom:
                 self.demolished.remove(self.demolished[i])
 
-    def get_fixme(self, new_feat, old_feat, text):
+    def new_fixme(self, new_feat, old_feat, text):
         msg = text + ' ' + new_feat.geometry.geom_type
         tags = {k: v for k, v in new_feat.tags.items() if k not in ('fixme', 'ref', 'addr:cat_name')}
         msg += str(tags)

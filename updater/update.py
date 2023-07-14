@@ -208,8 +208,8 @@ def update(municipios):
         print(f"Actualización {src_date} pendientes {len_mun} municipios de {start_len_mun}")
     else:
         print(f"Actualización {src_date} completados {start_len_mun} municipios")
-        with open('src_date.txt', 'w') as fo:
-            fo.write(src_date)
+        # with open('src_date.txt', 'w') as fo:
+        #     fo.write(src_date)
     qgs.exitQgis()
     return changes
 
