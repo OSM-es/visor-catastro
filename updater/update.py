@@ -111,7 +111,11 @@ def daily_check():
     if not provincias and municipios:
         check_mun_diff(municipios)
         upload_provs(config.include_provs.copy())
-        update(list(municipios.keys()))
+        changes = update(list(municipios.keys()))
+        # TODO: comunicar a upload que ha terminado la actualización
+        # para que limpie cosas como municipios que hayan desaparecido
+        # (no tienen tareas)
+        # TODO: procesar municipios modificados
 
 def upload_provs(provincias):
     """Solcita cargar provincias en la base de datos."""
@@ -178,6 +182,7 @@ def update(municipios):
     len_mun = len(municipios)
     start_len_mun = len_mun
     retries = 0
+    changes = []
     qgs = QgsSingleton()
     while municipios and retries < config.max_retries:
         print(f"Procesando {len_mun} municipios")
@@ -187,12 +192,13 @@ def update(municipios):
             for mun_code in pool.imap_unordered(process, municipios):
                 if mun_code is not None:
                     url = config.uploader_url + 'municipality/' + mun_code
-                    fn = os.path.join(catconfig.app_path, "municipalities.csv")
                     req = requests.put(url)
+                    if req.status_code == 422:
+                        municipios.remove(mun_code)
+                        changes.append(mun_code)
                     if req.status_code == requests.codes.ok:
                         if mun_code in req.text:
                             municipios.remove(mun_code)
-                            #TODO: Mover la carpeta a dist
             if len(municipios) == len_mun:
                 retries += 1
             else:
@@ -204,10 +210,8 @@ def update(municipios):
         print(f"Actualización {src_date} completados {start_len_mun} municipios")
         with open('src_date.txt', 'w') as fo:
             fo.write(src_date)
-            # TODO: comunicar a upload que ha terminado la actualización
-            # para que limpie cosas como municipios que hayan desaparecido
-            # (no tienen tareas)
     qgs.exitQgis()
+    return changes
 
 def process(mun_code):
     "Procesa un municipio individual."

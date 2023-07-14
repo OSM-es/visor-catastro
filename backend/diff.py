@@ -5,18 +5,23 @@ import geopandas as gpd
 import gzip
 import osm2geojson
 
+from config import Config
 
-dist_path = '/data/dist/'
-update_path = '/data/update/'
+UPDATE = Config.UPDATE_PATH
+DIST = Config.DIST_PATH
 
 
 class Diff():
     "Class to compare two osm datasets"
-    def __init__(self, df1, df2):
-        self.df1 = df1
-        self.df2 = df2
+    def __init__(self, df1=None, df2=None, demolished=[]):
+        self.df1 = df1 or Diff.dataframe()
+        self.df2 = df2 or Diff.dataframe()
         self.fixmes = []
-        self.demolished = []
+        self.demolished = demolished
+
+    @staticmethod
+    def get_filename(source_path, mun_code, task):
+        return source_path + mun_code + '/tasks/' + task + '.osm.gz'
 
     @staticmethod
     def parse_args(source_path, args):
@@ -24,7 +29,7 @@ class Diff():
         args is a list of <mun_code>-<taskfilename>
         """
         for mun_code, task in [arg.split('-') for arg in args]:
-            fn = source_path + mun_code + '/tasks/' + task + '.osm.gz'
+            fn = Diff.get_filename(source_path, mun_code, task)
             data = Diff.get_shapes(fn)
             df = Diff.dataframe()
             Diff.shapes_to_dataframe(df, data, mun_code, task)
@@ -45,10 +50,14 @@ class Diff():
     def shapes_to_dataframe(df, data, mun_code, task):
         """Convert geojson to dataframe"""
         for feat in data:
-            geom = feat['shape']
-            tags = feat['properties'].get('tags')
-            if tags:
-                df.loc[len(df)] = [mun_code, task, tags, geom]
+            Diff.add_row(df, mun_code, task, feat)
+
+    @staticmethod
+    def add_row(df, mun_code, task, feature):
+        geom = feature['shape']
+        tags = feature['properties'].get('tags')
+        if tags:
+            df.loc[len(df)] = [mun_code, task, tags, geom]
 
     @staticmethod
     def get_match(geom, candidates):
@@ -65,58 +74,17 @@ class Diff():
                 match_area = intersected_area
         return match
 
-    @staticmethod
-    def get_matches(df1, df2):
-        """
-        Return [
-            (
-                matching index in df1 or none (new),
-                matching index in df2 or none (deleted),
-            )
-        ]
-        """
-        nx = df1.geometry.sindex
-        matches = []
-        matches1 = []
-        for i in df2.index:
-            g = df2.geometry[i]
-            candidates = nx.query(g, predicate="intersects")
-            match = Diff.get_match(g, [df1.iloc[c].geometry for c in candidates])
-            if match is not None:
-                i1 = df1.index[candidates[match]]
-                matches.append((i1, i))
-                matches1.append(i1)
-            else:
-                matches.append((None, i))
-        for i in df1.index:
-            if i not in matches1:
-                matches.append((i, None))
-        return matches
-
-    def get_fixme(self, feat, text):
-        msg = text + ' ' + feat.geometry.geom_type
-        tags = {k: v for k, v in feat.tags.items() if k not in ('fixme', 'ref', 'addr:cat_name')}
-        msg += str(tags)
-        return {
-            'geom': feat.geometry,
-            'node': feat.geometry.point_on_surface(),
-            'mun_code': feat.mun_code,
-            'task': feat.task,
-            'fixme': msg,
-        }
-
-    def update_matches(self, matches):
+    def _update_matches(self, matches):
         for i1, i2 in matches:
             fixme = None
             feat = None
-            demolished = False
             if i1 is None:
+                feat1 = None
                 feat = self.df2.loc[i2]
                 fixme = 'Creado' if feat.geometry.geom_type == 'Point' else 'Creado o agregado'
             elif i2 is None:
                 feat = self.df1.loc[i1]
                 fixme = 'Eliminado' if feat.geometry.geom_type == 'Point' else 'Eliminado o segregado'
-                demolished = True
             else:
                 feat1 = self.df1.loc[i1]
                 feat = self.df2.loc[i2]
@@ -132,25 +100,65 @@ class Diff():
                 elif tags_diff:
                     fixme = "Varia las etiquetas de"
             if fixme:
-                if demolished:
-                    self.demolished.append(self.get_fixme(feat, fixme))
+                if i2 is None:
+                    self.demolished.append(self.get_fixme(feat, feat, fixme))
                 else:
-                    self.fixmes.append(self.get_fixme(feat, fixme))
+                    self.fixmes.append(self.get_fixme(feat, feat1, fixme))
 
+    def get_fixmes(self):
+        """
+        Return [
+            (
+                matching index in df1 or none (new),
+                matching index in df2 or none (deleted),
+            )
+        ]
+        """
+        nx = gpd.GeoSeries(self.df1.geometry).sindex
+        matches = []
+        matches1 = []
+        for i in self.df2.index:
+            g = self.df2.geometry[i]
+            candidates = nx.query(g, predicate="intersects")
+            match = Diff.get_match(g, [self.df1.loc[c].geometry for c in candidates])
+            if match is not None:
+                i1 = self.df1.index[candidates[match]]
+                matches.append((i1, i))
+                matches1.append(i1)
+            else:
+                matches.append((None, i))
+        for i in self.df1.index:
+            if i not in matches1:
+                matches.append((i, None))
+        self._update_matches(matches)
 
-    def run(self):
-        matches = Diff.get_matches(self.df1, self.df2)
-        self.update_matches(matches)
+    def clean_demolished(self, geom):
+        for i in range(len(self.demolished) - 1, -1, -1):
+            if self.demolished[i]['geom'] == geom:
+                self.demolished.remove(self.demolished[i])
+
+    def get_fixme(self, new_feat, old_feat, text):
+        msg = text + ' ' + new_feat.geometry.geom_type
+        tags = {k: v for k, v in new_feat.tags.items() if k not in ('fixme', 'ref', 'addr:cat_name')}
+        msg += str(tags)
+        return {
+            'geom': new_feat.geometry,
+            'node': new_feat.geometry.point_on_surface(),
+            'mun_code': None if old_feat is None else old_feat.mun_code,
+            'task': None if old_feat is None else old_feat.task,
+            'fixme': msg,
+        }
+    
 
 
 @click.command()
 @click.argument('old', nargs=-1)
 @click.option('--new', '-n', multiple=True)
 def command(old, new):
-    df1 = Diff.parse_args(dist_path, old)
-    df2 = Diff.parse_args(update_path, new)
+    df1 = Diff.parse_args(DIST, old)
+    df2 = Diff.parse_args(UPDATE, new)
     diff = Diff(df1, df2)
-    diff.run()
+    diff.get_fixmes()
     for f in diff.fixmes:
         print(f['task'], f['fixme'])
     print('----------------------')
