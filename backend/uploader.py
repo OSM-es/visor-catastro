@@ -50,13 +50,13 @@ def upload(mun_code):
     #     mun_geom = make_valid(mun_geom)
     # TODO: Mantener un historial de cambios de geometría o nombre
     candidates = Municipality.get_by_area(from_shape(mun_geom))
-    print(mun_code, 'match', candidates[0].muncode)
     mun.geom = from_shape(mun_geom)
     log.info(f"Registrada geometría de {mun_code} {mun_name}")
     db.session.add(mun)
     zoning = UPDATE + mun_code + '/' + 'zoning.geojson'
     tasks = merge_tasks(zoning)
     load_tasks(mun_code, tasks.values())
+    #load_tasks(mun_code, [tasks['6114001XJ2461S'], tasks['6114003XJ2461S']])
     return mun_code
     mun.name = mun_name
     mun.date = src_date
@@ -168,14 +168,15 @@ def load_tasks(mun_code, tasks):
         fn = Diff.get_filename(UPDATE, mun_code, task.localId)
         data = Diff.get_shapes(fn)
         Diff.shapes_to_dataframe(diff.df2, data, mun_code, task.localId, task.id)
+        diff.clean_demolished()
         for c in candidates:
             fn = Diff.get_filename(DIST, c.muncode, c.localId)
             for feat in Diff.get_shapes(fn):
                 geom = feat['shape']
                 # shapely.errors.GEOSException: TopologyException: side location conflict at -1.5376820875309667 39.212811681255161. This can occur if the input geometry is invalid.
-                task_geom = to_shape(task.geom).buffer(0)
-                if task_geom.contains(geom):
-                    diff.clean_demolished(geom)
+                # task_geom = to_shape(task.geom).buffer(0)
+                # if task_geom.contains(geom):
+                #     diff.clean_demolished(geom)
                 if (
                     True or
                     c.ad_status != Task.Status.READY.value
@@ -185,14 +186,17 @@ def load_tasks(mun_code, tasks):
         if len(diff.df1.index):
             diff.get_fixmes()
             for f in diff.fixmes:
-                print(f['task'], f['fixme'])
+                print(f['node'], f['task'], f['fixme'])
             print('----------------------')
             print(len(diff.demolished))
+            for f in diff.demolished:
+                print(f['node'], f['task'], f['fixme'])
         # si old no es vacio, ejecutar
         # mover
         # recorrer fixmes
         #   
         # agregar fixmes a bd
+
     # agregar los fixmes de lo que queda en demolished
 
 def upload_streets(mun_code):

@@ -133,10 +133,11 @@ class Diff():
                 matches.append((i, None))
         self._update_matches(matches)
 
-    def clean_demolished(self, geom):
+    def clean_demolished(self):
         for i in range(len(self.demolished) - 1, -1, -1):
-            if self.demolished[i]['geom'] == geom:
-                self.demolished.remove(self.demolished[i])
+            for g2 in self.df2.geometry.to_list():
+                if g2.contains(self.demolished[i]['geom']):
+                    self.demolished.remove(self.demolished[i])
 
     def new_fixme(self, new_feat, old_feat, text):
         msg = text + ' ' + new_feat.geometry.geom_type
