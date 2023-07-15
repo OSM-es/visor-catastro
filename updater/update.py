@@ -111,11 +111,14 @@ def daily_check():
     if not provincias and municipios:
         check_mun_diff(municipios)
         upload_provs(config.include_provs.copy())
-        update(list(municipios.keys()))
-        # TODO: comunicar a upload que ha terminado la actualización
-        # para que limpie cosas como municipios que hayan desaparecido
-        # (no tienen tareas)
-        # TODO: procesar municipios modificados
+        src_date = update(list(municipios.keys()))
+        if src_date:
+            url = config.uploader_url + 'municipality/'
+            req = requests.put(url)
+            if req.status_code == requests.codes.ok:
+                print(src_date)
+                # with open('src_date.txt', 'w') as fo:
+                #     fo.write(src_date)
 
 def upload_provs(provincias):
     """Solcita cargar provincias en la base de datos."""
@@ -204,9 +207,8 @@ def update(municipios):
         print(f"Actualización {src_date} pendientes {len_mun} municipios de {start_len_mun}")
     else:
         print(f"Actualización {src_date} completados {start_len_mun} municipios")
-        # with open('src_date.txt', 'w') as fo:
-        #     fo.write(src_date)
     qgs.exitQgis()
+    return None if municipios else src_date
 
 def process(mun_code):
     "Procesa un municipio individual."
@@ -264,11 +266,13 @@ def status(mun_code):
     if (
         os.path.exists(mun_code + '/tasks')
         and os.path.exists(mun_code + '/report.txt')
-        and os.path.exists(log_file)
     ):
-        with open(log_file, 'r') as fo:
-            log_text = fo.read()
-        return None if 'ERROR' in log_text else mun_code
+        if os.path.exists(log_file):
+            with open(log_file, 'r') as fo:
+                log_text = fo.read()
+            return None if 'ERROR' in log_text else mun_code
+        else:
+            return mun_code
     return None
 
 

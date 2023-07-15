@@ -241,6 +241,5 @@ class TaskUpdate(db.Model):
     zone = db.Column(db.String)
     type = db.Column(db.String)
     task = db.relationship('Task', back_populates='update', uselist=False)
-    municipality = db.relationship('MunicipalityUpdate', back_populates='tasks', uselist=False)
     geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
     fixmes = db.relationship('Fixme', back_populates='update')

@@ -12,7 +12,8 @@ class Municipality(db.Model):
     geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
     lock = db.Column(db.Boolean)
     tasks = db.relationship('Task', back_populates='municipality')
-
+    update_id = db.Column(db.Integer, db.ForeignKey('municipality_update.id'), nullable=True)
+    update = db.relationship('MunicipalityUpdate', back_populates='municipality', uselist=False)
 
     @staticmethod
     def get_by_code(mun_code):
@@ -34,26 +35,19 @@ class Municipality(db.Model):
         pass
 
 
-    class Update(db.Model):
-        id = db.Column(db.Integer, primary_key=True)
-        muncode = db.Column(db.String, index=True, unique=True)
-        name = db.Column(db.String, nullable=True)
-        date = db.Column(db.Date, nullable=True)
-        uploaded = db.Column(db.Boolean)
-        childs = db.Column(MutableList.as_mutable(JSONEncodedDict), default=[])
-        brothers = db.Column(MutableList.as_mutable(JSONEncodedDict), default=[])
-        geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
-
-
-        @staticmethod
-        def get_by_code(mun_code):
-            return Update.query.filter(Update.muncode == mun_code).one_or_none()
-
-
 class MunicipalityUpdate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     muncode = db.Column(db.String, index=True, unique=True)
     name = db.Column(db.String, nullable=False)
     date = db.Column(db.Date, nullable=False)
     geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
-    tasks = db.relationship('TaskUpdate', back_populates='municipality')
+    municipality = db.relationship('Municipality', back_populates='update', uselist=False)
+
+    def do_update(self):
+        mun = self.municipality
+        mun.muncode = self.muncode
+        mun.name = self.name
+        mun.date = self.date
+        mun.geom = self.geom
+        mun.lock = None
+        mun.update = None

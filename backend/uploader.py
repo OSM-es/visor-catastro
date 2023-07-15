@@ -18,7 +18,7 @@ from shapely import GeometryCollection
 from geoalchemy2.shape import from_shape, to_shape
 
 import overpass
-from models import db, Municipality, Province, Street, Task
+from models import db, Municipality, MunicipalityUpdate, Province, Street, Task
 from config import Config
 from diff import Diff
 
@@ -31,6 +31,19 @@ uploader = Blueprint('uploader', __name__, url_prefix='/')
 def status():
     return "ok"
 
+@uploader.route("/municipality/", methods=["PUT"])
+def end_upload():
+    log = current_app.logger
+    log.info("Fin de actualización")
+    s = Municipality.query.filter(Municipality.update_id is None).delete()
+    if s:
+        log.info('Municipios eliminados: %s', s)
+    for u in MunicipalityUpdate.query.all():
+        u.do_update()
+    MunicipalityUpdate.query.delete()
+    db.session.commit()
+    return {}
+
 @uploader.route("/municipality/<mun_code>", methods=["PUT"])
 def upload(mun_code):
     log = current_app.logger
@@ -39,33 +52,42 @@ def upload(mun_code):
         report = json.load(fo)
     mun_name = report['mun_name']
     src_date = datetime.date.fromisoformat(report['building_date'].replace('/', '-'))
-    mun = Municipality.get_by_code(mun_code)
-    if mun is None:
-        mun = Municipality(muncode=mun_code, name=mun_name, date=src_date)
-    elif mun.date == src_date:
-        log.info(f"{mun_code} ya está registrado")
-        abort(422)
     mun_geom = get_mun_limits(mun_code)
-    # if not is_valid(mun_geom):
-    #     mun_geom = make_valid(mun_geom)
     # TODO: Mantener un historial de cambios de geometría o nombre
-    candidates = Municipality.get_by_area(from_shape(mun_geom))
-    mun.geom = from_shape(mun_geom)
-    log.info(f"Registrada geometría de {mun_code} {mun_name}")
-    db.session.add(mun)
+    candidates = [
+        c for c in Municipality.get_by_area(from_shape(mun_geom))
+        if c.update_id is None
+    ]
+    if not candidates:
+        mun = Municipality(muncode=mun_code, name=mun_name, date=src_date)
+        mun.geom = from_shape(mun_geom)
+        db.session.add(mun)
+    else:
+        mun = next(
+            (c for c in candidates if c.muncode == mun_code),
+            candidates[0]
+        )
+        if mun.date == src_date:
+            msg = f"{mun_code} ya está registrado"
+            log.info(msg)
+            return msg
+    update = MunicipalityUpdate(
+        muncode=mun_code, name=mun_name, date=src_date, geom=from_shape(mun_geom)
+    )
+    update.municipality = mun
     zoning = UPDATE + mun_code + '/' + 'zoning.geojson'
     tasks = merge_tasks(zoning)
     load_tasks(mun_code, tasks.values())
     #load_tasks(mun_code, [tasks['6114001XJ2461S'], tasks['6114003XJ2461S']])
-    return mun_code
-    mun.name = mun_name
-    mun.date = src_date
-    #db.session.commit()
-    msg = f"Registradas {len(tasks)} tareas en {mun_code} {mun_name}"
-    #upload_streets(mun_code)
+    log.info(f"Registradas {len(tasks)} tareas en {mun_code} {mun_name}")
+    upload_streets(mun_code)
     # shutil.move(UPDATE + mun_code, DIST + mun_code)
-    log.info(msg)
-    return msg
+    if len(candidates) == 1:
+        update.do_update()
+    else:
+        db.session.add(update)
+    db.session.commit()
+    return mun_code
 
 @uploader.route("/province/<prov_code>", methods=["PUT"])
 def province(prov_code):
