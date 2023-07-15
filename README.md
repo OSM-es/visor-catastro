@@ -47,7 +47,21 @@ Ventana 2:
 Si se modifica el modelo de la base de datos, hay que registrarlo:
 
     docker-compose run --rm backend flask db migrate -m "Comentario migración"
+
+Algunos cambios pueden requerir ediciones manuales antes de aplicarlos con
+
     docker-compose run --rm backend flask db upgrade
+
+Las revisiones que hay que hacer a mano son:
+
+1) Comentar la creación de índices espaciales, ya la hace la bd por su cuenta
+    # batch_op.create_index('idx_<tabla>_geom'...
+    # batch_op.drop_index('idx_<tabla>_geom'...
+2) Columnas JSONEncodedDict hay que cambiarlas por String
+3) Claves externas sin nombre, hay que asignarles uno
+    batch_op.create_foreign_key(None, ---> batch_op.create_foreign_key('<tabla>_id_fkey'
+    batch_op.drop_constraint(None --> batch_op.drop_constraint('<tabla>_id_fkey'
+
 
 Si se modifican dependencias Python, hay que reflejarlo en los archivos requirements.txt.
 Por ejemplo, en backend:

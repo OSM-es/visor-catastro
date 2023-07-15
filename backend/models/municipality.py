@@ -48,3 +48,12 @@ class Municipality(db.Model):
         @staticmethod
         def get_by_code(mun_code):
             return Update.query.filter(Update.muncode == mun_code).one_or_none()
+
+
+class MunicipalityUpdate(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    muncode = db.Column(db.String, index=True, unique=True)
+    name = db.Column(db.String, nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
+    tasks = db.relationship('TaskUpdate', back_populates='municipality')

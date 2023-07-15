@@ -2,8 +2,7 @@ from datetime import datetime
 from enum import Enum
 
 from sqlalchemy import column, func, or_
-from sqlalchemy.orm import declarative_mixin, declared_attr
-from sqlalchemy.sql import expression
+from sqlalchemy.orm import declarative_mixin
 
 from models import db, OsmUser
 

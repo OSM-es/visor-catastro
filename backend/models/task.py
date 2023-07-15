@@ -78,6 +78,10 @@ class Task(db.Model):
     municipality = db.relationship('Municipality', back_populates='tasks', uselist=False)
     # Registro de los cambios realizados en la tarea más comentarios.
     history = db.relationship('TaskHistory', back_populates='task')
+    # Anotaciones para correcciones por el editor
+    fixmes = db.relationship('Fixme', back_populates='task')
+    update_id = db.Column(db.Integer, db.ForeignKey('task_update.id'), nullable=True)
+    update = db.relationship('TaskUpdate', back_populates='task', uselist=False)
     geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
     __table_args__ = (Index('codes_index', 'localid', 'muncode'), )
 
@@ -225,3 +229,18 @@ class Task(db.Model):
             Task.Status.MAPPED.name,
         )
         return mapper and mapper.user
+
+
+class TaskUpdate(db.Model):
+    """
+    Almacen temporal de nuevas tareas para actualizar.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    muncode = db.Column(db.String, db.ForeignKey('municipality_update.muncode'), nullable=True)
+    localId = db.Column('localid', db.String)
+    zone = db.Column(db.String)
+    type = db.Column(db.String)
+    task = db.relationship('Task', back_populates='update', uselist=False)
+    municipality = db.relationship('MunicipalityUpdate', back_populates='tasks', uselist=False)
+    geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
+    fixmes = db.relationship('Fixme', back_populates='update')
