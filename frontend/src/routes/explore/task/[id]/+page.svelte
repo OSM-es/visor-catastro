@@ -19,7 +19,7 @@
 
   $: buildings = data.task.buildings
 
-  let map, center, zoom, getConsLayer, getUrl
+  let map, center, zoom, initialCenter, initialZoom, getConsLayer, getUrl
   let fixmes = data.task?.fixmes
   let scrollImage, viewImage, imageCount
   let taskColor = 'text-success-500'

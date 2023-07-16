@@ -97,7 +97,7 @@ class Task(db.Model):
 
     def asdict(self):
         self.update_lock()
-        lock = 'system' if self.municipality.lock else self.lock.asdict() if self.lock else None
+        lock = self.lock.asdict() if self.lock else None
         return {
             'id': self.id,
             'localId': self.localId,

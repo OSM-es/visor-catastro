@@ -15,7 +15,7 @@ import osm2geojson
 from flask import Blueprint, abort, current_app
 from shapely.geometry import shape
 from shapely import GeometryCollection
-from geoalchemy2.shape import from_shape, to_shape
+from geoalchemy2.shape import from_shape
 
 import overpass
 from models import db, Municipality, Province, Street, Task
@@ -52,29 +52,16 @@ def upload(mun_code):
         report = json.load(fo)
     mun_name = report['mun_name']
     src_date = datetime.date.fromisoformat(report['building_date'].replace('/', '-'))
-    mun_geom = get_mun_limits(mun_code)
+    mun_shape = get_mun_limits(mun_code)
     # TODO: Mantener un historial de cambios de geometría o nombre
-    candidates = [
-        c for c in Municipality.get_by_area(from_shape(mun_geom))
-        if c.update_id is None
-    ]
-    if not candidates:
-        mun = Municipality(muncode=mun_code, name=mun_name, date=src_date)
-        mun.geom = from_shape(mun_geom)
-        db.session.add(mun)
-    else:
-        mun = next(
-            (c for c in candidates if c.muncode == mun_code),
-            candidates[0]
-        )
+    mun, candidates = Municipality.get_match(mun_code, mun_name, src_date, mun_shape)
+    if candidates:
         if mun.src_date == src_date:
-            msg = f"{mun_code} ya está registrado"
-            log.info(msg)
-            return msg
-    update = Municipality.Update(
-        muncode=mun_code, name=mun_name, date=src_date, geom=from_shape(mun_geom)
-    )
-    update.municipality = mun
+            return exit(f"{mun_code} ya está registrado")
+        locks = [m.set_lock for m in candidates]
+        if not all(locks):
+            return exit("No se han podido bloquear todos los municipios")
+        mun.update.set(mun_code, mun_name, src_date, mun_shape)
     zoning = UPDATE + mun_code + '/' + 'zoning.geojson'
     tasks = merge_tasks(zoning)
     load_tasks(mun_code, tasks.values())
@@ -82,10 +69,8 @@ def upload(mun_code):
     log.info(f"Registradas {len(tasks)} tareas en {mun_code} {mun_name}")
     upload_streets(mun_code)
     # shutil.move(UPDATE + mun_code, DIST + mun_code)
-    if len(candidates) == 1:
-        update.do_update()
-    else:
-        db.session.add(update)
+    if len(candidates) == 1 and mun.equal(mun_shape):
+        mun.update.do_update()
     db.session.commit()
     return mun_code
 
@@ -105,10 +90,12 @@ def province(prov_code):
     prov.geom = geom
     db.session.add(prov)
     db.session.commit()
-    msg = f"Registrada geometría de {prov_code} {name}"
+    return exit(f"Registrada geometría de {prov_code} {name}")
+
+
+def exit(msg):
     current_app.logger.info(msg)
     return msg
-
 
 def get_geometry(*ql, search=None, level=6):
     """Busca geometría de límite administrativo en overpass."""
