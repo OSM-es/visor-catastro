@@ -19,7 +19,7 @@
 
   $: buildings = data.task.buildings
 
-  let map, center, zoom, initialCenter, initialZoom, getConsLayer, getUrl
+  let map, center, zoom, getConsLayer, getUrl
   let fixmes = data.task?.fixmes
   let scrollImage, viewImage, imageCount
   let taskColor = 'text-success-500'
@@ -77,7 +77,7 @@
   <div class="md:max-w-md w-full flex-grow overflow-scroll px-4 border-l-2 border-gray-200 dark:border-gray-600">
     <div class="sticky top-0 z-10 bg-white dark:bg-neutral-900">
       <div class="prose dark:prose-invert pt-4">
-        <h3>Catastro de {data.task.name} ({data.task.muncode}) · #{data.task.id}</h3>
+        <h3>Catastro de {data.task.municipality.name} ({data.task.muncode}) · #{data.task.id}</h3>
       </div>
       <Tabs bind:tab>
         <TabItem key={'edicion'}>Edición</TabItem>

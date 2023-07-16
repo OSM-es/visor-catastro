@@ -67,7 +67,7 @@ def upload(mun_code):
             (c for c in candidates if c.muncode == mun_code),
             candidates[0]
         )
-        if mun.date == src_date:
+        if mun.src_date == src_date:
             msg = f"{mun_code} ya está registrado"
             log.info(msg)
             return msg

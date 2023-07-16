@@ -55,7 +55,7 @@ class Task(Resource):
         fixmes = get_fixmes(shapes)
         fn = DIST + task.muncode + '/tasks/' + task.localId + '.fixmes.geojson'
         data = task.asdict()
-        data['name'] = Municipality.get_by_code(task.muncode).name
+        data['municipality'] = Municipality.get_by_code(task.muncode).asdict()
         if fixmes: data['fixmes'] = {'type': geojson['type'], 'features': fixmes}
         data['buildings'] = {'type': geojson['type'], 'features': buildings}
         data['parts'] = {'type': geojson['type'], 'features': parts}

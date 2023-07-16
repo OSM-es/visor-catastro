@@ -74,8 +74,6 @@ class Task(db.Model):
     lock_id = db.Column(db.Integer, db.ForeignKey('task_lock.id'), nullable=True)
     # Bloqueo para mapear o validar. Tendrán un tiempo de caducidad.
     lock = db.relationship('TaskLock', viewonly=True)
-    # Municipio al que pertenece la tarea
-    municipality = db.relationship('Municipality', back_populates='tasks', uselist=False)
     # Registro de los cambios realizados en la tarea más comentarios.
     history = db.relationship('TaskHistory', back_populates='task')
     # Anotaciones para correcciones por el editor

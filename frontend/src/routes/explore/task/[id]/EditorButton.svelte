@@ -18,7 +18,9 @@
   }
 </script>
 
-{#if task.currentLock && task.currentLock !== task.id}
+{#if task.municipality.lock }
+  <p class="text-danger-500 font-bold">Municipio bloqueado para actualización.</p>
+{:else if task.currentLock && task.currentLock !== task.id}
   <p>
     Tienes otra tarea bloqueada
     <Button on:click={gotoCurrentTask}>Complétala</Button>

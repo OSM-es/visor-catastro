@@ -8,12 +8,17 @@ class Municipality(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     muncode = db.Column(db.String, index=True, unique=True)
     name = db.Column(db.String, nullable=False)
-    date = db.Column(db.Date, nullable=False)
+    src_date = db.Column(db.Date, nullable=False)
     geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
-    lock = db.Column(db.Boolean)
-    tasks = db.relationship('Task', back_populates='municipality')
     update_id = db.Column(db.Integer, db.ForeignKey('municipality_update.id'), nullable=True)
     update = db.relationship('MunicipalityUpdate', back_populates='municipality', uselist=False)
+
+    def asdict(self):
+        return {
+            'muncode': self.muncode,
+            'name': self.name,
+            'lock': self.update_id is not None,
+        }
 
     @staticmethod
     def get_by_code(mun_code):
@@ -39,7 +44,7 @@ class MunicipalityUpdate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     muncode = db.Column(db.String, index=True, unique=True)
     name = db.Column(db.String, nullable=False)
-    date = db.Column(db.Date, nullable=False)
+    src_date = db.Column(db.Date, nullable=False)
     geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
     municipality = db.relationship('Municipality', back_populates='update', uselist=False)
 
@@ -47,7 +52,7 @@ class MunicipalityUpdate(db.Model):
         mun = self.municipality
         mun.muncode = self.muncode
         mun.name = self.name
-        mun.date = self.date
+        mun.src_date = self.src_date
         mun.geom = self.geom
         mun.lock = None
         mun.update = None
