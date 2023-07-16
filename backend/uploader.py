@@ -18,7 +18,7 @@ from shapely import GeometryCollection
 from geoalchemy2.shape import from_shape, to_shape
 
 import overpass
-from models import db, Municipality, MunicipalityUpdate, Province, Street, Task
+from models import db, Municipality, Province, Street, Task
 from config import Config
 from diff import Diff
 
@@ -38,9 +38,9 @@ def end_upload():
     s = Municipality.query.filter(Municipality.update_id is None).delete()
     if s:
         log.info('Municipios eliminados: %s', s)
-    for u in MunicipalityUpdate.query.all():
+    for u in Municipality.Update.query.all():
         u.do_update()
-    MunicipalityUpdate.query.delete()
+    Municipality.Update.query.delete()
     db.session.commit()
     return {}
 
@@ -71,7 +71,7 @@ def upload(mun_code):
             msg = f"{mun_code} ya está registrado"
             log.info(msg)
             return msg
-    update = MunicipalityUpdate(
+    update = Municipality.Update(
         muncode=mun_code, name=mun_name, date=src_date, geom=from_shape(mun_geom)
     )
     update.municipality = mun

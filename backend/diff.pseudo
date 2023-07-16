@@ -1,0 +1,13 @@
+v Resources tasks consultar municipality y de as dict coger name y lock (update id is not none)
+v Task page task.municipality.name
+v EditorButton bloqueo si task.municipality.lock. 
+v model Task model municipality quitar relación  
+v date -> src_date
+
+v MunicipalityUpdate -> Municipality.Update
+v Método para bloquear municipio
+* Uploader bloquear (en model municipality) municipio poniendo update (sin código) a todos los candidatos que no tengan tareas bloqueadas, si no consigue bloquearlos, aborta misión 
+* Al terminar quitar update si la geometría coincide en los dos sentidos
+
+* Tratar caso type: "R&uacute;stica"
+* Poner node on surface a tareas y municipios para marcador con candado. En resource task query a municipios y aplicar columna para lock
