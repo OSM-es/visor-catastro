@@ -32,6 +32,7 @@ class Municipality(db.Model):
             mun.geom = self.geom
             mun.lock = None
             mun.update = None
+            db.session.delete(self)
 
 
     id = db.Column(db.Integer, primary_key=True)
@@ -83,7 +84,7 @@ class Municipality(db.Model):
             self.update = Municipality.Update()
             self.update.muncode = self.muncode
             self.update.name = self.name
-            self.update.src_date = self.src_date
+            #self.update.src_date = self.src_date
             self.update.geom = self.geom
         return locks == 0
 

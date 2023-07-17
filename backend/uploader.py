@@ -68,10 +68,10 @@ def upload(mun_code):
         mun.update.set(mun_code, mun_name, src_date, mun_shape)
     zoning = UPDATE + mun_code + '/' + 'zoning.geojson'
     tasks = merge_tasks(zoning)
-    load_tasks(mun_code, tasks.values())
+    load_tasks(mun_code, tasks.values(), mun_shape)
     #load_tasks(mun_code, [tasks['6114001XJ2461S'], tasks['6114003XJ2461S']])
     log.info(f"Registradas {len(tasks)} tareas en {mun_code} {mun_name}")
-    upload_streets(mun_code)
+    #upload_streets(mun_code)
     # shutil.move(UPDATE + mun_code, DIST + mun_code)
     if len(candidates) == 1 and mun.equal(mun_shape):
         mun.update.do_update()
@@ -155,22 +155,17 @@ def calc_difficulty(task):
     task.addresses = addresses
     task.difficulty = difficulty.value
 
-def load_tasks(mun_code, tasks):
-    """Registra las tareas.
-    Por ahora no contempla estado, reemplaza todas las tareas.
-    TODO: Como pueden cambiar entre actualizaciones, 
-    TODO: debe buscar si existe por la forma de la tarea, no
-    TODO: por códigos. Falta el código para comprobar si hay diferencias.
-    """
-    #Task.query.filter(Task.muncode == mun_code).delete()
-
+def load_tasks(mun_code, tasks, mun_shape):
+    """Registra las tareas."""
+    mun_geom = from_shape(mun_shape)
+    old_tasks = [
+        t.id for t in Task.query.filter(Task.geom.contained(mun_geom)).all()
+    ]
     demolished = []
     for feat in tasks:
         task = Task(**feat['properties'])
         if task.type == 'R&uacute;stica': task.type = 'Rústica'
         geom = feat['geometry']
-        # if not is_valid(geom):
-        #     geom = make_valid(geom)
         task.geom = from_shape(geom)
         calc_difficulty(task)
         candidates = Task.get_by_area(task.geom)
@@ -184,13 +179,12 @@ def load_tasks(mun_code, tasks):
         Diff.shapes_to_dataframe(diff.df2, data, mun_code, task.localId, task.id)
         diff.clean_demolished()
         for c in candidates:
+            if c.id in old_tasks: old_tasks.remove(c.id)
             fn = Diff.get_filename(DIST, c.muncode, c.localId)
             for feat in Diff.get_shapes(fn):
                 geom = feat['shape']
                 # shapely.errors.GEOSException: TopologyException: side location conflict at -1.5376820875309667 39.212811681255161. This can occur if the input geometry is invalid.
                 # task_geom = to_shape(task.geom).buffer(0)
-                # if task_geom.contains(geom):
-                #     diff.clean_demolished(geom)
                 if (
                     True or
                     c.ad_status != Task.Status.READY.value
@@ -199,18 +193,21 @@ def load_tasks(mun_code, tasks):
                     Diff.add_row(diff.df1, c.muncode, c.localId, c.id, feat)
         if len(diff.df1.index):
             diff.get_fixmes()
-            for f in diff.fixmes:
-                print(f['node'], f['task'], f['fixme'])
-            print('----------------------')
-            print(len(diff.demolished))
-            for f in diff.demolished:
-                print(f['node'], f['task'], f['fixme'])
+        #     for f in diff.fixmes:
+        #         print(f['node'], f['task'], f['fixme'])
+        #     print('----------------------')
+        #     print(len(diff.demolished))
+        #     for f in diff.demolished:
+        #         print(f['node'], f['task'], f['fixme'])
         # si old no es vacio, ejecutar
         # mover
         # recorrer fixmes
         #   
         # agregar fixmes a bd
-
+    if old_tasks:
+        current_app.logger.info(f"Eliminadas {len(old_tasks)} tareas")
+    for id in old_tasks:
+        db.session.delete(Task.query.get(id))
     # agregar los fixmes de lo que queda en demolished
 
 def upload_streets(mun_code):

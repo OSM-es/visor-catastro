@@ -44,12 +44,26 @@ class Task(db.Model):
                 difficulty = Task.Difficulty['MODERATE']
             return difficulty
 
+    class Update(db.Model):
+        """
+        Almacen temporal de nuevas tareas para actualizar.
+        """
+        __tablename__ = 'task_update'
+
+        id = db.Column(db.Integer, primary_key=True)
+        muncode = db.Column(db.String, db.ForeignKey('municipality_update.muncode'), nullable=True)
+        localId = db.Column('localid', db.String)
+        zone = db.Column(db.String)
+        type = db.Column(db.String)
+        task = db.relationship('Task', back_populates='update', uselist=False)
+        geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
+
     MODERATE_THRESHOLD = 10
     CHALLENGING_THRESHOLD = 20
 
     id = db.Column(db.Integer, primary_key=True)
     # Código de Catastro del municipio. Coincide en ocasiones con el código postal o código INE, pero no siempre.
-    muncode = db.Column(db.String, db.ForeignKey('municipality.muncode'), index=True, nullable=False)
+    muncode = db.Column(db.String, index=True, nullable=False)
     # Identificador asignado por el programa conversor a partir de la referencia catastral de la parcela.
     # Puede repetirse en otro municipio.
     # No es inmutable por que las parcelas pueden segregarse o agregarse.
@@ -79,7 +93,7 @@ class Task(db.Model):
     # Anotaciones para correcciones por el editor
     fixmes = db.relationship('Fixme', back_populates='task')
     update_id = db.Column(db.Integer, db.ForeignKey('task_update.id'), nullable=True)
-    update = db.relationship('TaskUpdate', back_populates='task', uselist=False)
+    update = db.relationship(Update, back_populates='task', uselist=False)
     geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
     __table_args__ = (Index('codes_index', 'localid', 'muncode'), )
 
@@ -227,17 +241,3 @@ class Task(db.Model):
             Task.Status.MAPPED.name,
         )
         return mapper and mapper.user
-
-
-class TaskUpdate(db.Model):
-    """
-    Almacen temporal de nuevas tareas para actualizar.
-    """
-    id = db.Column(db.Integer, primary_key=True)
-    muncode = db.Column(db.String, db.ForeignKey('municipality_update.muncode'), nullable=True)
-    localId = db.Column('localid', db.String)
-    zone = db.Column(db.String)
-    type = db.Column(db.String)
-    task = db.relationship('Task', back_populates='update', uselist=False)
-    geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
-    fixmes = db.relationship('Fixme', back_populates='update')
