@@ -58,7 +58,7 @@ def upload(mun_code):
     if candidates:
         if mun.src_date == src_date:
             return exit(f"{mun_code} ya está registrado")
-        locks = [m.set_lock for m in candidates]
+        locks = [m.set_lock() for m in candidates]
         if not all(locks):
             return exit("No se han podido bloquear todos los municipios")
         mun.update.set(mun_code, mun_name, src_date, mun_shape)

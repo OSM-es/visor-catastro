@@ -64,9 +64,8 @@ class Municipality(db.Model):
     @staticmethod
     def get_match(mun_code, mun_name, src_date, shape):
         geom = from_shape(shape)
-        candidates = get_by_area(Municipality, geom)
         candidates = [
-            c for c in Municipality.get_by_area(geom)
+            c for c in get_by_area(Municipality, geom)
             if c.update_id is None
         ]
         if candidates:
