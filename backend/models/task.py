@@ -3,6 +3,7 @@ from enum import Enum
 from pytz import UTC
 
 from geoalchemy2 import Geometry, Index
+from geoalchemy2.shape import from_shape
 
 from models import db, TaskHistory, TaskLock
 from models.utils import get_by_area
@@ -46,17 +47,25 @@ class Task(db.Model):
 
     class Update(db.Model):
         """
-        Almacen temporal de nuevas tareas para actualizar.
+        Almacén temporal de nuevas tareas para actualizar.
         """
         __tablename__ = 'task_update'
 
         id = db.Column(db.Integer, primary_key=True)
-        muncode = db.Column(db.String, db.ForeignKey('municipality_update.muncode'), nullable=True)
+        muncode = db.Column(db.String, nullable=True)
         localId = db.Column('localid', db.String)
         zone = db.Column(db.String)
         type = db.Column(db.String)
         task = db.relationship('Task', back_populates='update', uselist=False)
         geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
+
+        @staticmethod
+        def from_feature(feature):
+            u = Task.Update(**feature['properties'])
+            if u.type == 'R&uacute;stica': u.type = 'Rústica'
+            geom = feature['geometry']
+            u.geom = from_shape(geom)
+            return u
 
     MODERATE_THRESHOLD = 10
     CHALLENGING_THRESHOLD = 20
@@ -102,12 +111,31 @@ class Task(db.Model):
         return Task.query.filter(Task.muncode == mun_code, Task.localId == local_id).one_or_none()
 
     @staticmethod
-    def get_by_area(geom):
-        return get_by_area(Task, geom)
+    def from_feature(feature):
+        del feature['properties']['parts']
+        task = Task(**feature['properties'])
+        if task.type == 'R&uacute;stica': task.type = 'Rústica'
+        shape = feature['geometry']
+        task.geom = from_shape(shape)
+        return task
 
+    @staticmethod
+    def get_match(feature):
+        task = Task.from_feature(feature)
+        candidates = get_by_area(Task, task.geom)
+        if candidates:
+            u = Task.Update.from_feature(feature)
+            task = next(
+                (c for c in candidates if c.localId == u.localId and c.update_id is None),
+                candidates[0]
+            )
+            # task.update = u
+        else:
+            db.session.add(task)
+        return task, candidates
 
     def __str__(self):
-        return f"{self.muncode} {self.localId} {self.type} {self.parts}"
+        return f"{self.muncode} {self.localId} {self.type}"
 
     def asdict(self):
         self.update_lock()

@@ -52,7 +52,7 @@ class Task(Resource):
         filtered = remove_no_addr_nodes(geojson)
         buildings = get_buildings_and_nodes_for_addr_in_areas(filtered, shapes)
         parts = [f for f in filtered if 'building:part' in f['properties']['tags']]
-        fixmes = get_fixmes(shapes)
+        fixmes = [f.to_feature() for f in task.fixmes]
         fn = DIST + task.muncode + '/tasks/' + task.localId + '.fixmes.geojson'
         data = task.asdict()
         data['municipality'] = Municipality.get_by_code(task.muncode).asdict()

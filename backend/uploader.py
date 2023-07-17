@@ -18,7 +18,7 @@ from shapely import GeometryCollection
 from geoalchemy2.shape import from_shape
 
 import overpass
-from models import db, Municipality, Province, Street, Task
+from models import db, Municipality, Province, Street, Task, Fixme
 from config import Config
 from diff import Diff
 
@@ -68,8 +68,8 @@ def upload(mun_code):
         mun.update.set(mun_code, mun_name, src_date, mun_shape)
     zoning = UPDATE + mun_code + '/' + 'zoning.geojson'
     tasks = merge_tasks(zoning)
-    load_tasks(mun_code, tasks.values(), mun_shape)
-    #load_tasks(mun_code, [tasks['6114001XJ2461S'], tasks['6114003XJ2461S']])
+    load_tasks(mun_code, tasks.values(), mun_shape, src_date)
+    # load_tasks(mun_code, [tasks['03062A00100006']], mun_shape, src_date)
     log.info(f"Registradas {len(tasks)} tareas en {mun_code} {mun_name}")
     #upload_streets(mun_code)
     # shutil.move(UPDATE + mun_code, DIST + mun_code)
@@ -155,63 +155,66 @@ def calc_difficulty(task):
     task.addresses = addresses
     task.difficulty = difficulty.value
 
-def load_tasks(mun_code, tasks, mun_shape):
+def clean_demolished(demolished, task_shape):
+    for i in range(len(demolished) - 1, -1, -1):
+        if task_shape.contains(demolished[i]['shape']):
+            demolished.remove(demolished[i])
+
+def load_tasks(mun_code, tasks, mun_shape, src_date):
     """Registra las tareas."""
     mun_geom = from_shape(mun_shape)
     old_tasks = [
         t.id for t in Task.query.filter(Task.geom.contained(mun_geom)).all()
     ]
     demolished = []
-    for feat in tasks:
-        task = Task(**feat['properties'])
-        if task.type == 'R&uacute;stica': task.type = 'Rústica'
-        geom = feat['geometry']
-        task.geom = from_shape(geom)
-        calc_difficulty(task)
-        candidates = Task.get_by_area(task.geom)
-        print(mun_code, len(candidates))
+    for feature in tasks:
+        localid = feature['properties']['localId']
+        task, candidates = Task.get_match(feature)
         if not candidates:
-            db.session.add(task)
+            calc_difficulty(task)
             continue
-        diff = Diff(demolished=demolished)
-        fn = Diff.get_filename(UPDATE, mun_code, task.localId)
-        data = Diff.get_shapes(fn)
-        Diff.shapes_to_dataframe(diff.df2, data, mun_code, task.localId, task.id)
-        diff.clean_demolished()
+        diff = Diff()
+        fn = Diff.get_filename(UPDATE, mun_code, localid)
+        task_shape = feature['geometry'].buffer(0)
+        for feat in Diff.get_shapes(fn):
+            shape = feat['shape']
+            if task_shape.contains(shape):
+                Diff.add_row(diff.df2, feat)
+            else:
+                demolished.append({'shape': shape, 'localid': localid})
         for c in candidates:
-            if c.id in old_tasks: old_tasks.remove(c.id)
+            if c.id in old_tasks:
+                old_tasks.remove(c.id)
             fn = Diff.get_filename(DIST, c.muncode, c.localId)
             for feat in Diff.get_shapes(fn):
-                geom = feat['shape']
-                # shapely.errors.GEOSException: TopologyException: side location conflict at -1.5376820875309667 39.212811681255161. This can occur if the input geometry is invalid.
-                # task_geom = to_shape(task.geom).buffer(0)
                 if (
                     True or
                     c.ad_status != Task.Status.READY.value
                     or c.bu_status != Task.Status.READY.value
                 ):
-                    Diff.add_row(diff.df1, c.muncode, c.localId, c.id, feat)
+                    Diff.add_row(diff.df1, feat)
         if len(diff.df1.index):
             diff.get_fixmes()
-        #     for f in diff.fixmes:
-        #         print(f['node'], f['task'], f['fixme'])
-        #     print('----------------------')
-        #     print(len(diff.demolished))
-        #     for f in diff.demolished:
-        #         print(f['node'], f['task'], f['fixme'])
-        # si old no es vacio, ejecutar
-        # mover
-        # recorrer fixmes
-        #   
-        # agregar fixmes a bd
+            load_fixmes(task, diff, src_date)
     if old_tasks:
         current_app.logger.info(f"Eliminadas {len(old_tasks)} tareas")
     for id in old_tasks:
+        #TODO Si está importada, hay que tratarlo con fixmes, no eliminar
         db.session.delete(Task.query.get(id))
-    # agregar los fixmes de lo que queda en demolished
+
+def load_fixmes(task, diff, src_date):
+    """Carga fixmes de actualización en bd."""
+    for f in diff.fixmes:
+        f['geom'] = from_shape(f['geom'])
+        fixme = Fixme(**f)
+        fixme.type = 0
+        fixme.src_date = src_date
+        task.fixmes.append(fixme)
+    for f in task.fixmes:
+        print(f)
 
 def upload_streets(mun_code):
-    """Registra el callejero del municipio.
+    """Registra el callejero demol municipio.
     
     Excluye las calles que no tengan ninguna dirección asociada.
     """

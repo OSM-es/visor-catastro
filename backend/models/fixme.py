@@ -1,6 +1,8 @@
 from enum import Enum
 
 from geoalchemy2 import Geometry
+from geoalchemy2.shape import to_shape
+import osm2geojson
 
 from models import db
 
@@ -25,6 +27,13 @@ class Fixme(db.Model):
     text = db.Column(db.String)
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=True)
     task = db.relationship('Task', back_populates='fixmes')
-    update_id = db.Column(db.Integer, db.ForeignKey('task_update.id'), nullable=True)
-    update = db.relationship('TaskUpdate', back_populates='fixmes')
     geom = db.Column(Geometry("POINT", srid=4326))
+
+    def __str__(self):
+        shape = to_shape(self.geom)
+        return f"{shape} {self.text}"
+
+    def to_feature(self):
+        shape = to_shape(self.geom)
+        return osm2geojson.shape_to_feature(shape, {'fixme': self.text})
+   

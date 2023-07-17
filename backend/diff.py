@@ -13,26 +13,25 @@ DIST = Config.DIST_PATH
 
 class Diff():
     "Class to compare two osm datasets"
-    def __init__(self, df1=None, df2=None, demolished=[]):
+    def __init__(self, df1=None, df2=None):
         self.df1 = Diff.dataframe() if df1 is None else df1
         self.df2 = Diff.dataframe() if df2 is None else df2
         self.fixmes = []
-        self.demolished = demolished
 
     @staticmethod
-    def get_filename(source_path, mun_code, task):
-        return source_path + mun_code + '/tasks/' + task + '.osm.gz'
+    def get_filename(source_path, mun_code, localid):
+        return source_path + mun_code + '/tasks/' + localid + '.osm.gz'
 
     @staticmethod
     def parse_args(source_path, args):
         """Read command args to geojson shapes.
         args is a list of <mun_code>-<taskfilename>
         """
-        for mun_code, task in [arg.split('-') for arg in args]:
-            fn = Diff.get_filename(source_path, mun_code, task)
+        for mun_code, localid in [arg.split('-') for arg in args]:
+            fn = Diff.get_filename(source_path, mun_code, localid)
             data = Diff.get_shapes(fn)
             df = Diff.dataframe()
-            Diff.shapes_to_dataframe(df, data, mun_code, task)
+            Diff.shapes_to_dataframe(df, data)
         return df
 
     @staticmethod
@@ -44,22 +43,27 @@ class Diff():
 
     @staticmethod
     def dataframe():
-        columns = ['mun_code', 'task', 'task_id', 'tags', 'geometry']
-        return gpd.GeoDataFrame(columns=columns)
+        return gpd.GeoDataFrame(columns=['tags', 'geometry'])
 
     @staticmethod
-    def shapes_to_dataframe(df, data, mun_code, task, task_id=None):
+    def shapes_to_dataframe(df, data):
         """Convert geojson to dataframe"""
         for feat in data:
-            Diff.add_row(df, mun_code, task, task_id, feat)
+            Diff.add_row(df, feat)
 
     @staticmethod
-    def add_row(df, mun_code, task, task_id, feature):
+    def add_row(df, feature):
         geom = feature['shape']
         tags = feature['properties'].get('tags')
         if tags:
-            df.loc[len(df)] = [mun_code, task, task_id, tags, geom]
+            df.loc[len(df)] = [tags, geom]
 
+    @staticmethod
+    def clean_tags(tags):
+        private_tags = ('fixme', 'ref', 'addr:cat_name')
+        tags = {k: v for k, v in tags.items() if k not in private_tags}
+        return tags
+        
     @staticmethod
     def get_match(geom, candidates):
         """
@@ -67,12 +71,12 @@ class Diff():
         closely resembles geom or None
         """
         match = None
-        match_area = 0
+        match_area = 9999999
         for i, c in enumerate(candidates):
-            intersected_area = c.intersection(geom).area
-            if c.area != 0 and intersected_area > match_area:
+            ia = max(geom.area, c.area) - c.intersection(geom).area
+            if c.area != 0 and ia < match_area:
                 match = i
-                match_area = intersected_area
+                match_area = ia
         return match
 
     def _update_matches(self, matches):
@@ -81,7 +85,6 @@ class Diff():
             feat = None
             if i1 is None:
                 feat = self.df2.loc[i2]
-                feat1 = feat
                 fixme = 'Creado' if feat.geometry.geom_type == 'Point' else 'Creado o agregado'
             elif i2 is None:
                 feat = self.df1.loc[i1]
@@ -92,7 +95,7 @@ class Diff():
                 geom_diff = not feat.geometry.simplify(0.000000001).equals(
                     feat1.geometry.simplify(0.000000001)
                 )
-                tags_diff = feat.tags != feat1.tags
+                tags_diff = Diff.clean_tags(feat.tags) != Diff.clean_tags(feat1.tags)
                 if geom_diff:
                     if tags_diff:
                         fixme = "Varia la geometría y las etiquetas de"
@@ -101,20 +104,9 @@ class Diff():
                 elif tags_diff:
                     fixme = "Varia las etiquetas de"
             if fixme:
-                if i2 is None:
-                    self.demolished.append(self.new_fixme(feat, feat, fixme))
-                else:
-                    self.fixmes.append(self.new_fixme(feat, feat1, fixme))
+                self.fixmes.append(self.new_fixme(feat, fixme))
 
     def get_fixmes(self):
-        """
-        Return [
-            (
-                matching index in df1 or none (new),
-                matching index in df2 or none (deleted),
-            )
-        ]
-        """
         nx = gpd.GeoSeries(self.df1.geometry).sindex
         matches = []
         matches1 = []
@@ -131,24 +123,18 @@ class Diff():
         for i in self.df1.index:
             if i not in matches1:
                 matches.append((i, None))
+        print(matches)
+        print(self.df1.to_string())
+        print(self.df2.to_string())
         self._update_matches(matches)
 
-    def clean_demolished(self):
-        for i in range(len(self.demolished) - 1, -1, -1):
-            for g2 in self.df2.geometry.to_list():
-                if g2.contains(self.demolished[i]['geom']):
-                    self.demolished.remove(self.demolished[i])
-
-    def new_fixme(self, new_feat, old_feat, text):
-        msg = text + ' ' + new_feat.geometry.geom_type
-        tags = {k: v for k, v in new_feat.tags.items() if k not in ('fixme', 'ref', 'addr:cat_name')}
+    def new_fixme(self, feat, text):
+        msg = text + ' ' + feat.geometry.geom_type
+        tags = Diff.clean_tags(feat.tags)
         msg += str(tags)
         return {
-            'geom': new_feat.geometry,
-            'node': new_feat.geometry.point_on_surface(),
-            'mun_code': None if old_feat is None else old_feat.mun_code,
-            'task': None if old_feat is None else old_feat.task,
-            'fixme': msg,
+            'geom': feat.geometry.point_on_surface(),
+            'text': msg,
         }
     
 
@@ -162,10 +148,7 @@ def command(old, new):
     diff = Diff(df1, df2)
     diff.get_fixmes()
     for f in diff.fixmes:
-        print(f['task'], f['fixme'])
-    print('----------------------')
-    for f in diff.demolished:
-        print(f['task'], f['fixme'])
+        print(f['geom'], f['text'])
 
 
 if __name__ == '__main__':
