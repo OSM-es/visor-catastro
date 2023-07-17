@@ -36,10 +36,14 @@ def end_upload():
     log = current_app.logger
     log.info("Fin de actualización")
     s = Municipality.query.filter(Municipality.update_id is None).delete()
+    for u in Municipality.Update.query.all():
+        if u.muncode:
+            u.do_update()
+        else:
+            db.session.delete(u.municipality)
+            s += 1
     if s:
         log.info('Municipios eliminados: %s', s)
-    for u in Municipality.Update.query.all():
-        u.do_update()
     Municipality.Update.query.delete()
     db.session.commit()
     return {}
@@ -163,6 +167,7 @@ def load_tasks(mun_code, tasks):
     demolished = []
     for feat in tasks:
         task = Task(**feat['properties'])
+        if task.type == 'R&uacute;stica': task.type = 'Rústica'
         geom = feat['geometry']
         # if not is_valid(geom):
         #     geom = make_valid(geom)

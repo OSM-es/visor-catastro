@@ -79,8 +79,12 @@ class Municipality(db.Model):
 
     def set_lock(self):
         locks = models.Task.query.filter(models.Task.lock_id != None).count()
-        if locks == 0:
+        if locks == 0 and self.update_id is None:
             self.update = Municipality.Update()
+            self.update.muncode = self.muncode
+            self.update.name = self.name
+            self.update.src_date = self.src_date
+            self.update.geom = self.geom
         return locks == 0
 
     def equal(self, shape):
