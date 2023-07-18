@@ -69,7 +69,7 @@ def upload(mun_code):
     zoning = UPDATE + mun_code + '/' + 'zoning.geojson'
     tasks = merge_tasks(zoning)
     load_tasks(mun_code, tasks.values(), mun_shape, src_date)
-    # load_tasks(mun_code, [tasks['03062A00100006']], mun_shape, src_date)
+    # load_tasks(mun_code, [tasks['000700100XJ24B']], mun_shape, src_date)
     log.info(f"Registradas {len(tasks)} tareas en {mun_code} {mun_name}")
     #upload_streets(mun_code)
     # shutil.move(UPDATE + mun_code, DIST + mun_code)
@@ -175,7 +175,7 @@ def load_tasks(mun_code, tasks, mun_shape, src_date):
             continue
         diff = Diff()
         fn = Diff.get_filename(UPDATE, mun_code, localid)
-        task_shape = feature['geometry'].buffer(0)
+        task_shape = feature['geometry'].buffer(0.00001)
         for feat in Diff.get_shapes(fn):
             shape = feat['shape']
             if task_shape.contains(shape):
@@ -194,6 +194,7 @@ def load_tasks(mun_code, tasks, mun_shape, src_date):
                 ):
                     Diff.add_row(diff.df1, feat)
         if len(diff.df1.index):
+            print(len(diff.df1), len(diff.df2), len(demolished))
             diff.get_fixmes()
             load_fixmes(task, diff, src_date)
     if old_tasks:
