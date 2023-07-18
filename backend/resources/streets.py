@@ -23,9 +23,10 @@ class Streets(Resource):
     def get(self, id, cat_name):
         task = models.Task.query.get(id)
         if not task: abort(404)
-        mun_code = task.municipality.muncode
+        mun_code = task.muncode
+        municipality = models.Municipality.get_by_code(mun_code)
 
-        fn = DIST + task.muncode + '/tasks/' + task.localId + '.osm.gz'
+        fn = DIST + mun_code + '/tasks/' + task.localId + '.osm.gz'
         with gzip.open(fn) as fo:
             xml = fo.read()
         geojson = osm2geojson.xml2geojson(xml, filter_used_refs=False)
@@ -35,7 +36,7 @@ class Streets(Resource):
             if f['properties'].get('tags', {}).get('addr:cat_name', '')
         }
 
-        bounds = to_shape(task.municipality.geom).bounds
+        bounds = to_shape(municipality.geom).bounds
         streets = []
         street = None
         for st in models.Street.query.filter(
