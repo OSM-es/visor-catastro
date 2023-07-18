@@ -121,18 +121,25 @@ class Task(db.Model):
 
     @staticmethod
     def get_match(feature):
-        task = Task.from_feature(feature)
-        candidates = get_by_area(Task, task.geom)
+        new_task = Task.from_feature(feature)
+        candidates = get_by_area(Task, new_task.geom)
         if candidates:
             u = Task.Update.from_feature(feature)
-            task = next(
+            old_task = next(
                 (c for c in candidates if c.localId == u.localId and c.update_id is None),
                 candidates[0]
             )
+            task = old_task
             # task.update = u
         else:
-            db.session.add(task)
+            db.session.add(new_task)
+            task = new_task
         return task, candidates
+
+    @staticmethod
+    def query_by_shape(shape):
+        geom = from_shape(shape)
+        return Task.query.filter(Task.geom.contained(geom))
 
     def __str__(self):
         return f"{self.muncode} {self.localId} {self.type}"
@@ -251,6 +258,12 @@ class Task(db.Model):
         if (i >= 0):
             return self.history[i]
         return None
+
+    def both_ready(self):
+        return (
+            self.ad_status != Task.Status.READY.value
+            or self.bu_status != Task.Status.READY.value
+        )
 
     @property
     def ad_mapper(self):

@@ -24,6 +24,7 @@ from diff import Diff
 
 UPDATE = Config.UPDATE_PATH
 DIST = Config.DIST_PATH
+TASK_BUFFER = 0.00001  # Márgen de desplazamiento por correcciones de precisión
 uploader = Blueprint('uploader', __name__, url_prefix='/')
 
 
@@ -71,7 +72,10 @@ def upload(mun_code):
     load_tasks(mun_code, tasks.values(), mun_shape, src_date)
     # load_tasks(mun_code, [tasks['000700100XJ24B']], mun_shape, src_date)
     log.info(f"Registradas {len(tasks)} tareas en {mun_code} {mun_name}")
+    # TODO: falta actualizar calles
     #upload_streets(mun_code)
+    # tareas de dist ready+ready se pueden borrar
+    # resto de dist a backup
     # shutil.move(UPDATE + mun_code, DIST + mun_code)
     if len(candidates) == 1 and mun.equal(mun_shape):
         mun.update.do_update()
@@ -155,18 +159,10 @@ def calc_difficulty(task):
     task.addresses = addresses
     task.difficulty = difficulty.value
 
-def clean_demolished(demolished, task_shape):
-    for i in range(len(demolished) - 1, -1, -1):
-        if task_shape.contains(demolished[i]['shape']):
-            demolished.remove(demolished[i])
-
 def load_tasks(mun_code, tasks, mun_shape, src_date):
     """Registra las tareas."""
-    mun_geom = from_shape(mun_shape)
-    old_tasks = [
-        t.id for t in Task.query.filter(Task.geom.contained(mun_geom)).all()
-    ]
-    demolished = []
+    old_tasks = [t.id for t in Task.query_by_shape(mun_shape).all()]
+    demolished = {}
     for feature in tasks:
         localid = feature['properties']['localId']
         task, candidates = Task.get_match(feature)
@@ -175,32 +171,38 @@ def load_tasks(mun_code, tasks, mun_shape, src_date):
             continue
         diff = Diff()
         fn = Diff.get_filename(UPDATE, mun_code, localid)
-        task_shape = feature['geometry'].buffer(0.00001)
-        for feat in Diff.get_shapes(fn):
-            shape = feat['shape']
-            if task_shape.contains(shape):
-                Diff.add_row(diff.df2, feat)
-            else:
-                demolished.append({'shape': shape, 'localid': localid})
+        data = Diff.get_shapes(fn)
+        Diff.shapes_to_dataframe(diff.df2, data)
+        task_shape = feature['geometry'].buffer(TASK_BUFFER)
         for c in candidates:
             if c.id in old_tasks:
                 old_tasks.remove(c.id)
             fn = Diff.get_filename(DIST, c.muncode, c.localId)
             for feat in Diff.get_shapes(fn):
-                if (
-                    True or
-                    c.ad_status != Task.Status.READY.value
-                    or c.bu_status != Task.Status.READY.value
-                ):
-                    Diff.add_row(diff.df1, feat)
+                if True: # c.both_ready():
+                    shape = feat['shape']
+                    if task_shape.intersects(shape):
+                        demolished.pop(shape, None)
+                        Diff.add_row(diff.df1, feat)
+                    else:
+                        demolished[shape] = localid
         if len(diff.df1.index):
             diff.get_fixmes()
             load_fixmes(task, diff, src_date)
-    #if old_tasks:
-    #    current_app.logger.info(f"Eliminadas {len(old_tasks)} tareas")
-    #for id in old_tasks:
-    #    #TODO Si está importada, hay que tratarlo con fixmes, no eliminar
-    #    db.session.delete(Task.query.get(id))
+    # query_by_shape(mun_shape).filter(Task.update_id == None)
+    # Si ha sido candidata (id not in old_tasks)
+    #    en su caso habrá generado fixmes en otra tarea, se puede eliminar
+    # si no,
+    #    tareas huerfanas, si están ready+ready se pueden eliminar.
+    #    si no, se mantienen con need update + fixme, 
+    #    el archivo va a backup.
+    #    current_app.logger.info(f"Eliminadas {} tareas")
+    # Para cada Task.Update, copiar valores a la tarea y eliminar
+    # si el estado no es ready, pasa a need_update
+    # se marca el src_date
+    for shape, localid in demolished.items():
+        pass
+        # añadir fixme se ha eliminado? 
 
 def load_fixmes(task, diff, src_date):
     """Carga fixmes de actualización en bd."""
@@ -210,8 +212,7 @@ def load_fixmes(task, diff, src_date):
         fixme.type = 0
         fixme.src_date = src_date
         task.fixmes.append(fixme)
-    for f in task.fixmes:
-        print(f)
+    # log registrados len(diff.fixmes)
 
 def upload_streets(mun_code):
     """Registra el callejero demol municipio.

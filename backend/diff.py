@@ -39,7 +39,8 @@ class Diff():
         """Read osm.gz file to geojson shapes"""
         with gzip.open(fn) as fo:
             xml = fo.read()
-        return osm2geojson.xml2shapes(xml, filter_used_refs=False)
+        shapes = osm2geojson.xml2shapes(xml, filter_used_refs=False)
+        return [s for s in shapes if 'tags' in s['properties']]
 
     @staticmethod
     def dataframe():
