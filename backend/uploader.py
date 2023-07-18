@@ -194,14 +194,13 @@ def load_tasks(mun_code, tasks, mun_shape, src_date):
                 ):
                     Diff.add_row(diff.df1, feat)
         if len(diff.df1.index):
-            print(len(diff.df1), len(diff.df2), len(demolished))
             diff.get_fixmes()
             load_fixmes(task, diff, src_date)
-    if old_tasks:
-        current_app.logger.info(f"Eliminadas {len(old_tasks)} tareas")
-    for id in old_tasks:
-        #TODO Si está importada, hay que tratarlo con fixmes, no eliminar
-        db.session.delete(Task.query.get(id))
+    #if old_tasks:
+    #    current_app.logger.info(f"Eliminadas {len(old_tasks)} tareas")
+    #for id in old_tasks:
+    #    #TODO Si está importada, hay que tratarlo con fixmes, no eliminar
+    #    db.session.delete(Task.query.get(id))
 
 def load_fixmes(task, diff, src_date):
     """Carga fixmes de actualización en bd."""

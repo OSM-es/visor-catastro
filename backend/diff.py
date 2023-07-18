@@ -71,12 +71,15 @@ class Diff():
         closely resembles geom or None
         """
         match = None
-        match_area = 9999999
+        match_factor = 9E9
         for i, c in enumerate(candidates):
-            ia = max(geom.area, c.area) - c.intersection(geom).area
-            if c.area != 0 and ia < match_area:
+            if geom.geom_type == 'Point' and c.geom_type == 'Point':
+                f = geom.distance(c)
+            else:
+                f = max(geom.area, c.area) - c.intersection(geom).area
+            if f < match_factor:
                 match = i
-                match_area = ia
+                match_factor = f
         return match
 
     def _update_matches(self, matches):
@@ -112,7 +115,7 @@ class Diff():
         matches1 = []
         for i in self.df2.index:
             g = self.df2.geometry[i]
-            candidates = nx.query(g, predicate="intersects")
+            candidates = nx.query(g.buffer(0.00001), predicate="intersects")
             match = Diff.get_match(g, [self.df1.loc[c].geometry for c in candidates])
             if match is not None:
                 i1 = self.df1.index[candidates[match]]
@@ -123,9 +126,6 @@ class Diff():
         for i in self.df1.index:
             if i not in matches1:
                 matches.append((i, None))
-        print(matches)
-        print(self.df1.to_string())
-        print(self.df2.to_string())
         self._update_matches(matches)
 
     def new_fixme(self, feat, text):
