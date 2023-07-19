@@ -161,12 +161,16 @@ def calc_difficulty(task):
 
 def load_tasks(mun_code, tasks, mun_shape, src_date):
     """Registra las tareas."""
+    log = current_app.logger
     old_tasks = [t.id for t in Task.query_by_shape(mun_shape).all()]
+    new_tasks = []
     demolished = {}
+    fixmes = 0
     for feature in tasks:
         localid = feature['properties']['localId']
         task, candidates = Task.get_match(feature)
         if not candidates:
+            new_tasks.append(task.localId)
             calc_difficulty(task)
             continue
         diff = Diff()
@@ -179,18 +183,23 @@ def load_tasks(mun_code, tasks, mun_shape, src_date):
                 old_tasks.remove(c.id)
             fn = Diff.get_filename(DIST, c.muncode, c.localId)
             for feat in Diff.get_shapes(fn):
-                if True: # c.both_ready():
+                if not c.both_ready():
                     shape = feat['shape']
                     if task_shape.intersects(shape):
                         demolished.pop(shape, None)
+                        # TODO: añadir si debe revisar direcciones, edificios o ambos
                         Diff.add_row(diff.df1, feat)
                     else:
                         demolished[shape] = localid
         if len(diff.df1.index):
             diff.get_fixmes()
+            fixmes += len(diff.fixmes)
             load_fixmes(task, diff, src_date)
-    log = current_app.logger
+    if fixmes:
+        log.info(f"Registrados {fixmes} anotaciones de actualización en {mun_code}")
     for t in Task.query_by_shape(mun_shape).filter(Task.update_id == None).all():
+        if t.localId in new_tasks:
+            continue
         if t.id in old_tasks and not t.both_ready():
             geom = to_shape(t.geom).point_on_surface()
             f = Fixme(type=Fixme.Type.UPDATE_ORPHAN.value, geom=geom)
@@ -200,12 +209,14 @@ def load_tasks(mun_code, tasks, mun_shape, src_date):
         else:
             t.delete()
             log.info(f"Eliminada tarea {str(t)}")
-    # Para cada Task.Update, copiar valores a la tarea y eliminar
-    # si el estado no es ready, pasa a need_update
-    # se marca el src_date
-    for shape, localid in demolished.items():
-        pass
-        # añadir fixme se ha eliminado? 
+    Task.update_all()
+    # TODO: recalcular dificultad
+    # for shape, localid in demolished.items():
+    #     t = Task.get_by_code(mun_code, localid)
+    #     geom = shape.point_on_surface()
+    #     f = Fixme(type=Fixme.Type.UPDATE_DEL_CHECK.value, geom=geom)
+    #     t.fixmes.append(f)
+    #     t.set_need_update()
 
 def load_fixmes(task, diff, src_date):
     """Carga fixmes de actualización en bd."""
@@ -214,10 +225,9 @@ def load_fixmes(task, diff, src_date):
         fixme = Fixme(**f)
         fixme.src_date = src_date
         task.fixmes.append(fixme)
-    # log registrados len(diff.fixmes)
 
 def upload_streets(mun_code):
-    """Registra el callejero demol municipio.
+    """Registra el callejero del municipio.
     
     Excluye las calles que no tengan ninguna dirección asociada.
     """

@@ -25,6 +25,10 @@ class Fixme(db.Model):
         UPDATE_GEOM = 8  # Ha cambiado la geometría
         UPDATE_FULL = 9  # Cambian tanto etiquetas como geometría
         UPDATE_ORPHAN = 10  # Tarea eliminada
+        UPDATE_DEL_CHECK = 11  # Comprobar si hay que eliminar
+
+        def is_update(self):
+            return self.name.startswith('UPDATE')
 
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.Integer)
@@ -42,4 +46,6 @@ class Fixme(db.Model):
         shape = to_shape(self.geom)
         data = {'type': Fixme.Type(self.type).name, 'fixme': self.text}
         return osm2geojson.shape_to_feature(shape, data)
-   
+
+    def is_update(self):
+        return Fixme.Type(self.type).is_update()

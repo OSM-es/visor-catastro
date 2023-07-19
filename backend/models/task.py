@@ -130,7 +130,7 @@ class Task(db.Model):
                 candidates[0]
             )
             task = old_task
-            # task.update = u
+            task.update = u
         else:
             db.session.add(new_task)
             task = new_task
@@ -140,6 +140,18 @@ class Task(db.Model):
     def query_by_shape(shape):
         geom = from_shape(shape)
         return Task.query.filter(Task.geom.contained(geom))
+
+    @staticmethod
+    def update_all():
+        for u in Task.Update.query.all():
+            u.task.muncode = u.muncode
+            u.task.localId = u.localId
+            u.task.zone = u.zone
+            u.task.type = u.type
+            u.task.geom = u.geom
+            u.task.set_need_update()
+            u.task.update = None
+        Task.Update.query.delete()
 
     def __str__(self):
         return f"{self.muncode} {self.localId} {self.type}"
@@ -208,18 +220,22 @@ class Task(db.Model):
         db.session.delete(self.lock)
         db.session.commit()
 
-    def set_need_update(self):
-        user=OsmUser.system_bot()
-        if self.ad_status != Task.Status.Ready.value:
-            if self.bu_status != Task.Status.Ready.value:
-                self.change_status(user, Task.Status.NEED_UPDATE, True, True)
-            else:
-                self.change_status(user, Task.Status.NEED_UPDATE, False, True)
-        else:
-            self.change_status(user, Task.Status.NEED_UPDATE, True, False)
+    def need_update(self):
+        return any([f.is_update() for f in self.fixmes])
 
-    def change_status(self, user, status, buildings, addresses):
-        if not self.lock or self.lock.user != user.user:
+    def set_need_update(self):
+        if not self.need_update():
+            return
+        user=OsmUser.system_bot()
+        addresses = self.ad_status != Task.Status.READY.value
+        buildings = self.bu_status != Task.Status.READY.value
+        if buildings or addresses:
+            self.change_status(
+                user, Task.Status.NEED_UPDATE, buildings, addresses, check_lock=False
+            )
+
+    def change_status(self, user, status, buildings, addresses, check_lock=True):
+        if check_lock and (not self.lock or self.lock.user != user.user):
             raise PermissionError
         if not buildings and not addresses:
             raise ValueError("Se debe especificar al menos edificios o direcciones")
@@ -235,21 +251,22 @@ class Task(db.Model):
             addresses=addresses,
         )
         self.history.append(h)
-        db.session.delete(self.lock)
+        if self.lock: db.session.delete(self.lock)
         db.session.commit()
     
     def validate_status(self, key, status):
         old = Task.Status(getattr(self, key))
-        if status == Task.Status.MAPPED and old in (
-            Task.Status.READY,
-            Task.Status.INVALIDATED,
-            Task.Status.NEED_UPDATE,
-        ):
-            setattr(self, key, status.value)
-            return
-        elif old == Task.Status.MAPPED and status in (
-            Task.Status.VALIDATED,
-            Task.Status.INVALIDATED,
+        if (
+            status == Task.Status.NEED_UPDATE and old != Task.Status.READY
+            or status == Task.Status.MAPPED and old in (
+                Task.Status.READY,
+                Task.Status.INVALIDATED,
+                Task.Status.NEED_UPDATE,
+            )
+            or old == Task.Status.MAPPED and status in (
+                Task.Status.VALIDATED,
+                Task.Status.INVALIDATED,
+            )
         ):
             setattr(self, key, status.value)
             return
@@ -271,12 +288,11 @@ class Task(db.Model):
 
     def both_ready(self):
         return (
-            self.ad_status != Task.Status.READY.value
-            or self.bu_status != Task.Status.READY.value
+            self.ad_status == Task.Status.READY.value
+            and self.bu_status == Task.Status.READY.value
         )
 
     def delete(self):
-        return
         for h in self.history:
             db.session.delete(h)
         db.session.delete(self)
