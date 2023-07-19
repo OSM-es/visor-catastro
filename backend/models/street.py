@@ -4,7 +4,7 @@ from pytz import UTC
 
 from sqlalchemy.sql import expression
 
-from models import db, StreetHistory, StreetLock
+from models import db, History, StreetHistory, StreetLock
 
 STREET_LOCK_TIMEOUT = 3600
 
@@ -43,6 +43,10 @@ class Street(db.Model):
     def get_by_name(mun_code, name):
         return Street.query.filter(Street.mun_code == mun_code, Street.cat_name == name).one_or_none()
 
+    @staticmethod
+    def query_by_code(mun_code):
+        return Street.query.filter(Street.mun_code == mun_code)
+
     def asdict(self):
         return {
             'mun_code': self.mun_code,
@@ -71,6 +75,16 @@ class Street(db.Model):
         self.lock = StreetLock(user=user)
         db.session.add(self)
         db.session.commit()
+
+    def delete(self):
+        if self.lock:
+            db.session.delete(self.lock)
+        for h in self.history:
+            db.session.delete(h)
+        db.session.delete(self)
+        h = History(action=History.Action.DEL_STREET.value)
+        db.session.add(h)
+
 
     @property
     def owner(self):

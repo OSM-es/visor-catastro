@@ -41,7 +41,7 @@ def end_upload():
         if u.muncode:
             u.do_update()
         else:
-            db.session.delete(u.municipality)
+            u.municipality.delete()
             s += 1
     if s:
         log.info('Municipios eliminados: %s', s)
@@ -70,10 +70,9 @@ def upload(mun_code):
     zoning = UPDATE + mun_code + '/' + 'zoning.geojson'
     tasks = merge_tasks(zoning)
     load_tasks(mun_code, tasks.values(), mun_shape, src_date)
-    # load_tasks(mun_code, [tasks['000700100XJ24B']], mun_shape, src_date)
     log.info(f"Registradas {len(tasks)} tareas en {mun_code} {mun_name}")
-    # TODO: falta actualizar calles
-    #upload_streets(mun_code)
+    old_mun = mun.update.muncode if mun.update else None
+    upload_streets(mun_code, old_mun)
     # tareas de dist ready+ready se pueden borrar
     # resto de dist a backup
     # shutil.move(UPDATE + mun_code, DIST + mun_code)
@@ -226,11 +225,13 @@ def load_fixmes(task, diff, src_date):
         fixme.src_date = src_date
         task.fixmes.append(fixme)
 
-def upload_streets(mun_code):
+def upload_streets(mun_code, old_mun):
     """Registra el callejero del municipio.
     
     Excluye las calles que no tengan ninguna dirección asociada.
     """
+    log = current_app.logger
+    old_streets = {s.cat_name: s for s in Street.query_by_code(old_mun).all()}
     fn = UPDATE + mun_code + '/tasks/address.osm'
     with open(fn) as fh:
         xml = fh.read()
@@ -240,22 +241,35 @@ def upload_streets(mun_code):
         for ad in data['features']
     }
     fn = UPDATE + mun_code + '/tasks/highway_names.csv'
-    count = 0
+    new_streets = 0
+    mod_streets = 0
     with open(fn) as fh:
         for st in csv.reader(fh, delimiter='\t'):
             cat_name, osm_name, source = st[0:3]
             if osm_name and cat_name in addresses:
-                street = Street(
-                    mun_code=mun_code,
-                    cat_name=cat_name,
-                    osm_name=osm_name,
-                    source=Street.Source[source].value
-                )
-                db.session.add(street)
-                count += 1
-    db.session.commit()
-    msg = f"Registradas {count} calles en {mun_code}"
-    current_app.logger.info(msg)
+                street = old_streets.get(cat_name)
+                if street:
+                    street.mun_code = mun_code
+                    if not street.validated:
+                        street.osm_name = osm_name
+                        street.source = Street.Source[source].value
+                        mod_streets += 1
+                    del old_streets[cat_name]
+                else:
+                    street = Street(
+                        mun_code=mun_code,
+                        cat_name=cat_name,
+                        osm_name=osm_name,
+                        source=Street.Source[source].value
+                    )
+                    db.session.add(street)
+                    new_streets += 1
+    if old_streets:
+        for street in old_streets.values():
+            street.delete()
+        log.info(f"Eliminadas {len(old_streets)} calles en {mun_code}")
+    if mod_streets: log.info(f"Actualizadas {mod_streets} calles en {mun_code}")
+    if new_streets: log.info(f"Registradas {new_streets} calles en {mun_code}")
 
 def get_mun_limits(mun_code):
     """Lee el archivo con la geometría del municipio."""

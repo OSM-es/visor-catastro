@@ -144,7 +144,6 @@ class Task(db.Model):
     @staticmethod
     def update_all():
         for u in Task.Update.query.all():
-            print(u.task, u.muncode)
             u.task.muncode = u.muncode
             u.task.localId = u.localId
             u.task.zone = u.zone

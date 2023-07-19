@@ -65,8 +65,6 @@ class Municipality(db.Model):
     @staticmethod
     def get_match(mun_code, mun_name, src_date, shape):
         geom = from_shape(shape)
-        print(len(get_by_area(Municipality, geom)))
-        print(get_by_area(Municipality, geom))
         candidates = [
             c for c in get_by_area(Municipality, geom)
             if c.update_id is None
@@ -97,6 +95,20 @@ class Municipality(db.Model):
             intersect / mun_shape.area > 0.9
             and intersect / shape.area > 0.9
         )
+
+    def delete(self):
+        if self.lock:
+            db.session.delete(self.lock)
+        for h in models.StreetHistory.query.join(
+            models.Street
+        ).filter(
+            models.Street.mun_code==self.muncode
+        ).all():
+            db.session.delete(h)
+        models.Street.query_by_code(self.muncode).delete()
+        db.session.delete(self)
+        h = models.History(action=models.History.Action.DEL_MUNICIPALITY.value)
+        db.session.add(h)
 
     def __str__(self):
         return f"{self.muncode} {self.name}"

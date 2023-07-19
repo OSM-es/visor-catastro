@@ -32,6 +32,8 @@ class TaskHistoryMixin:
 class History(HistoryMixin, db.Model):
     class Action(Enum):
         DEL_TASK = 1
+        DEL_MUNICIPALITY = 2
+        DEL_STREET = 3
 
     type = db.Column(db.String, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('osm_user.id'), nullable=False)
