@@ -142,6 +142,7 @@
                   on:click={centerMap}
                   data-sveltekit-preload-data="off"
                 >
+                  {fixme.properties.type}
                   {fixme.properties.fixme}
                 </a>
               </li>

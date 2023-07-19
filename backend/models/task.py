@@ -130,7 +130,7 @@ class Task(db.Model):
                 candidates[0]
             )
             task = old_task
-            task.update = u
+            # task.update = u
         else:
             db.session.add(new_task)
             task = new_task
@@ -276,6 +276,7 @@ class Task(db.Model):
         )
 
     def delete(self):
+        return
         for h in self.history:
             db.session.delete(h)
         db.session.delete(self)

@@ -15,7 +15,7 @@ import osm2geojson
 from flask import Blueprint, abort, current_app
 from shapely.geometry import shape
 from shapely import GeometryCollection
-from geoalchemy2.shape import from_shape
+from geoalchemy2.shape import from_shape, to_shape
 
 import overpass
 from models import db, Municipality, Province, Street, Task, Fixme
@@ -192,7 +192,9 @@ def load_tasks(mun_code, tasks, mun_shape, src_date):
     log = current_app.logger
     for t in Task.query_by_shape(mun_shape).filter(Task.update_id == None).all():
         if t.id in old_tasks and not t.both_ready():
-            # TODO: poner fixme
+            geom = to_shape(t.geom).point_on_surface()
+            f = Fixme(type=Fixme.Type.UPDATE_ORPHAN.value, geom=geom)
+            t.fixmes.append(f)
             t.set_need_update()
             log.info(f"Tarea huérfana {str(t)}")
         else:
@@ -210,7 +212,6 @@ def load_fixmes(task, diff, src_date):
     for f in diff.fixmes:
         f['geom'] = from_shape(f['geom'])
         fixme = Fixme(**f)
-        fixme.type = 0
         fixme.src_date = src_date
         task.fixmes.append(fixme)
     # log registrados len(diff.fixmes)

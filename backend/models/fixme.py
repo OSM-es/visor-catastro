@@ -14,12 +14,17 @@ class Fixme(db.Model):
     """
 
     class Type(Enum):
-        CONVERTER = 0  # Introducida por catatom2osm
-        UPDATE_DEL = 1  # Eliminar
-        UPDATE_ADD = 2  # Añadir
-        UPDATE_TAGS = 3  # Han cambiado las etiquetas
-        UPDATE_GEOM = 4  # Ha cambiado la geometría
-        UPDATE_FULL = 5  # Cambian tanto etiquetas como geometría
+        CA2O_PART_BIGGER = 0  # Parte mayor que edificio
+        CA2O_SMALL_AREA = 1  # Área demasiado pequeña
+        CA2O_BIG_AREA = 2  # Área demasiado grande
+        CA2O_MISSING_PARTS = 3  # Partes no cubren edificio
+        CA2O_GEOS = 4  # Error de validación GEOS
+        UPDATE_DEL = 5  # Eliminar
+        UPDATE_ADD = 6  # Añadir
+        UPDATE_TAGS = 7  # Han cambiado las etiquetas
+        UPDATE_GEOM = 8  # Ha cambiado la geometría
+        UPDATE_FULL = 9  # Cambian tanto etiquetas como geometría
+        UPDATE_ORPHAN = 10  # Tarea eliminada
 
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.Integer)
@@ -35,5 +40,6 @@ class Fixme(db.Model):
 
     def to_feature(self):
         shape = to_shape(self.geom)
-        return osm2geojson.shape_to_feature(shape, {'fixme': self.text})
+        data = {'type': Fixme.Type(self.type).name, 'fixme': self.text}
+        return osm2geojson.shape_to_feature(shape, data)
    

@@ -6,6 +6,7 @@ import gzip
 import osm2geojson
 
 from config import Config
+from models import Fixme
 
 UPDATE = Config.UPDATE_PATH
 DIST = Config.DIST_PATH
@@ -89,10 +90,10 @@ class Diff():
             feat = None
             if i1 is None:
                 feat = self.df2.loc[i2]
-                fixme = 'Creado' if feat.geometry.geom_type == 'Point' else 'Creado o agregado'
+                fixme = Fixme.Type.UPDATE_ADD.value
             elif i2 is None:
                 feat = self.df1.loc[i1]
-                fixme = 'Eliminado' if feat.geometry.geom_type == 'Point' else 'Eliminado o segregado'
+                fixme = Fixme.Type.UPDATE_DEL.value
             else:
                 feat1 = self.df1.loc[i1]
                 feat = self.df2.loc[i2]
@@ -102,11 +103,11 @@ class Diff():
                 tags_diff = Diff.clean_tags(feat.tags) != Diff.clean_tags(feat1.tags)
                 if geom_diff:
                     if tags_diff:
-                        fixme = "Varia la geometría y las etiquetas de"
+                        fixme = Fixme.Type.UPDATE_FULL.value
                     else:
-                        fixme = "Varia la geometría de"
+                        fixme = Fixme.Type.UPDATE_TAGS.value
                 elif tags_diff:
-                    fixme = "Varia las etiquetas de"
+                    fixme = Fixme.Type.UPDATE_GEOM.value
             if fixme:
                 self.fixmes.append(self.new_fixme(feat, fixme))
 
@@ -129,11 +130,11 @@ class Diff():
                 matches.append((i, None))
         self._update_matches(matches)
 
-    def new_fixme(self, feat, text):
-        msg = text + ' ' + feat.geometry.geom_type
+    def new_fixme(self, feat, type):
         tags = Diff.clean_tags(feat.tags)
-        msg += str(tags)
+        msg = feat.geometry.geom_type + str(tags)
         return {
+            'type': type,
             'geom': feat.geometry.point_on_surface(),
             'text': msg,
         }
@@ -149,7 +150,7 @@ def command(old, new):
     diff = Diff(df1, df2)
     diff.get_fixmes()
     for f in diff.fixmes:
-        print(f['geom'], f['text'])
+        print(f['geom'], Fixme.Type(f['type']).name, f['text'])
 
 
 if __name__ == '__main__':
