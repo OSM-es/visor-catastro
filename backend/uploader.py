@@ -140,14 +140,10 @@ def merge_tasks(zoning):
             tasks[local_id]['properties']['parts'] += feat['properties']['parts']
     return tasks
 
-def calc_difficulty(task):
+def calc_difficulty(task, data):
     """Obtiene los datos necesarios para calcular la dificultad."""
-    fn = f"{UPDATE}{task.muncode}/tasks/{task.localId}.osm.gz"
-    with gzip.open(fn) as fo:
-        xml = fo.read()
-    geojson = osm2geojson.xml2geojson(xml)
     (buildings, parts, addresses) = (0, 0, 0)
-    for feat in geojson['features']:
+    for feat in data:
         tags = feat['properties'].get('tags', {})
         buildings += 1 if 'building' in tags else 0
         parts += 1 if 'building:part' in tags else 0
@@ -168,13 +164,13 @@ def load_tasks(mun_code, tasks, mun_shape, src_date):
     for feature in tasks:
         localid = feature['properties']['localId']
         task, candidates = Task.get_match(feature)
-        if not candidates:
-            new_tasks.append(task.localId)
-            calc_difficulty(task)
-            continue
-        diff = Diff()
         fn = Diff.get_filename(UPDATE, mun_code, localid)
         data = Diff.get_shapes(fn)
+        calc_difficulty(task, data)
+        if not candidates:
+            new_tasks.append(task.localId)
+            continue
+        diff = Diff()
         Diff.shapes_to_dataframe(diff.df2, data)
         task_shape = feature['geometry'].buffer(TASK_BUFFER)
         for c in candidates:
