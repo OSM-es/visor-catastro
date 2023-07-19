@@ -24,7 +24,7 @@ from diff import Diff
 
 UPDATE = Config.UPDATE_PATH
 DIST = Config.DIST_PATH
-TASK_BUFFER = 0.00001  # Márgen de desplazamiento por correcciones de precisión
+TASK_BUFFER = 0.00005  # Márgen de desplazamiento por correcciones de precisión
 uploader = Blueprint('uploader', __name__, url_prefix='/')
 
 
@@ -201,8 +201,8 @@ def load_tasks(mun_code, tasks, mun_shape, src_date):
         if t.localId in new_tasks:
             continue
         if t.id in old_tasks and not t.both_ready():
-            geom = to_shape(t.geom).point_on_surface()
-            f = Fixme(type=Fixme.Type.UPDATE_ORPHAN.value, geom=geom)
+            geom = from_shape(to_shape(t.geom).point_on_surface())
+            f = Fixme(type=Fixme.Type.UPDATE_ORPHAN.value, geom=geom, src_date=src_date)
             t.fixmes.append(f)
             t.set_need_update()
             log.info(f"Tarea huérfana {str(t)}")
@@ -211,12 +211,12 @@ def load_tasks(mun_code, tasks, mun_shape, src_date):
             log.info(f"Eliminada tarea {str(t)}")
     Task.update_all()
     # TODO: recalcular dificultad
-    # for shape, localid in demolished.items():
-    #     t = Task.get_by_code(mun_code, localid)
-    #     geom = shape.point_on_surface()
-    #     f = Fixme(type=Fixme.Type.UPDATE_DEL_CHECK.value, geom=geom)
-    #     t.fixmes.append(f)
-    #     t.set_need_update()
+    for shape, localid in demolished.items():
+        t = Task.get_by_code(mun_code, localid)
+        geom = from_shape(shape.point_on_surface())
+        f = Fixme(type=Fixme.Type.UPDATE_DEL_CHECK.value, geom=geom, src_date=src_date)
+        t.fixmes.append(f)
+        t.set_need_update()
 
 def load_fixmes(task, diff, src_date):
     """Carga fixmes de actualización en bd."""
