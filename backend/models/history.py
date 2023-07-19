@@ -30,12 +30,20 @@ class TaskHistoryMixin:
 
 
 class History(HistoryMixin, db.Model):
+    class Action(Enum):
+        DEL_TASK = 1
+
     type = db.Column(db.String, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('osm_user.id'), nullable=False)
     user = db.relationship('OsmUser', back_populates='history')
     action = db.Column(db.Integer, nullable=False)
 
-    __mapper_args__ = {'polymorphic_on': 'type'}
+    __mapper_args__ = {'polymorphic_on': 'type', 'polymorphic_identity': 'H'}
+
+    def __init__(self, *args, **kwargs):
+        if 'user' not in kwargs:
+            kwargs['user'] = OsmUser.system_bot()
+        super(History, self).__init__(*args, **kwargs)
 
     @property
     def target(self):

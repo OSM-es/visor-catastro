@@ -189,14 +189,15 @@ def load_tasks(mun_code, tasks, mun_shape, src_date):
         if len(diff.df1.index):
             diff.get_fixmes()
             load_fixmes(task, diff, src_date)
-    # query_by_shape(mun_shape).filter(Task.update_id == None)
-    # Si ha sido candidata (id not in old_tasks)
-    #    en su caso habrá generado fixmes en otra tarea, se puede eliminar
-    # si no,
-    #    tareas huerfanas, si están ready+ready se pueden eliminar.
-    #    si no, se mantienen con need update + fixme, 
-    #    el archivo va a backup.
-    #    current_app.logger.info(f"Eliminadas {} tareas")
+    log = current_app.logger
+    for t in Task.query_by_shape(mun_shape).filter(Task.update_id == None).all():
+        if t.id in old_tasks and not t.both_ready():
+            # TODO: poner fixme
+            t.set_need_update()
+            log.info(f"Tarea huérfana {str(t)}")
+        else:
+            t.delete()
+            log.info(f"Eliminada tarea {str(t)}")
     # Para cada Task.Update, copiar valores a la tarea y eliminar
     # si el estado no es ready, pasa a need_update
     # se marca el src_date

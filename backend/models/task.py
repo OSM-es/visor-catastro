@@ -5,7 +5,7 @@ from pytz import UTC
 from geoalchemy2 import Geometry, Index
 from geoalchemy2.shape import from_shape
 
-from models import db, TaskHistory, TaskLock
+from models import db, History, TaskHistory, TaskLock, OsmUser
 from models.utils import get_by_area
 
 
@@ -130,7 +130,7 @@ class Task(db.Model):
                 candidates[0]
             )
             task = old_task
-            # task.update = u
+            task.update = u
         else:
             db.session.add(new_task)
             task = new_task
@@ -208,6 +208,16 @@ class Task(db.Model):
         db.session.delete(self.lock)
         db.session.commit()
 
+    def set_need_update(self):
+        user=OsmUser.system_bot()
+        if self.ad_status != Task.Status.Ready.value:
+            if self.bu_status != Task.Status.Ready.value:
+                self.change_status(user, Task.Status.NEED_UPDATE, True, True)
+            else:
+                self.change_status(user, Task.Status.NEED_UPDATE, False, True)
+        else:
+            self.change_status(user, Task.Status.NEED_UPDATE, True, False)
+
     def change_status(self, user, status, buildings, addresses):
         if not self.lock or self.lock.user != user.user:
             raise PermissionError
@@ -264,6 +274,13 @@ class Task(db.Model):
             self.ad_status != Task.Status.READY.value
             or self.bu_status != Task.Status.READY.value
         )
+
+    def delete(self):
+        for h in self.history:
+            db.session.delete(h)
+        db.session.delete(self)
+        h = History(action=History.Action.DEL_TASK.value)
+        db.session.add(h)
 
     @property
     def ad_mapper(self):
