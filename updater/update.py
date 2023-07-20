@@ -117,8 +117,8 @@ def daily_check():
             req = requests.put(url)
             if req.status_code == requests.codes.ok:
                 print(src_date)
-                # with open('src_date.txt', 'w') as fo:
-                #     fo.write(src_date)
+                with open('src_date.txt', 'w') as fo:
+                    fo.write(src_date)
 
 def upload_provs(provincias):
     """Solcita cargar provincias en la base de datos."""

@@ -9,10 +9,7 @@ from geoalchemy2.shape import to_shape
 
 import models
 from auth import auth, get_current_user
-from config import Config
 from overpass import getOsmStreets
-
-DIST = Config.DIST_PATH
 
 
 def getStreet(tags):
@@ -26,8 +23,7 @@ class Streets(Resource):
         mun_code = task.muncode
         municipality = models.Municipality.get_by_code(mun_code)
 
-        fn = DIST + mun_code + '/tasks/' + task.localId + '.osm.gz'
-        with gzip.open(fn) as fo:
+        with gzip.open(task.path()) as fo:
             xml = fo.read()
         geojson = osm2geojson.xml2geojson(xml, filter_used_refs=False)
         task_streets = {
@@ -55,7 +51,7 @@ class Streets(Resource):
         if not street.is_locked() and user:
             street.set_lock(user)
 
-        fn = Config.DIST_PATH + mun_code + '/tasks/address.osm'
+        fn = models.Task.get_path(mun_code, 'address.osm')
         with open(fn) as fo:
             xml = fo.read()
         addresses = osm2geojson.xml2geojson(xml)

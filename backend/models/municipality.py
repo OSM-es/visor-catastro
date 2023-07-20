@@ -1,9 +1,17 @@
+from glob import glob
+import shutil
+
 from geoalchemy2 import Geometry
 from geoalchemy2.shape import from_shape, to_shape
 
 from models import db
 from models.utils import get_by_area
 import models
+from config import Config
+
+UPDATE = Config.UPDATE_PATH
+DIST = Config.DIST_PATH
+BACKUP = Config.BACKUP_PATH
 
 
 class Municipality(db.Model):
@@ -18,6 +26,16 @@ class Municipality(db.Model):
         geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
         municipality = db.relationship('Municipality', back_populates='update', uselist=False)
 
+        @staticmethod
+        def get_path(mun_code, filename=None):
+            fp = UPDATE + mun_code
+            if filename:
+                fp = fp + '/' + filename
+            return fp
+
+        def path(self, filename=None):
+            return Municipality.Update.get_path(self.muncode, filename)
+
         def set(self, muncode, name, src_date, shape):
             self.muncode = muncode
             self.name = name
@@ -26,12 +44,14 @@ class Municipality(db.Model):
 
         def do_update(self):
             mun = self.municipality
+            mun.backup()
             mun.muncode = self.muncode
             mun.name = self.name
-            #mun.src_date = self.src_date
+            mun.src_date = self.src_date
             mun.geom = self.geom
             mun.lock = None
             mun.update = None
+            mun.publish()
             db.session.delete(self)
 
 
@@ -78,6 +98,16 @@ class Municipality(db.Model):
             mun = Municipality.create(mun_code, mun_name, src_date, geom)
         return mun, candidates
 
+    @staticmethod
+    def get_path(mun_code, filename=None):
+        fp = DIST + mun_code
+        if filename:
+            fp = fp + '/' + filename
+        return fp
+
+    def path(self, filename=None):
+        return Municipality.get_path(self.muncode, filename)
+
     def set_lock(self):
         locks = models.Task.query.filter(models.Task.lock_id != None).count()
         if locks == 0 and self.update_id is None:
@@ -106,9 +136,20 @@ class Municipality(db.Model):
         ).all():
             db.session.delete(h)
         models.Street.query_by_code(self.muncode).delete()
+        self.backup()
         db.session.delete(self)
         h = models.History(action=models.History.Action.DEL_MUNICIPALITY.value)
         db.session.add(h)
+
+    def backup(self):
+        target = BACKUP + self.src_date.isoformat() + '/' + self.muncode
+        if glob(f"{DIST}{self.muncode}/tasks/*.osm.gz"):
+            shutil.move(DIST + self.muncode, target)
+        else:
+            shutil.rmtree(DIST + self.muncode)
+
+    def publish(self):
+        shutil.move(UPDATE + self.muncode, DIST + self.muncode)
 
     def __str__(self):
         return f"{self.muncode} {self.name}"

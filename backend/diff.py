@@ -5,11 +5,7 @@ import geopandas as gpd
 import gzip
 import osm2geojson
 
-from config import Config
-from models import Fixme
-
-UPDATE = Config.UPDATE_PATH
-DIST = Config.DIST_PATH
+from models import Fixme, Task
 
 
 class Diff():
@@ -20,16 +16,12 @@ class Diff():
         self.fixmes = []
 
     @staticmethod
-    def get_filename(source_path, mun_code, localid):
-        return source_path + mun_code + '/tasks/' + localid + '.osm.gz'
-
-    @staticmethod
-    def parse_args(source_path, args):
+    def parse_args(source_class, args):
         """Read command args to geojson shapes.
         args is a list of <mun_code>-<taskfilename>
         """
         for mun_code, localid in [arg.split('-') for arg in args]:
-            fn = Diff.get_filename(source_path, mun_code, localid)
+            fn = source_class.get_path(mun_code, localid)
             data = Diff.get_shapes(fn)
             df = Diff.dataframe()
             Diff.shapes_to_dataframe(df, data)
@@ -145,8 +137,8 @@ class Diff():
 @click.argument('old', nargs=-1)
 @click.option('--new', '-n', multiple=True)
 def command(old, new):
-    df1 = Diff.parse_args(DIST, old)
-    df2 = Diff.parse_args(UPDATE, new)
+    df1 = Diff.parse_args(Task, old)
+    df2 = Diff.parse_args(Task.Update, new)
     diff = Diff(df1, df2)
     diff.get_fixmes()
     for f in diff.fixmes:

@@ -6,11 +6,10 @@ Transfiere a /data/dist.
 """
 import datetime
 import json
-import shutil
+import os
 
 import csv
 import geojson
-import gzip
 import osm2geojson
 from flask import Blueprint, abort, current_app
 from shapely.geometry import shape
@@ -19,11 +18,8 @@ from geoalchemy2.shape import from_shape, to_shape
 
 import overpass
 from models import db, Municipality, Province, Street, Task, Fixme
-from config import Config
 from diff import Diff
 
-UPDATE = Config.UPDATE_PATH
-DIST = Config.DIST_PATH
 TASK_BUFFER = 0.00005  # Márgen de desplazamiento por correcciones de precisión
 uploader = Blueprint('uploader', __name__, url_prefix='/')
 
@@ -36,7 +32,10 @@ def status():
 def end_upload():
     log = current_app.logger
     log.info("Fin de actualización")
-    s = Municipality.query.filter(Municipality.update_id is None).delete()
+    s = 0
+    for m in Municipality.query.filter(Municipality.update_id is None).all():
+        m.delete()
+        s += 1
     for u in Municipality.Update.query.all():
         if u.muncode:
             u.do_update()
@@ -52,7 +51,7 @@ def end_upload():
 @uploader.route("/municipality/<mun_code>", methods=["PUT"])
 def upload(mun_code):
     log = current_app.logger
-    filename = UPDATE + mun_code + '/' + 'report.json'
+    filename = Municipality.Update.get_path(mun_code, 'report.json')
     with open(filename, 'r') as fo:
         report = json.load(fo)
     mun_name = report['mun_name']
@@ -61,22 +60,20 @@ def upload(mun_code):
     # TODO: Mantener un historial de cambios de geometría o nombre
     mun, candidates = Municipality.get_match(mun_code, mun_name, src_date, mun_shape)
     if candidates:
-        if mun.src_date == src_date:
-            return exit(f"{mun_code} ya está registrado")
         locks = [m.set_lock() for m in candidates]
         if not all(locks):
             return exit("No se han podido bloquear todos los municipios")
         mun.update.set(mun_code, mun_name, src_date, mun_shape)
-    zoning = UPDATE + mun_code + '/' + 'zoning.geojson'
+    zoning = Municipality.Update.get_path(mun_code, 'zoning.geojson')
     tasks = merge_tasks(zoning)
     load_tasks(mun_code, tasks.values(), mun_shape, src_date)
     log.info(f"Registradas {len(tasks)} tareas en {mun_code} {mun_name}")
     old_mun = mun.update.muncode if mun.update else None
     upload_streets(mun_code, old_mun)
-    # tareas de dist ready+ready se pueden borrar
-    # resto de dist a backup
-    # shutil.move(UPDATE + mun_code, DIST + mun_code)
-    if len(candidates) == 1 and mun.equal(mun_shape):
+    Task.update_all()
+    if len(candidates) == 0:
+        mun.publish()
+    elif len(candidates) == 1 and mun.equal(mun_shape):
         mun.update.do_update()
     db.session.commit()
     return mun_code
@@ -164,7 +161,7 @@ def load_tasks(mun_code, tasks, mun_shape, src_date):
     for feature in tasks:
         localid = feature['properties']['localId']
         task, candidates = Task.get_match(feature)
-        fn = Diff.get_filename(UPDATE, mun_code, localid)
+        fn = Task.Update.get_path(mun_code, localid + '.osm.gz')
         data = Diff.get_shapes(fn)
         calc_difficulty(task, data)
         if not candidates:
@@ -174,11 +171,13 @@ def load_tasks(mun_code, tasks, mun_shape, src_date):
         Diff.shapes_to_dataframe(diff.df2, data)
         task_shape = feature['geometry'].buffer(TASK_BUFFER)
         for c in candidates:
+            fn = c.path()
             if c.id in old_tasks:
                 old_tasks.remove(c.id)
-            fn = Diff.get_filename(DIST, c.muncode, c.localId)
-            for feat in Diff.get_shapes(fn):
-                if not c.both_ready():
+            if c.both_ready():
+                if os.path.exists(fn): os.remove(fn)
+            else:
+                for feat in Diff.get_shapes(fn):
                     shape = feat['shape']
                     if task_shape.intersects(shape):
                         demolished.pop(shape, None)
@@ -204,8 +203,6 @@ def load_tasks(mun_code, tasks, mun_shape, src_date):
         else:
             t.delete()
             log.info(f"Eliminada tarea {str(t)}")
-    Task.update_all()
-    # TODO: recalcular dificultad
     for shape, localid in demolished.items():
         t = Task.get_by_code(mun_code, localid)
         geom = from_shape(shape.point_on_surface())
@@ -228,7 +225,7 @@ def upload_streets(mun_code, old_mun):
     """
     log = current_app.logger
     old_streets = {s.cat_name: s for s in Street.query_by_code(old_mun).all()}
-    fn = UPDATE + mun_code + '/tasks/address.osm'
+    fn = Task.Update.get_path(mun_code, 'address.osm')
     with open(fn) as fh:
         xml = fh.read()
     data = osm2geojson.xml2geojson(xml)
@@ -236,7 +233,7 @@ def upload_streets(mun_code, old_mun):
         ad['properties'].get('tags', {}).get('addr:cat_name', '')
         for ad in data['features']
     }
-    fn = UPDATE + mun_code + '/tasks/highway_names.csv'
+    fn = Task.Update.get_path(mun_code, '/highway_names.csv')
     new_streets = 0
     mod_streets = 0
     with open(fn) as fh:
@@ -269,7 +266,7 @@ def upload_streets(mun_code, old_mun):
 
 def get_mun_limits(mun_code):
     """Lee el archivo con la geometría del municipio."""
-    fn = UPDATE + mun_code + '/' + mun_code + '.geojson'
+    fn = Municipality.Update.get_path(mun_code, mun_code + '.geojson')
     with open(fn) as fo:
         data = json.load(fo)
     geoms = [shape(feat['geometry']) for feat in data['features']]

@@ -5,7 +5,7 @@ from pytz import UTC
 from geoalchemy2 import Geometry, Index
 from geoalchemy2.shape import from_shape
 
-from models import db, History, TaskHistory, TaskLock, OsmUser
+from models import db, History, Municipality, TaskHistory, TaskLock, OsmUser
 from models.utils import get_by_area
 
 
@@ -66,6 +66,13 @@ class Task(db.Model):
             geom = feature['geometry']
             u.geom = from_shape(geom)
             return u
+
+        @staticmethod
+        def get_path(mun_code, filename):
+            return Municipality.Update.get_path(mun_code) + '/tasks/' + filename
+
+        def path(self):
+            return Task.Update.get_path(self.muncode, self.localId + '.osm.gz')
 
     MODERATE_THRESHOLD = 10
     CHALLENGING_THRESHOLD = 20
@@ -153,6 +160,13 @@ class Task(db.Model):
             u.task.update = None
         Task.Update.query.delete()
 
+    @staticmethod
+    def get_path(mun_code, filename):
+        return Municipality.get_path(mun_code) + '/tasks/' + filename
+
+    def path(self):
+        return Task.get_path(self.muncode, self.localId + '.osm.gz')
+
     def __str__(self):
         return f"{self.muncode} {self.localId} {self.type}"
 
@@ -177,7 +191,7 @@ class Task(db.Model):
         if self.lock:
             age = (datetime.now(tz=UTC) - self.lock.date).total_seconds()
             if age > self.lock.timeout:
-                # Añadir AUTO_UNLOCKED a historial
+                # TODO: Añadir AUTO_UNLOCKED a historial
                 db.session.delete(self.lock)
                 db.session.commit()
     
@@ -204,7 +218,6 @@ class Task(db.Model):
         )
         db.session.add(lock)
         self.history.append(h)
-        db.session.commit()
     
     def unlock(self, user):
         if not self.lock or self.lock.user != user.user:
@@ -218,7 +231,6 @@ class Task(db.Model):
         )
         self.history.append(h)
         db.session.delete(self.lock)
-        db.session.commit()
 
     def need_update(self):
         return any([f.is_update() for f in self.fixmes])
@@ -252,7 +264,6 @@ class Task(db.Model):
         )
         self.history.append(h)
         if self.lock: db.session.delete(self.lock)
-        db.session.commit()
     
     def validate_status(self, key, status):
         old = Task.Status(getattr(self, key))

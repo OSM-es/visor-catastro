@@ -8,11 +8,9 @@ import osm2geojson
 
 import models
 from auth import auth, get_current_user
-from config import Config
 from overpass import getOsmStreets
 
 Municipality = models.Municipality
-DIST = Config.DIST_PATH
 
 
 class Tasks(Resource):
@@ -43,8 +41,7 @@ class Task(Resource):
         if not task:
             abort(404)
         user = get_current_user()
-        fn = DIST + task.muncode + '/tasks/' + task.localId + '.osm.gz'
-        with gzip.open(fn) as fo:
+        with gzip.open(task.path()) as fo:
             xml = fo.read()
         geojson = osm2geojson.xml2geojson(xml, filter_used_refs=False)
         shapes = osm2geojson.xml2shapes(xml)
@@ -53,7 +50,6 @@ class Task(Resource):
         buildings = get_buildings_and_nodes_for_addr_in_areas(filtered, shapes)
         parts = [f for f in filtered if 'building:part' in f['properties']['tags']]
         fixmes = [f.to_feature() for f in task.fixmes]
-        fn = DIST + task.muncode + '/tasks/' + task.localId + '.fixmes.geojson'
         data = task.asdict()
         data['municipality'] = Municipality.get_by_code(task.muncode).asdict()
         if fixmes: data['fixmes'] = {'type': geojson['type'], 'features': fixmes}
@@ -87,6 +83,7 @@ class Task(Resource):
                 task.set_lock(user, lock, buildings, addresses)
             else:
                 task.change_status(user, status, buildings, addresses)
+            models.db.session.commit()
         except PermissionError:
             abort(403)
         except ValueError as e:
