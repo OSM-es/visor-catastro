@@ -31,7 +31,6 @@
 
 <div>
   <SortTable data={tasks.map(t => t.properties)} bind:items divClass="overflow-scroll" striped>
-    <caption class="text-left mb-2">Selecciona una tarea:</caption>
     <TableHead defaultRow={false} theadClass="bg-neutral-100 dark:bg-neutral-700">
       <tr class="text-xs uppercase"> 
         {#if munCount > 1 || muncode}

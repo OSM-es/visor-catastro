@@ -13,13 +13,14 @@
   let map, geoJsonData, hoveredFeature, previewFeature, getUrl
   let muncode, type, difficulty, ad_status, bu_status
   let loading = false
+  let delayed = false
   let center = data.center
   let zoom = data.zoom
 
   const tasksThreshold = 15
   const munThreshold = 8
   const geojsonUrl = (target, bounds) => `${data.api}/${target}?bounds=${bounds}`
-  const rightBarClass = 'md:max-w-md w-full flex-grow overflow-scroll px-4 pt-8 '
+  const rightBarClass = 'md:max-w-md w-full flex-grow overflow-scroll px-4 pt-3 '
     + 'border-l-2 border-neutral-300 dark:border-neutral-500 dark:bg-neutral-800'
 
   const target = (zoom) => (
@@ -46,6 +47,8 @@
 
   async function fetchData() {
     loading = true
+    delayed = false
+    setTimeout(() => (delayed = true), 500)
     const bounds = map.getMap().getBounds().toBBoxString()
     const response = await fetch(geojsonUrl(target(zoom), bounds))
     geoJsonData = await response.json()
@@ -161,10 +164,11 @@
   </div>
   <div class={rightBarClass}>
     <div class="h-full max-h-0">
-      {#if loading}
-        <span>Cargando datos... </span>
-        <Spinner size={4} />
-        {:else if target(zoom) === 'provinces'}
+      {#if loading && delayed}
+        <p class="mt-4">Cargando datos... 
+          <Spinner size={4} />
+        </p>
+      {:else if target(zoom) === 'provinces'}
         <div class="prose lg:prose-xl dark:prose-invert">
           <p>
             Aquí se visalizará estadísticas de la importación por provincias.

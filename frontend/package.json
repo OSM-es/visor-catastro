@@ -31,6 +31,7 @@
     "intl-parse-accept-language": "^1.0.0",
     "leaflet": "^1.9.2",
     "lodash": "^4.17.21",
+    "sass": "^1.64.0",
     "svelte-relative-time": "^0.0.3",
     "sveltekit-i18n": "^2.3.0",
     "viewerjs": "^1.11.3"
