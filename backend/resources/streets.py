@@ -60,7 +60,9 @@ class Streets(Resource):
             if f['properties'].get('tags', {}).get('addr:cat_name', '') == cat_name
         ]
         shape = shapely.buffer(shapely.from_geojson(json.dumps(addresses)), 0.001)
-        osm_streets = osm2geojson.xml2geojson(getOsmStreets(shape.bounds))
+        xml = getOsmStreets(shape.bounds)
+        if xml:
+            osm_streets = osm2geojson.xml2geojson(xml)
 
         data = {
             'street': street.asdict(),

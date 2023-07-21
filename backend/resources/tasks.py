@@ -55,7 +55,9 @@ class Task(Resource):
         if fixmes: data['fixmes'] = {'type': geojson['type'], 'features': fixmes}
         data['buildings'] = {'type': geojson['type'], 'features': buildings}
         data['parts'] = {'type': geojson['type'], 'features': parts}
-        data['osmStreets'] = osm2geojson.xml2geojson(getOsmStreets(bb))
+        xml = getOsmStreets(bb)
+        if xml:
+            data['osmStreets'] = osm2geojson.xml2geojson(xml)
         data['streets'] = get_streets(buildings, task.muncode)
         data['currentLock'] = user.user.lock.task.id if user and user.user and user.user.lock else None
         data['isOwner'] = False

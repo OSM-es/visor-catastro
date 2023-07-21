@@ -27,11 +27,17 @@ def getPhoto(ref):
     resp = False
     try:
         url = current_app.config.get('FOTO_FACHADA_URL') + ref
+        print(url)
         resp = requests.get(url, stream=True)
     except requests.RequestException:
         resp = False
-    contentType = resp.headers.get('content-type')
-    if resp and resp.ok and contentType and int(resp.headers['Content-Length']) > 0:
+    if (
+        resp
+        and resp.ok
+        and 'content-type' in resp.headers
+        and int(resp.headers['Content-Length']) > 0
+    ):
+        contentType = resp.headers.get('content-type')
         data = resp.raw.read()
     else:
         contentType = 'image/png'
