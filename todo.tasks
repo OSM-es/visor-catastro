@@ -3,7 +3,6 @@ Edición Callejero:
     ☐ Botón editar en JOSM
     ☐ Botones ver en OSM / Mapillary / Kartaview
     ☐ Botón recargar de osm?
-    ☐ Que pasa con el botón de regresar cuando currentTask es nulo
 
 Mapa:
     ☐ Capas wms según zona
@@ -24,14 +23,18 @@ Mapa:
         ☐ En chrome la lista de tareas sale con barras de desplazamiento no necesarias
 
 Edición tarea:
-    ☐ Descarga de archivo de tarea sólo para editores. Eliminar fixmes/refs/addr:cat_name.
-    ☐ Añadir comentarios en los cambios de estado MAPPED, VALIDATED e INVALIDATED
+    ☐ Descarga de archivo de tarea
+        ☐ Sólo para editores.
+        ☐ Preparar según sea sólo edificios o sólo direcciones.
+        ☐ Eliminar fixmes/refs/addr:cat_name.
     ☐ ¿Quién puede mapear qué, cualquiera o según nivel de mapeador/dificultad tarea?
     ☐ ¿Quién puede validar, cualquiera o con perfil especial? ¿Asignar automático según nivel de mapeador?
     ☐ No estaría de más, que al importar, se diera un recordatorio de usar la cuenta de importación si se está logueado con la normal.
     Historial:
+        ☐ Añadir comentarios en los cambios de estado MAPPED, VALIDATED e INVALIDATED
         ☐ Formulario añadir comentario.
             ☐ En la api, depurar códigos raros
+        ☐ Añadir AUTO_UNLOCKED a historial
         ☐ Poner enlaces como en gestor tareas
             Ver conjunto de cambios en OSMCha
             Visualizar con Overpass?
@@ -89,6 +92,6 @@ Gestor de notificaciones #3:
     ☐ Estudiar si se puede usar la api OSM para mandar mensajes
     
 Actualización:
-    ☐ Notificar por correo nuevos municipios
-    ☐ Al terminar de cargar en bd, mover archivos de update a dist para que no
-      colisionen con próxima actualización
+    ☐ Notificar por correo cambios de geometría o nombre de municipio
+    ☐ Mantener historial de cambios de geometría o nombre de municipio
+    ☐ Añadir fixmes teniendo en cuenta si no se han importado direcciones o edificios
