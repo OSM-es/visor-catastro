@@ -69,7 +69,8 @@ def upload(mun_code):
     log.info(f"Registradas {len(tasks)} tareas en {mun_code} {mun_name}")
     old_mun = mun.update.muncode if mun.update else None
     upload_streets(mun_code, old_mun)
-    Task.update_all()
+    if candidates:
+        Task.update_tasks(mun_code)
     if len(candidates) == 0:
         mun.publish()
     elif len(candidates) == 1 and mun.equal(mun_shape):

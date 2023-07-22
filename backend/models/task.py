@@ -150,8 +150,8 @@ class Task(db.Model):
         return Task.query.filter(Task.geom.contained(geom))
 
     @staticmethod
-    def update_all():
-        for u in Task.Update.query.all():
+    def update_tasks(mun_code):
+        for u in Task.Update.query.filter(Task.Update.muncode == mun_code):
             u.task.muncode = u.muncode
             u.task.localId = u.localId
             u.task.zone = u.zone
@@ -159,7 +159,7 @@ class Task(db.Model):
             u.task.geom = u.geom
             u.task.set_need_update()
             u.task.update = None
-        Task.Update.query.delete()
+        Task.Update.query.filter(Task.Update.muncode == mun_code).delete()
 
     @staticmethod
     def get_path(mun_code, filename):
