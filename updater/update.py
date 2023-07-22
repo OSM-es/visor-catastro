@@ -48,7 +48,7 @@ class Config:
         self.read_int('MAX_RETRIES', 10)
         self.read_int('RETRAY_DELAY', 3)
         # Estas no se corresponden a provincias
-        self.read_list('PROV_SUBOFFICES', '51, 52, 53, 54, 55, 56')
+        self.read_list('PROV_SUBOFFICES', '51, 52, 53, 54')
 
     def read_int(self, key, default):
         self.__dict__[key.lower()] = int(os.getenv(key, default))
