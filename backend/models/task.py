@@ -76,6 +76,7 @@ class Task(db.Model):
 
     MODERATE_THRESHOLD = 10
     CHALLENGING_THRESHOLD = 20
+    BUFFER = 0.00005  # Márgen de desplazamiento por correcciones de precisión
 
     id = db.Column(db.Integer, primary_key=True)
     # Código de Catastro del municipio. Coincide en ocasiones con el código postal o código INE, pero no siempre.
@@ -129,7 +130,7 @@ class Task(db.Model):
     @staticmethod
     def get_match(feature):
         new_task = Task.from_feature(feature)
-        candidates = get_by_area(Task, new_task.geom)
+        candidates = get_by_area(Task, new_task.geom, buffer=Task.BUFFER)
         if candidates:
             u = Task.Update.from_feature(feature)
             old_task = next(

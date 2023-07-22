@@ -20,7 +20,6 @@ import overpass
 from models import db, Municipality, Province, Street, Task, Fixme
 from diff import Diff
 
-TASK_BUFFER = 0.00005  # Márgen de desplazamiento por correcciones de precisión
 uploader = Blueprint('uploader', __name__, url_prefix='/')
 
 
@@ -169,7 +168,7 @@ def load_tasks(mun_code, tasks, mun_shape, src_date):
             continue
         diff = Diff()
         Diff.shapes_to_dataframe(diff.df2, data)
-        task_shape = feature['geometry'].buffer(TASK_BUFFER)
+        task_shape = feature['geometry'].buffer(Task.BUFFER)
         for c in candidates:
             fn = c.path()
             if c.id in old_tasks:
