@@ -55,13 +55,13 @@ class MutableList(Mutable, list):
         list.__delitem__(self, key)
         self.changed()
 
-def get_by_area(model, geom, percentaje=0.1, buffer=None):
-    s = to_shape(geom)
-    if buffer: s = s.buffer(buffer)
+def get_by_area(model, geom, percentaje=0.9, buffer=None):
+    shape = to_shape(geom)
+    if buffer: shape = shape.buffer(buffer)
     candidates = []
     for c in model.query.filter(model.geom.intersects(geom)).all():
-        geom = to_shape(c.geom)
-        area = s.intersection(geom).area / s.area
+        s = to_shape(c.geom)
+        area = shape.intersection(s).area / s.area
         if area > percentaje:
             candidates.append({'area': area, 'feat': c})
     candidates.sort(key=lambda c: c['area'], reverse=True)

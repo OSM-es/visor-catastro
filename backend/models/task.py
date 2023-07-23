@@ -132,6 +132,8 @@ class Task(db.Model):
         new_task = Task.from_feature(feature)
         candidates = get_by_area(Task, new_task.geom, buffer=Task.BUFFER)
         if candidates:
+            for c in candidates:
+                c.update = Task.Update()
             u = Task.Update.from_feature(feature)
             old_task = next(
                 (c for c in candidates if c.localId == u.localId and c.update_id is None),
@@ -145,13 +147,16 @@ class Task(db.Model):
         return task, candidates
 
     @staticmethod
-    def query_by_shape(shape):
+    def get_by_shape(shape):
         geom = from_shape(shape)
-        return Task.query.filter(Task.geom.contained(geom))
+        return get_by_area(Task, geom)
 
     @staticmethod
     def update_tasks(mun_code):
         for u in Task.Update.query.filter(Task.Update.muncode == mun_code):
+            if not u.muncode:
+                u.task.update = None
+                continue
             u.task.muncode = u.muncode
             u.task.localId = u.localId
             u.task.zone = u.zone

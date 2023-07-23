@@ -70,7 +70,14 @@ def upload(mun_code):
         mun.update.set(mun_code, mun_name, src_date, mun_shape)
     zoning = Municipality.Update.get_path(mun_code, 'zoning.geojson')
     tasks = merge_tasks(zoning)
-    load_tasks(mun_code, tasks.values(), mun_shape, src_date)
+    load_tasks(mun_code, tasks.values(), src_date)
+    for t in Task.get_by_shape(mun_shape):
+        if not t.both_ready() and not t.update:
+            geom = from_shape(to_shape(t.geom).point_on_surface())
+            f = Fixme(type=Fixme.Type.UPDATE_ORPHAN.value, geom=geom, src_date=src_date)
+            t.fixmes.append(f)
+            t.set_need_update()
+            log.info(f"Tarea huérfana {str(t)}")
     log.info(f"Registradas {len(tasks)} tareas en {mun_code} {mun_name}")
     old_mun = mun.update.muncode if mun.update else None
     upload_streets(mun_code, old_mun)
@@ -156,11 +163,9 @@ def calc_difficulty(task, data):
     task.addresses = addresses
     task.difficulty = difficulty.value
 
-def load_tasks(mun_code, tasks, mun_shape, src_date):
+def load_tasks(mun_code, tasks, src_date):
     """Registra las tareas."""
     log = current_app.logger
-    old_tasks = [t.id for t in Task.query_by_shape(mun_shape).all()]
-    new_tasks = []
     demolished = {}
     fixmes = 0
     for feature in tasks:
@@ -170,15 +175,12 @@ def load_tasks(mun_code, tasks, mun_shape, src_date):
         data = Diff.get_shapes(fn)
         calc_difficulty(task, data)
         if not candidates:
-            new_tasks.append(task.localId)
             continue
         diff = Diff()
         Diff.shapes_to_dataframe(diff.df2, data)
         task_shape = feature['geometry'].buffer(Task.BUFFER)
         for c in candidates:
             fn = c.path()
-            if c.id in old_tasks:
-                old_tasks.remove(c.id)
             if c.both_ready():
                 if os.path.exists(fn): os.remove(fn)
             else:
@@ -196,18 +198,6 @@ def load_tasks(mun_code, tasks, mun_shape, src_date):
             load_fixmes(task, diff, src_date)
     if fixmes:
         log.info(f"Registrados {fixmes} anotaciones de actualización en {mun_code}")
-    for t in Task.query_by_shape(mun_shape).filter(Task.update_id == None).all():
-        if t.localId in new_tasks:
-            continue
-        if t.id in old_tasks and not t.both_ready():
-            geom = from_shape(to_shape(t.geom).point_on_surface())
-            f = Fixme(type=Fixme.Type.UPDATE_ORPHAN.value, geom=geom, src_date=src_date)
-            t.fixmes.append(f)
-            t.set_need_update()
-            log.info(f"Tarea huérfana {str(t)}")
-        else:
-            t.delete()
-            log.info(f"Eliminada tarea {str(t)}")
     for shape, localid in demolished.items():
         t = Task.get_by_code(mun_code, localid)
         geom = from_shape(shape.point_on_surface())
