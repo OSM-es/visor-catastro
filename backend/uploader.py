@@ -20,7 +20,6 @@ import overpass
 from models import db, Municipality, Province, Street, Task, Fixme
 from diff import Diff
 
-TASK_BUFFER = 0.00005  # Márgen de desplazamiento por correcciones de precisión
 uploader = Blueprint('uploader', __name__, url_prefix='/')
 
 
@@ -75,7 +74,8 @@ def upload(mun_code):
     log.info(f"Registradas {len(tasks)} tareas en {mun_code} {mun_name}")
     old_mun = mun.update.muncode if mun.update else None
     upload_streets(mun_code, old_mun)
-    Task.update_all()
+    if candidates:
+        Task.update_tasks(mun_code)
     if len(candidates) == 0:
         mun.publish()
     elif len(candidates) == 1 and mun.equal(mun_shape):
@@ -174,7 +174,7 @@ def load_tasks(mun_code, tasks, mun_shape, src_date):
             continue
         diff = Diff()
         Diff.shapes_to_dataframe(diff.df2, data)
-        task_shape = feature['geometry'].buffer(TASK_BUFFER)
+        task_shape = feature['geometry'].buffer(Task.BUFFER)
         for c in candidates:
             fn = c.path()
             if c.id in old_tasks:

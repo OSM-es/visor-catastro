@@ -40,10 +40,6 @@ Edición tarea:
             Visualizar con Overpass?
             Descargar desde Overpass?
 
-Errores:
-    ☐ Poner un spiner durante carga de datos. Mirar si el de /explore se puede hacer general
-    ☐ Revisar API y manejadores de formularios
-
 Ajustes usuario:
     ☐ Idioma, notificaciones, qué se muestra en la página de usuario
     ☐ Cuentas vinculadas (normal / importación)
@@ -58,6 +54,7 @@ Página de usuario:
     ☐ Datos públicos
 
 Internacionalización #8:
+    ☐ Sacar cadenas
     ☐ Buscar traductores
 
 Tutorial #9:
@@ -66,9 +63,6 @@ Tutorial #9:
     ☐ Página configuración de Josm et al
     ☐ Parte específica del visor
     ☐ Edición de tareas
-
-Comprobador de diferencias #4:
-    ☐ Herramienta para comprobar dos archivos de tareas y comprobar las diferencias en los edificios/direcciones
 
 Estadísticas:
     ☐ Página de estadísticas globales
