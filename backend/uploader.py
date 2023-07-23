@@ -46,6 +46,7 @@ def end_upload():
         log.info('Municipios eliminados: %s', s)
     Municipality.Update.query.delete()
     db.session.commit()
+    Municipality.Update.clean()
     return {}
 
 @uploader.route("/municipality/<mun_code>", methods=["PUT"])
@@ -59,6 +60,10 @@ def upload(mun_code):
     mun_shape = get_mun_limits(mun_code)
     # TODO: Mantener un historial de cambios de geometría o nombre
     mun, candidates = Municipality.get_match(mun_code, mun_name, src_date, mun_shape)
+    if mun.src_date == src_date and candidates:
+        msg = f"{mun_code} ya está registrado"
+        log.info(msg)
+        return msg
     if candidates:
         locks = [m.set_lock() for m in candidates]
         if not all(locks):

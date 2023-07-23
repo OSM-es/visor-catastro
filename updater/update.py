@@ -116,9 +116,9 @@ def daily_check():
             url = config.uploader_url + 'municipality/'
             req = requests.put(url)
             if req.status_code == requests.codes.ok:
-                print(src_date)
                 with open('src_date.txt', 'w') as fo:
                     fo.write(src_date)
+                print("Finaliza actualización", src_date)
 
 def upload_provs(provincias):
     """Solcita cargar provincias en la base de datos."""
@@ -262,6 +262,8 @@ def status(mun_code):
     Devuelve 'mun_code' si es correcto.
     None si hay error o no está completo.
     """
+    if os.path.exists(mun_code + '/uploaded'):
+        return mun_code
     log_file = mun_code + '/catatom2osm.log'
     if (
         os.path.exists(mun_code + '/tasks')

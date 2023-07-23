@@ -1,4 +1,7 @@
 from glob import glob
+from pathlib import Path
+import os
+import re
 import shutil
 
 from geoalchemy2 import Geometry
@@ -32,6 +35,13 @@ class Municipality(db.Model):
             if filename:
                 fp = fp + '/' + filename
             return fp
+
+        @staticmethod
+        def clean():
+            for p in os.listdir(UPDATE):
+                if re.match(r'^\d{5}$', p):
+                    shutil.rmtree(UPDATE + p)
+
 
         def path(self, filename=None):
             return Municipality.Update.get_path(self.muncode, filename)
@@ -149,7 +159,13 @@ class Municipality(db.Model):
             shutil.rmtree(DIST + self.muncode)
 
     def publish(self):
-        shutil.move(UPDATE + self.muncode, DIST + self.muncode)
+        Path(UPDATE, self.muncode, 'uploaded').touch()
+        os.makedirs(DIST + self.muncode)
+        for p in os.listdir(UPDATE + self.muncode):
+            if p != 'uploaded':
+                src = Path(UPDATE, self.muncode, p)
+                dst = Path(DIST, self.muncode, p)
+                shutil.move(src, dst)
 
     def __str__(self):
         return f"{self.muncode} {self.name}"
