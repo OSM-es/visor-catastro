@@ -34,7 +34,7 @@ class MutableDict(Mutable, dict):
         self.changed()
 
     def __delitem__(self, key):
-        dict.__delitem__(self, dbkey)
+        dict.__delitem__(self, key)
         self.changed()
 
 class MutableList(Mutable, list):
