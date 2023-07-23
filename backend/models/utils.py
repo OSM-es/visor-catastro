@@ -60,7 +60,7 @@ def get_by_area(model, geom, percentaje=0.9, buffer=None):
     if buffer: shape = shape.buffer(buffer)
     candidates = []
     for c in model.query.filter(model.geom.intersects(geom)).all():
-        s = to_shape(c.geom)
+        s = to_shape(c.geom).buffer(0)
         area = shape.intersection(s).area / s.area
         if area > percentaje:
             candidates.append({'area': area, 'feat': c})
