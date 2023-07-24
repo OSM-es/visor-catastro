@@ -18,6 +18,7 @@ import requests
 import shutil
 import schedule
 import time
+import traceback
 from multiprocessing import Pool, current_process
 from requests.exceptions import RequestException
 from zipfile import BadZipfile
@@ -230,11 +231,18 @@ def process(mun_code):
         options.municipality=False,
         CatAtom2Osm.create_and_run(mun_code, options)
         log.info('Procesado ' + mun_code)
-    except (BadZipfile, CatException, RequestException) as e:
+    except Exception as e:
         if os.path.exists(mun_code):
             shutil.rmtree(mun_code)
+        log.error(f"Error en {mun_code}")
         msg = e.message if getattr(e, "message", "") else str(e)
         log.error(msg)
+        if not (
+            isinstance(e, BadZipfile)
+            or isinstance(e, CatException)
+            or isinstance(e, RequestException)
+        ):
+            print(traceback.format_exc())
         return None
     return status(mun_code)
 
