@@ -4,6 +4,7 @@ from pytz import UTC
 
 from geoalchemy2 import Geometry, Index
 from geoalchemy2.shape import from_shape
+from sqlalchemy import and_
 
 from models import db, History, Municipality, TaskHistory, TaskLock, OsmUser
 from models.utils import get_by_area
@@ -117,6 +118,19 @@ class Task(db.Model):
     @staticmethod
     def get_by_code(mun_code, local_id):
         return Task.query.filter(Task.muncode == mun_code, Task.localId == local_id).one_or_none()
+
+    @staticmethod
+    def query_by_muncode(mun_code):
+        return Task.query.filter(Task.muncode == mun_code)
+
+    @staticmethod
+    def query_by_provcode(prov_code):
+        return Task.query.filter(Task.muncode.startswith(prov_code))
+
+    @staticmethod
+    def query_mapped(query):
+        mapped = [Task.Status.MAPPED.value, Task.Status.VALIDATED.value]
+        return query.filter(and_(Task.ad_status.in_(mapped), Task.bu_status.in_(mapped)))
 
     @staticmethod
     def from_feature(feature):

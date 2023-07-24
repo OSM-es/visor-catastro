@@ -69,6 +69,7 @@ class Municipality(db.Model):
     muncode = db.Column(db.String, index=True, unique=True)
     name = db.Column(db.String, nullable=False)
     src_date = db.Column(db.Date, nullable=False)
+    task_count = db.Column(db.Integer, nullable=True)
     geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
     update_id = db.Column(db.Integer, db.ForeignKey('municipality_update.id'), nullable=True)
     update = db.relationship(Update, back_populates='municipality', uselist=False)
@@ -159,6 +160,7 @@ class Municipality(db.Model):
             shutil.rmtree(DIST + self.muncode)
 
     def publish(self):
+        self.task_count = models.Task.query_by_muncode(self.muncode).count()
         Path(UPDATE, self.muncode, 'uploaded').touch()
         os.makedirs(DIST + self.muncode)
         for p in os.listdir(UPDATE + self.muncode):

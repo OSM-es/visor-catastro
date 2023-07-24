@@ -44,6 +44,7 @@ def end_upload():
     if s:
         log.info('Municipios eliminados: %s', s)
     Municipality.Update.query.delete()
+    Province.count_tasks()
     db.session.commit()
     Municipality.Update.clean()
     return {}

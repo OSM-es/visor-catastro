@@ -17,4 +17,6 @@ class Provinces(Resource):
             q = q.filter(models.Province.geom.intersects(bb))
         sql = q.statement
         df = geopandas.GeoDataFrame.from_postgis(sql=sql, con=models.db.get_engine())
+        get_mapped = lambda v: models.Task.query_mapped(models.Task.query_by_provcode(v)).count()
+        df['mapped_count'] = df['provcode'].map(get_mapped)
         return Response(df.to_json(), mimetype='application/json')

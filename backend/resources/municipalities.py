@@ -21,4 +21,6 @@ class Municipalities(Resource):
             q = q.filter(models.Municipality.geom.intersects(bb))
         sql = q.statement
         df = geopandas.GeoDataFrame.from_postgis(sql=sql, con=models.db.get_engine())
+        get_mapped = lambda v: models.Task.query_mapped(models.Task.query_by_muncode(v)).count()
+        df['mapped_count'] = df['muncode'].map(get_mapped)
         return Response(df.to_json(default=convertDate), mimetype='application/json')

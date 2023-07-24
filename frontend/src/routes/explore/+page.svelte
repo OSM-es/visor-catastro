@@ -3,7 +3,8 @@
   import TaskList from './TaskList.svelte'
   import { goto } from '$app/navigation'
   import { GeoJSON } from 'svelte-leafletjs'
-  
+  import { locale } from '$lib/translations'
+
   import { TASK_COLORS, TASK_LOCKED_COLOR, TASK_DIFFICULTY_VALUES, TASK_STATUS_VALUES, TASK_TYPE_VALUES } from '$lib/config'
   import Map from '$lib/components/maps/Map.svelte'
 
@@ -28,7 +29,6 @@
     'tasks' : 
     (zoom >= munThreshold ? 'municipalities' : 'provinces')
   )
-
 
   $: tasks = filterTasks(geoJsonData, muncode, type, difficulty, ad_status, bu_status)
 
@@ -133,6 +133,13 @@
         <li>Tipo: ${TASK_TYPE_VALUES[feat.type]}</li>
         <li>Dificultad: ${TASK_DIFFICULTY_VALUES[feat.difficulty]}</li>
         <li>Estado: ${getStatus(feat)}</li>
+      `
+    } else {
+      const mapped = feat.mapped_count / feat.task_count
+      const fmt = new Intl.NumberFormat($locale, { maximumFractionDigits: 2, style: "percent" })
+      info += `
+        <li>Tareas: ${feat.task_count}</li>
+        <li>Mapeado: ${fmt.format(mapped)}</li>
       `
     }
     info += '</ul>'
