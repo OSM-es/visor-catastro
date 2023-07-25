@@ -54,7 +54,7 @@
           <!-- svelte-ignore a11y-mouse-events-have-key-events -->
           <tr
             on:click={() => goto('/explore/' + code(item, target))}
-            on:mouseover={() => dispatch('mouseover', { feature: data.find(t => t.properties.muncode === item.muncode) })}
+            on:mouseover={() => dispatch('mouseover', { feature: data.find(t => code(t.properties, target) === item.muncode) })}
             on:mouseout={() => dispatch('mouseout')}
             class={trClass + (String(i) === active ? ' !bg-amber-400' : '')}
           >
