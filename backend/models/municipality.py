@@ -94,6 +94,10 @@ class Municipality(db.Model):
         return Municipality.query.filter(Municipality.muncode == mun_code).one_or_none()
 
     @staticmethod
+    def query_by_prov(code):
+        return Municipality.query.filter(Municipality.muncode.startswith(code))
+        
+    @staticmethod
     def get_match(mun_code, mun_name, src_date, shape):
         geom = from_shape(shape)
         candidates = [

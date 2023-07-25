@@ -1,16 +1,17 @@
 <script>
 	import { createEventDispatcher } from 'svelte'
   import { TableBody, TableBodyCell, TableHead } from 'flowbite-svelte'
-
   import { goto } from '$app/navigation'
-
   import SortTable from '$lib/components/tables/SortTable.svelte'
   import SortTableHeadCell from '$lib/components/tables/SortTableHeadCell.svelte'
   import { locale } from '$lib/translations'
 
+  import { TASK_THR, MUN_THR } from '$lib/config'
+
   export let data
   export let target
   export let activeItem = null
+  export let map
 
   let items = []
 
@@ -21,6 +22,11 @@
 
   const code = (item, target) => target === 'provinces' ? item.provcode : item.muncode
   const key = target => target === 'provinces' ? 'provcode' : 'muncode' 
+
+  function setZoom(zoom) {
+    console.info(zoom)
+    map.getMap().setZoom(zoom)
+  }
 </script>
 
 <div>
@@ -35,9 +41,13 @@
     >
       <caption class="text-left mb-2">
         {#if target === 'provinces'}
-          Selecciona una provincia o haz zoom para ver los municipios.
+          Selecciona una provincia o haz
+          <button class="text-primary-500" on:click={() => setZoom(MUN_THR)}>zoom</button>
+          para ver los municipios.
         {:else}
-          Selecciona un municipio o haz zoom para ver las tareas.
+          Selecciona un municipio o haz
+          <button class="text-primary-500" on:click={() => setZoom(TASK_THR)}>zoom</button>
+          para ver las tareas.
         {/if}
       </caption>
       <TableHead defaultRow={false} theadClass="bg-neutral-100 dark:bg-neutral-700">

@@ -15,6 +15,11 @@ def convertDate(o):
 class Municipalities(Resource):
     def get(self):
         q = models.Municipality.query
+        code = request.args.get('code')
+        if code and len(code) == 5:
+            q = q.filter(models.Municipality.muncode == code)
+        if code and len(code) == 2:
+            q = models.Municipality.query_by_prov(code)
         bounds = request.args.get('bounds', '').split(",")
         if len(bounds) == 4:
             bb = f"LINESTRING({bounds[0]} {bounds[1]}, {bounds[2]} {bounds[3]})"

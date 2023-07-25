@@ -1,39 +1,54 @@
 <script>
   import { Spinner } from 'flowbite-svelte'
-  import { goto } from '$app/navigation'
+  import { afterNavigate, goto } from '$app/navigation'
   import { GeoJSON } from 'svelte-leafletjs'
   import { locale } from '$lib/translations'
-  
+  import { page } from '$app/stores'
+
   import TaskList from './TaskList.svelte'
   import ProjList from './ProjList.svelte'
 
-  import { TASK_COLORS, TASK_LOCKED_COLOR, TASK_DIFFICULTY_VALUES, TASK_STATUS_VALUES, TASK_TYPE_VALUES } from '$lib/config'
+  import { TASK_COLORS, TASK_LOCKED_COLOR, TASK_DIFFICULTY_VALUES, TASK_STATUS_VALUES, TASK_TYPE_VALUES, TASK_THR, MUN_THR } from '$lib/config'
   import Map from '$lib/components/maps/Map.svelte'
 
   export let data
 
-
-  let map, geoJsonData, hoveredFeature, previewFeature, getUrl
+  
+  let map, geoJsonData, hoveredFeature, previewFeature, getUrl, getGeoJSON
   let muncode, type, difficulty, ad_status, bu_status
   let loading = false
   let delayed = false
   let center = data.center
   let zoom = data.zoom
+  let project
+  let timer
 
-  const tasksThreshold = 15
-  const munThreshold = 8
-  const geojsonUrl = (target, bounds) => `${data.api}/${target}?bounds=${bounds}`
+  $: code = $page?.params?.code
+
+  const geojsonUrl = (target, code, bounds) => {
+    return `${data.api}/${target}?${code ? 'code=' + code : ''}&bounds=${bounds}`
+  }
   const rightBarClass = 'md:max-w-md w-full flex-grow overflow-scroll px-4 pt-3 '
     + 'border-l-2 border-neutral-300 dark:border-neutral-500 dark:bg-neutral-800'
 
   const target = (zoom) => (
-    zoom >= tasksThreshold ? 
+    zoom >= TASK_THR ? 
     'tasks' : 
-    (zoom >= munThreshold ? 'municipalities' : 'provinces')
+    (zoom >= MUN_THR ? 'municipalities' : 'provinces')
   )
 
   $: tasks = filterTasks(geoJsonData, muncode, type, difficulty, ad_status, bu_status)
 
+
+  afterNavigate(async ({from, to}) => {
+    if (to?.route?.id === '/explore/[[code]]') {
+      await fetchData()
+      if (code && code !== from?.params?.code) {
+        project = geoJsonData.features[0].properties
+        map.getMap().fitBounds(getGeoJSON().getBounds())
+      }
+    }
+  })
 
   function filterTasks(geoJsonData, muncode, type, difficulty, ad_status, bu_status) {
     let data = geoJsonData?.features || []
@@ -51,15 +66,15 @@
     loading = true
     delayed = false
     setTimeout(() => (delayed = true), 500)
+    const code = $page.params?.code
     const bounds = map.getMap().getBounds().toBBoxString()
-    const response = await fetch(geojsonUrl(target(zoom), bounds))
+    const response = await fetch(geojsonUrl(target(zoom), code, bounds))
     geoJsonData = await response.json()
     loading = false
   }
 
   function handleMoveEnd() {
-    fetchData()
-    goto(`/explore?map=${getUrl()}`, { replaceState: true })
+    goto(`${$page.url.pathname}?map=${getUrl()}`, { replaceState: true })
   }
 
   function updateStyle(feature, layer) {
@@ -70,9 +85,18 @@
     }
   }
 
-	function handleClick(feature) {
-    if (target(zoom) === 'tasks') {
-      goto('/explore/task/' + feature.properties.id)
+	function handleClick(event, feature) {
+    const t = target(zoom)
+    if (event.originalEvent.detail === 1) {
+      timer = setTimeout(() => {
+        if (t === 'tasks') {
+          goto('/explore/task/' + feature.properties.id)
+        } else if (t === 'municipalities') {
+          goto('/explore/' + feature.properties.muncode)
+        } else if (t === 'provinces') {
+          goto('/explore/' + feature.properties.provcode)
+        }
+      }, 200)
     }
 	}
 
@@ -146,7 +170,8 @@
     style: setStyle,
     onEachFeature: function(feature, layer) {
       layer.bindTooltip(featInfo(feature.properties))
-      layer.on('click', () => handleClick(feature, layer))
+      layer.on('click', (event) => handleClick(event, feature))
+      layer.on('dblclick', (event) => (clearTimeout(timer)))
       layer.on('mouseover', () => handleMouseover(feature, layer))
       layer.on('mouseout', () => handleMouseover(null, null))
     },
@@ -162,7 +187,7 @@
       bind:getUrl
       on:moveend={handleMoveEnd}
     >
-      <GeoJSON data={tasks} options={geoJsonOptions}/>
+      <GeoJSON data={tasks} options={geoJsonOptions} bind:getGeoJSON/>
     </Map>
   </div>
   <div class={rightBarClass}>
@@ -185,13 +210,24 @@
           on:mouseout={() => handleMouseover()}
         />
       {:else}
-        <ProjList
-          data={geoJsonData?.features}
-          target={target(zoom)}
-          activeItem={hoveredFeature?.id}
-          on:mouseover={(event) => handleMouseover(event.detail.feature)}
-          on:mouseout={() => handleMouseover()}
-        />
+        {#if code}
+        <div class="prose dark:prose-invert pb-2">
+          <h3>{project?.name} ({code})</h3>
+        </div>
+        {/if}
+        {#if code?.length === 5}
+          <!-- TODO -->
+          <p>Estadisticas...</p>
+        {:else}
+          <ProjList
+            data={geoJsonData?.features}
+            target={target(zoom)}
+            activeItem={hoveredFeature?.id}
+            {map}
+            on:mouseover={(event) => handleMouseover(event.detail.feature)}
+            on:mouseout={() => handleMouseover()}
+          />
+        {/if}
       {/if}
     </div>
   </div>

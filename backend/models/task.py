@@ -116,8 +116,16 @@ class Task(db.Model):
     __table_args__ = (Index('codes_index', 'localid', 'muncode'), )
 
     @staticmethod
-    def get_by_code(mun_code, local_id):
+    def get_by_ref(mun_code, local_id):
         return Task.query.filter(Task.muncode == mun_code, Task.localId == local_id).one_or_none()
+
+    @staticmethod
+    def query_by_code(code):
+        if code and len(code) == 5:
+            return Task.query.filter(Task.muncode == code)
+        elif code and len(code) == 2:
+            return Task.query.filter(Task.muncode.startswith(code))
+        return Task.query
 
     @staticmethod
     def query_by_muncode(mun_code):

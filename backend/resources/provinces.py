@@ -11,6 +11,9 @@ from config import Config
 class Provinces(Resource):
     def get(self):
         q = models.Province.query
+        code = request.args.get('code')
+        if code and len(code) == 2:
+            q = q.filter(models.Province.provcode == code)
         bounds = request.args.get('bounds', '').split(",")
         if len(bounds) == 4:
             bb = f"LINESTRING({bounds[0]} {bounds[1]}, {bounds[2]} {bounds[3]})"

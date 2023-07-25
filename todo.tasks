@@ -10,15 +10,8 @@ Mapa:
     ☐ Cuadro de búsqueda de municipios y otras localidades ¿dónde lo ponemos?
     ☐ En la vista de tareas mostrar una leyenda minimizable
     ☐ Ponerle icono de candado a tareas bloqueadas
-    Vista de municipios:
-        ☐ Al hacer clic ruta /explore/[code] filtrar por municipio
-            >>> Task.query.filter(Task.muncode=='02001')
-    Vista de provincias:
-        ☐ Al pasar el ratón en el panel lateral poner nombre y alguna estadística que sea rápido de obtener.
-        ☐ Al hacer clic ruta /explore/[code] filtrar por provincia
-            >>> Task.query.filter(Task.muncode.startswith('02'))
-    Vista de tareas:
-        ☐ En chrome la lista de tareas sale con barras de desplazamiento no necesarias
+    ☐ Mostrar estadísticas del municipio
+    ☐ En chrome la lista de tareas sale con barras de desplazamiento no necesarias
 
 Edición tarea:
     ☐ Descarga de archivo de tarea

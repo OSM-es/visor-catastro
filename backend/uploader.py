@@ -200,7 +200,7 @@ def load_tasks(mun_code, tasks, src_date):
     if fixmes:
         log.info(f"Registrados {fixmes} anotaciones de actualización en {mun_code}")
     for shape, localid in demolished.items():
-        t = Task.get_by_code(mun_code, localid)
+        t = Task.get_by_ref(mun_code, localid)
         geom = from_shape(shape.point_on_surface())
         f = Fixme(type=Fixme.Type.UPDATE_DEL_CHECK.value, geom=geom, src_date=src_date)
         t.fixmes.append(f)
