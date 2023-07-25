@@ -9,7 +9,9 @@
   export let data = []
   export let items = []
   export const getTable = () => table
-  
+  export let activeItem
+
+
   const table = writable({
 		key: null,
 		direction: 1,
@@ -35,5 +37,5 @@
 </script>
 
 <Table {divClass} {striped}>
-  <slot></slot>
+  <slot {activeItem} {items}></slot>
 </Table>
