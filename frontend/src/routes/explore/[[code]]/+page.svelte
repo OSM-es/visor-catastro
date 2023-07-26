@@ -202,18 +202,24 @@
           <Spinner size={4} />
         </p>
       {:else if target(zoom) === 'tasks'}
-        <TaskList
-          tasks={tasks.features}
-          bind:muncode
-          bind:type
-          bind:difficulty
-          bind:ad_status
-          bind:bu_status
-          activeItem={hoveredFeature?.id}
-          on:click={(event) => handleClick(event.detail.feature)}
-          on:mouseover={(event) => handleMouseover(event.detail.feature)}
-          on:mouseout={() => handleMouseover()}
-        />
+        {#if geoJsonData?.features?.length > 0}
+          <TaskList
+            tasks={tasks.features}
+            bind:muncode
+            bind:type
+            bind:difficulty
+            bind:ad_status
+            bind:bu_status
+            activeItem={hoveredFeature?.id}
+            on:click={(event) => handleClick(event.detail.feature)}
+            on:mouseover={(event) => handleMouseover(event.detail.feature)}
+            on:mouseout={() => handleMouseover()}
+          />
+        {:else}
+          <p class="w-full bg-neutral-100 dark:bg-neutral-700 p-2">
+            No hay tareas aquí
+          </p>
+        {/if}
       {:else}
         {#if code}
         <div class="prose dark:prose-invert pb-2">

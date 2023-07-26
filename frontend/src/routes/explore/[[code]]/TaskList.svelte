@@ -31,73 +31,72 @@
 </script>
 
 <div>
-  {#if tasks?.length > 0}
-    <SortTable
-      data={tasks.map(t => t.properties)}
-      bind:items
-      {activeItem}
-      let:activeItem={active}
-      let:items={prueba}
-      divClass="overflow-scroll"
-      striped
-    >
-      {#if munCount > 1 || muncode}
-        <TableHead defaultRow={false} theadClass="bg-neutral-100 dark:bg-neutral-700">
-          <tr class="text-xs uppercase"> 
-            <SortTableHeadCell thClass="p-2" key='muncode'>Municipio</SortTableHeadCell>
-            <SortTableHeadCell thClass="p-2" key='type'>Tipo</SortTableHeadCell>
-            <SortTableHeadCell thClass="p-2" key='difficulty'>Dificultad</SortTableHeadCell>
-            <SortTableHeadCell thClass="p-2" key='bu_status'>Estado edificios</SortTableHeadCell>
-            <SortTableHeadCell thClass="p-2" key='ad_status'>Estado direcciones</SortTableHeadCell>
-          </tr>
-          <tr>
-            <FilterTableHeadCell key='muncode' bind:value={muncode} items={munItems}></FilterTableHeadCell>
-            <FilterTableHeadCell key='type' bind:value={type} items={TASK_TYPE_VALUES}></FilterTableHeadCell>
-            <FilterTableHeadCell key='difficulty' bind:value={difficulty} items={TASK_DIFFICULTY_VALUES}></FilterTableHeadCell>
-            <FilterTableHeadCell key='status' bind:value={bu_status} items={TASK_STATUS_VALUES}></FilterTableHeadCell>
-            <FilterTableHeadCell key='status' bind:value={ad_status} items={TASK_STATUS_VALUES}></FilterTableHeadCell>
-          </tr>
-        </TableHead>
-      {:else}
-      <TableHead defaultRow={false} theadClass="bg-neutral-100 dark:bg-neutral-700">
+  <SortTable
+    data={tasks.map(t => t.properties)}
+    bind:items
+    {activeItem}
+    let:activeItem={active}
+    let:items={prueba}
+    divClass="relative overflow-scroll"
+    striped
+  >
+    {#if munCount > 1 || muncode}
+      <TableHead defaultRow={false} theadClass="sticky top-0 bg-neutral-100 dark:bg-neutral-700">
         <tr class="text-xs uppercase"> 
+          <SortTableHeadCell thClass="p-2" key='muncode'>Municipio</SortTableHeadCell>
           <SortTableHeadCell thClass="p-2" key='type'>Tipo</SortTableHeadCell>
           <SortTableHeadCell thClass="p-2" key='difficulty'>Dificultad</SortTableHeadCell>
           <SortTableHeadCell thClass="p-2" key='bu_status'>Estado edificios</SortTableHeadCell>
           <SortTableHeadCell thClass="p-2" key='ad_status'>Estado direcciones</SortTableHeadCell>
         </tr>
         <tr>
+          <FilterTableHeadCell key='muncode' bind:value={muncode} items={munItems}></FilterTableHeadCell>
           <FilterTableHeadCell key='type' bind:value={type} items={TASK_TYPE_VALUES}></FilterTableHeadCell>
           <FilterTableHeadCell key='difficulty' bind:value={difficulty} items={TASK_DIFFICULTY_VALUES}></FilterTableHeadCell>
           <FilterTableHeadCell key='status' bind:value={bu_status} items={TASK_STATUS_VALUES}></FilterTableHeadCell>
           <FilterTableHeadCell key='status' bind:value={ad_status} items={TASK_STATUS_VALUES}></FilterTableHeadCell>
         </tr>
       </TableHead>
-    {/if}
-      <TableBody>
-        {#each items as task, i}
-          <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <!-- svelte-ignore a11y-mouse-events-have-key-events -->
-          <tr
-            on:click={() => goto('/explore/task/' + task.id)}
-            on:mouseover={() => dispatch('mouseover', { feature: tasks.find(t => t.properties.id === task.id) })}
-            on:mouseout={() => dispatch('mouseout')}
-            class={trClass + (String(i) === active ? ' !bg-amber-400' : '')}
-          >
-            {#if munCount > 1 || muncode}
-              <TableBodyCell {tdClass}>{task.muncode}</TableBodyCell>
-            {/if}
-            <TableBodyCell {tdClass}>{TASK_TYPE_VALUES[task.type]}</TableBodyCell>
-            <TableBodyCell {tdClass}>{TASK_DIFFICULTY_VALUES[task.difficulty]}</TableBodyCell>
-            <TableBodyCell {tdClass}>{task.lock_id ? 'Bloqueada' : TASK_STATUS_VALUES[task.bu_status]}</TableBodyCell>
-            <TableBodyCell {tdClass}>{task.lock_id ? 'Bloqueada' : TASK_STATUS_VALUES[task.ad_status]}</TableBodyCell>
-          </tr>
-        {/each}
-      </TableBody>
-    </SortTable>
-  {:else}
+    {:else}
+    <TableHead defaultRow={false} theadClass="sticky top-0 bg-neutral-100 dark:bg-neutral-700">
+      <tr class="text-xs uppercase"> 
+        <SortTableHeadCell thClass="p-2" key='type'>Tipo</SortTableHeadCell>
+        <SortTableHeadCell thClass="p-2" key='difficulty'>Dificultad</SortTableHeadCell>
+        <SortTableHeadCell thClass="p-2" key='bu_status'>Estado edificios</SortTableHeadCell>
+        <SortTableHeadCell thClass="p-2" key='ad_status'>Estado direcciones</SortTableHeadCell>
+      </tr>
+      <tr>
+        <FilterTableHeadCell key='type' bind:value={type} items={TASK_TYPE_VALUES}></FilterTableHeadCell>
+        <FilterTableHeadCell key='difficulty' bind:value={difficulty} items={TASK_DIFFICULTY_VALUES}></FilterTableHeadCell>
+        <FilterTableHeadCell key='status' bind:value={bu_status} items={TASK_STATUS_VALUES}></FilterTableHeadCell>
+        <FilterTableHeadCell key='status' bind:value={ad_status} items={TASK_STATUS_VALUES}></FilterTableHeadCell>
+      </tr>
+    </TableHead>
+  {/if}
+    <TableBody>
+      {#each items as task, i}
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+        <tr
+          on:click={() => goto('/explore/task/' + task.id)}
+          on:mouseover={() => dispatch('mouseover', { feature: tasks.find(t => t.properties.id === task.id) })}
+          on:mouseout={() => dispatch('mouseout')}
+          class={trClass + (String(i) === active ? ' !bg-amber-400' : '')}
+        >
+          {#if munCount > 1 || muncode}
+            <TableBodyCell {tdClass}>{task.muncode}</TableBodyCell>
+          {/if}
+          <TableBodyCell {tdClass}>{TASK_TYPE_VALUES[task.type]}</TableBodyCell>
+          <TableBodyCell {tdClass}>{TASK_DIFFICULTY_VALUES[task.difficulty]}</TableBodyCell>
+          <TableBodyCell {tdClass}>{task.lock_id ? 'Bloqueada' : TASK_STATUS_VALUES[task.bu_status]}</TableBodyCell>
+          <TableBodyCell {tdClass}>{task.lock_id ? 'Bloqueada' : TASK_STATUS_VALUES[task.ad_status]}</TableBodyCell>
+        </tr>
+      {/each}
+    </TableBody>
+  </SortTable>
+  {#if tasks?.length === 0}
     <p class="w-full bg-neutral-100 dark:bg-neutral-700 p-2">
-      No hay tareas aquí
+      No hay resultados
     </p>
   {/if}
 </div>

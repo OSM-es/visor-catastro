@@ -145,11 +145,11 @@
           <Label for="filterTask">En la tarea</Label>
         </div>
       </div>
-        <div>
-          <Badge large color={streetsToValidate.length === streets.length ? 'green' : 'dark'}>
-            {streetsToValidate.length} / {streets.length}
-          </Badge>
-          <ButtonGroup>
+      <div>
+        <Badge large color={streetsToValidate.length === streets.length ? 'green' : 'dark'}>
+          {streetsToValidate.length} / {streets.length}
+        </Badge>
+        <ButtonGroup>
           <Button
             class="!px-2"
             on:click={() => gotoNextStreet(-1)}
