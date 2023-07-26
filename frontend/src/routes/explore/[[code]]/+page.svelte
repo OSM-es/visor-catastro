@@ -1,5 +1,5 @@
 <script>
-  import { Spinner } from 'flowbite-svelte'
+  import { Progressbar, Spinner } from 'flowbite-svelte'
   import { afterNavigate, goto } from '$app/navigation'
   import { GeoJSON } from 'svelte-leafletjs'
   import { locale } from '$lib/translations'
@@ -36,8 +36,14 @@
     'tasks' : 
     (zoom >= MUN_THR ? 'municipalities' : 'provinces')
   )
+  const fmt = new Intl.NumberFormat($locale, { maximumFractionDigits: 2, style: "percent" })
 
   $: tasks = filterTasks(geoJsonData, muncode, type, difficulty, ad_status, bu_status)
+
+  function setZoom(zoom) {
+    map.getMap().fitBounds(getGeoJSON().getBounds())
+    map.getMap().setZoom(zoom)
+  }
 
 
   afterNavigate(async ({from, to}) => {
@@ -156,7 +162,6 @@
       `
     } else {
       const mapped = feat.mapped_count / feat.task_count
-      const fmt = new Intl.NumberFormat($locale, { maximumFractionDigits: 2, style: "percent" })
       info += `
         <li>Tareas: ${feat.task_count}</li>
         <li>Mapeado: ${fmt.format(mapped)}</li>
@@ -216,8 +221,31 @@
         </div>
         {/if}
         {#if code?.length === 5}
-          <!-- TODO -->
-          <p>Estadisticas...</p>
+          <div class="space-y-6 pt-4">
+            <div class="!space-y-1">
+              <p class="flex justify-between">
+                <span>Tareas:</span>
+                <span>{project?.task_count}</span>
+              </p>
+              {#if project?.task_count}
+                <p class="flex justify-between">
+                  <span>Mapeado:</span>
+                  <span>{fmt.format(project.mapped_count / project?.task_count)}</span>
+                </p>
+                  <Progressbar
+                  progress = {100 * project.mapped_count / project.task_count}
+                  size="h-4"
+                  color="gray"
+                />
+              {/if}
+            </div>
+            <p>
+              Haz <button class="text-primary-600" on:click={() => setZoom(TASK_THR)}>zoom</button>
+              para ver las tareas o
+              <a class="text-primary-600" href="/explore">explora</a>
+              el resto de municipios.
+            </p>
+          </div>
         {:else}
           <ProjList
             data={geoJsonData?.features}
@@ -227,6 +255,12 @@
             on:mouseover={(event) => handleMouseover(event.detail.feature)}
             on:mouseout={() => handleMouseover()}
           />
+          {#if code?.length == 2}
+            <p class="pt-4">
+              <a class="text-primary-600" href="/explore">Explora</a>
+              el resto de provincias.
+            </p>
+        {/if}
         {/if}
       {/if}
     </div>

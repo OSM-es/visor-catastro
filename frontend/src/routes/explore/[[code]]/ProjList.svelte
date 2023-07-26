@@ -24,7 +24,6 @@
   const key = target => target === 'provinces' ? 'provcode' : 'muncode' 
 
   function setZoom(zoom) {
-    console.info(zoom)
     map.getMap().setZoom(zoom)
   }
 </script>

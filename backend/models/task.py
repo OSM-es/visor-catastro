@@ -4,7 +4,7 @@ from pytz import UTC
 
 from geoalchemy2 import Geometry, Index
 from geoalchemy2.shape import from_shape
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 
 from models import db, History, Municipality, TaskHistory, TaskLock, OsmUser
 from models.utils import get_by_area
@@ -148,6 +148,33 @@ class Task(db.Model):
         shape = feature['geometry']
         task.geom = from_shape(shape)
         return task
+
+    @staticmethod
+    def status_stats(mun_code):
+        q = Task.query_by_muncode(mun_code)
+        ad_stats = q.with_entities(
+            Task.ad_status, func.count(Task.ad_status)
+        ).group_by(
+            Task.ad_status
+        ).all()
+        bu_stats = q.with_entities(
+            Task.bu_status, func.count(Task.bu_status)
+        ).group_by(
+            Task.bu_status
+        ).all()
+        status = {s.value: {} for s in Task.Status}
+        for s in ad_stats:
+            status[s[0]]['ad'] = s[1]
+        for s in bu_stats:
+            status[s[0]]['bu'] = s[1]
+        return [
+            {
+                'status': Task.Status(k).name,
+                'addresses': v.get('ad', 0),
+                'buildings': v.get('bu', 0)
+            }
+            for k, v in status.items()
+        ]
 
     @staticmethod
     def get_match(feature):
