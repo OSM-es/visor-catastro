@@ -28,56 +28,54 @@
   }
 </script>
 
-<div>
-  {#if data?.length > 0}
-    <SortTable
-      data={data.map(t => t.properties)}
-      bind:items
-      {activeItem}
-      let:activeItem={active}
-      divClass="overflow-scroll"
-      striped
-    >
-      <caption class="text-left mb-2">
-        {#if target === 'provinces'}
-          Selecciona una provincia o haz
-          <button class="text-primary-600" on:click={() => setZoom(MUN_THR)}>zoom</button>
-          para ver los municipios.
-        {:else}
-          Selecciona un municipio o haz
-          <button class="text-primary-600" on:click={() => setZoom(TASK_THR)}>zoom</button>
-          para ver las tareas.
-        {/if}
-      </caption>
-      <TableHead defaultRow={false} theadClass="bg-neutral-100 dark:bg-neutral-700">
-        <tr class="text-xs uppercase">
-          <SortTableHeadCell thClass="p-2" key={key(target)}>Código</SortTableHeadCell>
-          <SortTableHeadCell thClass="p-2" key='name'>Nombre</SortTableHeadCell>
-          <SortTableHeadCell thClass="p-2" key='task_count'>Tareas</SortTableHeadCell>
-          <SortTableHeadCell thClass="p-2" key='mapped_count'>Mapeado</SortTableHeadCell>
+{#if data?.length > 0}
+  <SortTable
+    data={data.map(t => t.properties)}
+    bind:items
+    {activeItem}
+    let:activeItem={active}
+    divClass="pt-3"
+    striped
+  >
+    <caption class="text-left mb-2">
+      {#if target === 'provinces'}
+        Selecciona una provincia o haz
+        <button class="text-primary-600" on:click={() => setZoom(MUN_THR)}>zoom</button>
+        para ver los municipios.
+      {:else}
+        Selecciona un municipio o haz
+        <button class="text-primary-600" on:click={() => setZoom(TASK_THR)}>zoom</button>
+        para ver las tareas.
+      {/if}
+    </caption>
+    <TableHead defaultRow={false} theadClass="sticky top-0 bg-neutral-100 dark:bg-neutral-700">
+      <tr class="text-xs uppercase">
+        <SortTableHeadCell thClass="p-2" key={key(target)}>Código</SortTableHeadCell>
+        <SortTableHeadCell thClass="p-2" key='name'>Nombre</SortTableHeadCell>
+        <SortTableHeadCell thClass="p-2" key='task_count'>Tareas</SortTableHeadCell>
+        <SortTableHeadCell thClass="p-2" key='mapped_count'>Mapeado</SortTableHeadCell>
+      </tr>
+    </TableHead>
+    <TableBody>
+      {#each items as item, i}
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+        <tr
+          on:click={() => goto('/explore/' + code(item, target))}
+          on:mouseover={() => dispatch('mouseover', { feature: data.find(t => code(t.properties, target) === item.muncode) })}
+          on:mouseout={() => dispatch('mouseout')}
+          class={trClass + (String(i) === active ? ' !bg-amber-400' : '')}
+        >
+          <TableBodyCell {tdClass}>{code(item, target)}</TableBodyCell>
+          <TableBodyCell {tdClass}>{item.name}</TableBodyCell>
+          <TableBodyCell {tdClass}>{item.task_count}</TableBodyCell>
+          <TableBodyCell {tdClass}>{fmt.format(item.mapped_count / item.task_count)}</TableBodyCell>
         </tr>
-      </TableHead>
-      <TableBody>
-        {#each items as item, i}
-          <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <!-- svelte-ignore a11y-mouse-events-have-key-events -->
-          <tr
-            on:click={() => goto('/explore/' + code(item, target))}
-            on:mouseover={() => dispatch('mouseover', { feature: data.find(t => code(t.properties, target) === item.muncode) })}
-            on:mouseout={() => dispatch('mouseout')}
-            class={trClass + (String(i) === active ? ' !bg-amber-400' : '')}
-          >
-            <TableBodyCell {tdClass}>{code(item, target)}</TableBodyCell>
-            <TableBodyCell {tdClass}>{item.name}</TableBodyCell>
-            <TableBodyCell {tdClass}>{item.task_count}</TableBodyCell>
-            <TableBodyCell {tdClass}>{fmt.format(item.mapped_count / item.task_count)}</TableBodyCell>
-          </tr>
-        {/each}
-      </TableBody>
-    </SortTable>
-  {:else}
-    <p class="w-full bg-neutral-100 dark:bg-neutral-700 p-2">
-      No hay {#if target === 'provinces'}provincias{:else}municipios{/if} aquí
-    </p>
-  {/if}
-</div>
+      {/each}
+    </TableBody>
+  </SortTable>
+{:else}
+  <p class="w-full bg-neutral-100 dark:bg-neutral-700 p-2 mt-3">
+    No hay {#if target === 'provinces'}provincias{:else}municipios{/if} aquí
+  </p>
+{/if}

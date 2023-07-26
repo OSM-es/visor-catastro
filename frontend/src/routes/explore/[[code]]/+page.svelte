@@ -28,7 +28,7 @@
   const geojsonUrl = (target, code, bounds) => {
     return `${data.api}/${target}?${code ? 'code=' + code : ''}&bounds=${bounds}`
   }
-  const rightBarClass = 'md:max-w-md w-full flex-grow overflow-scroll px-4 pt-3 '
+  const rightBarClass = 'md:max-w-md w-full flex-grow overflow-scroll px-4 '
     + 'border-l-2 border-neutral-300 dark:border-neutral-500 dark:bg-neutral-800'
 
   const target = (zoom) => (
@@ -216,13 +216,13 @@
             on:mouseout={() => handleMouseover()}
           />
         {:else}
-          <p class="w-full bg-neutral-100 dark:bg-neutral-700 p-2">
+          <p class="w-full bg-neutral-100 dark:bg-neutral-700 p-2 mt-3">
             No hay tareas aquí
           </p>
         {/if}
       {:else}
         {#if code}
-        <div class="prose dark:prose-invert pb-2">
+        <div class="prose dark:prose-invert pt-3">
           <h3>{project?.name} ({code})</h3>
         </div>
         {/if}
@@ -266,7 +266,7 @@
               <a class="text-primary-600" href="/explore">Explora</a>
               el resto de provincias.
             </p>
-        {/if}
+          {/if}
         {/if}
       {/if}
     </div>
