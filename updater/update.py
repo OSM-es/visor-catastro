@@ -13,6 +13,7 @@ import argparse
 import json
 import logging
 import os
+import psutil
 import re
 import requests
 import shutil
@@ -48,6 +49,7 @@ class Config:
         self.read_int('WORKERS', 4)
         self.read_int('MAX_RETRIES', 10)
         self.read_int('RETRAY_DELAY', 3)
+        self.read_int('MIN_FREEMEM', 80)
         # Estas no se corresponden a provincias
         self.read_list('PROV_SUBOFFICES', '51, 52, 53, 54')
 
@@ -222,6 +224,11 @@ def process(mun_code):
     if len(log.handlers) < 2:
         format = f"[{pname}] [%(levelname)s] %(message)s"
         catconfig.set_log_level(log, logging.INFO, format)
+    freemem = psutil.virtual_memory().percent
+    log.info(f"CPU {psutil.cpu_percent()} memoria {freemem}")
+    if freemem > config.min_freemem:
+        log.info(f"Omitido proceso de {mun_code} por falta de memoria")
+        return
     catconfig.set_config({'language': get_lang(mun_code)})
     options.path = [mun_code]
     options.args = mun_code
@@ -244,6 +251,7 @@ def process(mun_code):
         ):
             print(traceback.format_exc())
         return None
+    log.info(f"CPU {psutil.cpu_percent()} memoria {freemem}")
     return status(mun_code)
 
 def get_date(mun_code):

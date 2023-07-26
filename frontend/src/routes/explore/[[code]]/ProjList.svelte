@@ -42,11 +42,11 @@
       <caption class="text-left mb-2">
         {#if target === 'provinces'}
           Selecciona una provincia o haz
-          <button class="text-primary-500" on:click={() => setZoom(MUN_THR)}>zoom</button>
+          <button class="text-primary-600" on:click={() => setZoom(MUN_THR)}>zoom</button>
           para ver los municipios.
         {:else}
           Selecciona un municipio o haz
-          <button class="text-primary-500" on:click={() => setZoom(TASK_THR)}>zoom</button>
+          <button class="text-primary-600" on:click={() => setZoom(TASK_THR)}>zoom</button>
           para ver las tareas.
         {/if}
       </caption>
