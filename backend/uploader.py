@@ -52,6 +52,11 @@ def end_upload():
 @uploader.route("/municipality/<mun_code>", methods=["PUT"])
 def upload(mun_code):
     log = current_app.logger
+    filename = Municipality.Update.get_path(mun_code, 'uploaded')
+    if os.path.exists(filename):
+        msg = f"{mun_code} ya está registrado"
+        log.info(msg)
+        return msg
     filename = Municipality.Update.get_path(mun_code, 'report.json')
     with open(filename, 'r') as fo:
         report = json.load(fo)
