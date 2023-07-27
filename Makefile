@@ -32,7 +32,7 @@ up: build  ## Inicia servicios
 
 .PHONY: logs
 logs:  ## Muestra los registros
-	@docker-compose logs -f
+	@docker-compose logs -ft
 
 .PHONY: down
 down:  ## Finaliza los servicios
