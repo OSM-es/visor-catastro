@@ -19,7 +19,7 @@ mapa donde no están presentes o mejorar los datos si ya existen.
 
 Visualiza este vídeo para conocer el proyecto.
 
-<Video src="/src/lib/videos/1intro-catastro.webm" controls trackSrc="1intro-catastro.webm" />
+<Video src="/videos/1intro-catastro.webm" controls trackSrc="1intro-catastro.webm" />
 
 {#if !user}
 Conoce como debes registrarte para participar
