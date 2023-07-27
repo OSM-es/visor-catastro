@@ -19,7 +19,7 @@ map where they are not present or improve the data if they already exist.
 
 Watch this video to learn about the project.
 
-<Video src="/src/lib/videos/1intro-catastro.webm" controls trackSrc="1intro-catastro.webm" />
+<Video src="/videos/1intro-catastro.webm" controls trackSrc="1intro-catastro.webm" />
 
 {#if !user}
 Learn how to register to participate.
