@@ -9,11 +9,13 @@ import osm2geojson
 import models
 from auth import auth, get_current_user
 from overpass import getOsmStreets
+from resources.utils import json_compress
 
 Municipality = models.Municipality
 
 
 class Tasks(Resource):
+    @json_compress
     def get(self):
         code = request.args.get('code')
         bounds = request.args.get('bounds', '').split(",")
@@ -33,7 +35,8 @@ class Tasks(Resource):
         q = Municipality.query.filter(Municipality.muncode.in_(df.muncode.unique()))
         municip = {m.muncode: m.name for m in q.all()}
         df['name'] = df['muncode'].map(lambda v: municip[v])
-        return Response(df.to_json(), mimetype='application/json')
+        data = df.to_json().encode('utf-8')
+        return data
 
 
 class Task(Resource):

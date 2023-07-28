@@ -1,14 +1,13 @@
-import datetime
-
-from flask import Response, request
+from flask import request
 from flask_restful import Resource
 import geopandas
 
 import models
-from config import Config
+from resources.utils import json_compress
 
 
 class Provinces(Resource):
+    @json_compress
     def get(self):
         q = models.Province.query
         code = request.args.get('code')
@@ -22,4 +21,5 @@ class Provinces(Resource):
         df = geopandas.GeoDataFrame.from_postgis(sql=sql, con=models.db.get_engine())
         get_mapped = lambda v: models.Task.query_mapped(models.Task.query_by_provcode(v)).count()
         df['mapped_count'] = df['provcode'].map(get_mapped)
-        return Response(df.to_json(), mimetype='application/json')
+        data = df.to_json().encode('utf-8')
+        return data

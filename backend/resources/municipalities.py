@@ -1,11 +1,11 @@
 import datetime
 
-from flask import Response, request
+from flask import request
 from flask_restful import Resource
 import geopandas
 
 import models
-from config import Config
+from resources.utils import json_compress
 
 
 def convertDate(o):
@@ -13,6 +13,7 @@ def convertDate(o):
         return o.strftime('%Y-%m-%d')
 
 class Municipalities(Resource):
+    @json_compress
     def get(self):
         q = models.Municipality.query
         code = request.args.get('code')
@@ -28,4 +29,5 @@ class Municipalities(Resource):
         df = geopandas.GeoDataFrame.from_postgis(sql=sql, con=models.db.get_engine())
         get_mapped = lambda v: models.Task.query_mapped(models.Task.query_by_muncode(v)).count()
         df['mapped_count'] = df['muncode'].map(get_mapped)
-        return Response(df.to_json(default=convertDate), mimetype='application/json')
+        data = df.to_json(default=convertDate).encode('utf-8')
+        return data
