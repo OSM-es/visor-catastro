@@ -47,7 +47,10 @@
 
 
   afterNavigate(async ({from, to}) => {
-    if (to?.route?.id === '/explore/[[code]]') {
+    if (
+      from?.route?.id === '/explore/[[code]]'
+      && to?.route?.id === '/explore/[[code]]'
+    ) {
       await fetchData()
       if (code && code !== from?.params?.code) {
         project = geoJsonData.features[0].properties
