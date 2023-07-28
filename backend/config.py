@@ -61,3 +61,7 @@ class Config:
     CACHE_DEFAULT_TIMEOUT = 0
     CACHE_DIR = '/data/photos'
     CACHE_THRESHOLD = 1000
+
+    # Uploader
+    PROV_TOLERANCE = 0.01
+    MUN_TOLERANCE = 0.001

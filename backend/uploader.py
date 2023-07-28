@@ -13,7 +13,7 @@ import geojson
 import osm2geojson
 from flask import Blueprint, abort, current_app
 from shapely.geometry import shape
-from shapely import GeometryCollection
+from shapely import GeometryCollection, simplify
 from geoalchemy2.shape import from_shape, to_shape
 
 import overpass
@@ -133,6 +133,9 @@ def get_geometry(*ql, search=None, level=6):
         abort(500)
     shape = shapes[0]
     geom = GeometryCollection(shape['shape'])
+    config = current_app.config
+    tolerance = config['PROV_TOLERANCE'] if level == 6 else config['MUN_TOLERANCE']
+    geom = simplify(geom, tolerance)
     return shape, from_shape(geom)
 
 def merge_tasks(zoning):
