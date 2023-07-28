@@ -55,9 +55,8 @@ class MutableList(Mutable, list):
         list.__delitem__(self, key)
         self.changed()
 
-def get_by_area(model, geom, percentaje=0.9, buffer=None):
-    shape = to_shape(geom)
-    if buffer: shape = shape.buffer(buffer)
+def get_by_area(model, geom, percentaje=0.9, buffer=0):
+    shape = to_shape(geom).buffer(buffer)
     candidates = []
     for c in model.query.filter(model.geom.intersects(geom)).all():
         s = to_shape(c.geom).buffer(0)
