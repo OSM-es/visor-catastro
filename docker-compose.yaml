@@ -96,6 +96,7 @@ services:
 
   dozzle:
     container_name: dozzle
+    restart: always
     image: amir20/dozzle:v4.10.4
     environment:
       - DOZZLE_BASE=/logs
