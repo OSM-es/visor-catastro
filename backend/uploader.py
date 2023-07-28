@@ -180,6 +180,7 @@ def load_tasks(mun_code, tasks, src_date):
         fn = Task.Update.get_path(mun_code, localid + '.osm.gz')
         data = Diff.get_shapes(fn)
         calc_difficulty(task, data)
+        load_ca2o_fixmes(task, data, src_date)
         if not candidates:
             continue
         diff = Diff()
@@ -201,7 +202,7 @@ def load_tasks(mun_code, tasks, src_date):
         if len(diff.df1.index):
             diff.get_fixmes()
             fixmes += len(diff.fixmes)
-            load_fixmes(task, diff, src_date)
+            load_update_fixmes(task, diff, src_date)
     if fixmes:
         log.info(f"Registrados {fixmes} anotaciones de actualización en {mun_code}")
     for shape, localid in demolished.items():
@@ -211,7 +212,19 @@ def load_tasks(mun_code, tasks, src_date):
         t.fixmes.append(f)
         t.set_need_update()
 
-def load_fixmes(task, diff, src_date):
+def load_ca2o_fixmes(task, data, src_date):
+    """Carga fixmes de conversión en bd."""
+    for f in data:
+        if 'fixme' not in f['properties'].get('tags'):
+            continue
+        geom = from_shape(f['shape'].point_on_surface())
+        msg = f['properties']['tags']['fixme']
+        type = Fixme.Type.from_ca2o(msg)
+        text = msg.split(':')[2].strip() if type == Fixme.Type.CA2O_GEOS else None
+        fixme = Fixme(geom=geom, type=type.value, text=text, src_date=src_date)
+        task.fixmes.append(fixme)
+
+def load_update_fixmes(task, diff, src_date):
     """Carga fixmes de actualización en bd."""
     for f in diff.fixmes:
         f['geom'] = from_shape(f['geom'])

@@ -27,6 +27,21 @@ class Fixme(db.Model):
         UPDATE_ORPHAN = 10  # Tarea eliminada
         UPDATE_DEL_CHECK = 11  # Comprobar si hay que eliminar
 
+        @staticmethod
+        def from_ca2o(msg):
+            _type = None
+            if msg == 'Esta parte es mayor que su edificio':
+                _type = Fixme.Type.CA2O_PART_BIGGER
+            elif msg == 'Comprobar, área demasiado pequeña':
+                _type = Fixme.Type.CA2O_SMALL_AREA
+            elif msg == 'Comprobar, área demasiado grande':
+                _type = Fixme.Type.CA2O_BIG_AREA
+            elif msg == 'Las partes de edificio no cubren todo el contorno':
+                _type = Fixme.Type.CA2O_MISSING_PARTS
+            elif 'Validación GEOS' in msg:
+                _type = Fixme.Type.CA2O_GEOS
+            return _type
+
         def is_update(self):
             return self.name.startswith('UPDATE')
 
