@@ -59,6 +59,7 @@ class Municipality(db.Model):
             mun.name = self.name
             mun.src_date = self.src_date
             mun.geom = self.geom
+            mun.centre = from_shape(to_shape(self.geom).point_on_surface())
             mun.lock = None
             mun.update = None
             mun.publish()
@@ -71,6 +72,7 @@ class Municipality(db.Model):
     src_date = db.Column(db.Date, nullable=False)
     task_count = db.Column(db.Integer, nullable=True)
     geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
+    centre = db.Column(Geometry("POINT", srid=4326))
     update_id = db.Column(db.Integer, db.ForeignKey('municipality_update.id'), nullable=True)
     update = db.relationship(Update, back_populates='municipality', uselist=False)
 
@@ -83,8 +85,9 @@ class Municipality(db.Model):
 
     @staticmethod
     def create(muncode, name, src_date, geom):
+        centre = from_shape(to_shape(geom).point_on_surface())
         mun = Municipality(
-            muncode=muncode, name=name, src_date=src_date, geom=geom
+            muncode=muncode, name=name, src_date=src_date, geom=geom, centre=centre
         )
         db.session.add(mun)
         return mun        

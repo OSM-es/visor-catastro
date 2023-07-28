@@ -2,6 +2,7 @@ import datetime
 
 from flask import request
 from flask_restful import Resource
+from geoalchemy2.shape import to_shape
 import geopandas
 
 import models
@@ -28,6 +29,8 @@ class Municipalities(Resource):
         sql = q.statement
         df = geopandas.GeoDataFrame.from_postgis(sql=sql, con=models.db.get_engine())
         get_mapped = lambda v: models.Task.query_mapped(models.Task.query_by_muncode(v)).count()
+        get_centre = lambda v: (to_shape(v).x, to_shape(v).y)
         df['mapped_count'] = df['muncode'].map(get_mapped)
+        df['centre'] = df['centre'].map(get_centre)
         data = df.to_json(default=convertDate).encode('utf-8')
         return data

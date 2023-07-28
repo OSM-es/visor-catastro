@@ -9,6 +9,7 @@ class Province(db.Model):
     name = db.Column(db.String, nullable=False)
     task_count = db.Column(db.Integer, nullable=True)
     geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
+    centre = db.Column(Geometry("POINT", srid=4326))
 
     @staticmethod
     def get_by_code(prov_code):
