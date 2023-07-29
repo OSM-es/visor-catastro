@@ -123,14 +123,14 @@
 
     if (!pattern) {
       const shape = new L.PatternPath({
-        x: 12,
-        y: 12,
+        x: 6,
+        y: 6,
         color: 'red',
-        d: "M18.364 18.364C21.8787 14.8492 21.8787 9.15076 18.364 5.63604C14.8492 2.12132 9.15076 2.12132 5.63604 5.63604M18.364 18.364C14.8492 21.8787 9.15076 21.8787 5.63604 18.364C2.12132 14.8492 2.12132 9.15076 5.63604 5.63604M18.364 18.364L5.63604 5.63604",
+        d: "M9.182 9.182C10.93935 7.4246 10.93935 4.57538 9.182 2.81802C7.4246 1.06066 4.57538 1.06066 2.81802 2.81802M9.182 9.182C7.4246 10.93935 4.57538 10.93935 2.81802 9.182C1.06066 7.4246 1.06066 4.57538 2.81802 2.81802M9.182 9.182L2.81802 2.81802",
         fill: false,
         opacity: 1,
       })
-      pattern = new L.Pattern({width:50, height:50})
+      pattern = new L.Pattern({width:18, height:18, color: 'red'})
       pattern.addShape(shape)
       pattern.addTo(map.getMap())
     }
@@ -145,10 +145,9 @@
       }
       const stripes = new L.StripePattern(options)
       stripes.addTo(map.getMap())
-      style = { 
-        fillPattern: stripes,
-        fillColor: feature.properties.lock_id ? TASK_LOCKED_COLOR : TASK_COLORS[feature.properties.status],
-        fillOpacity: feature.properties.bu_status == feature.properties.ad_status ? 1 : 0.5,
+      style = {
+        fillPattern: feature.properties.lock_id ? pattern : stripes,
+        fillOpacity: 1,
         dashArray: null,
         weight: 1,
         color: '#3388ff', 
@@ -225,11 +224,6 @@
       on:moveend={handleMoveEnd}
     >
       <GeoJSON data={tasks} options={geoJsonOptions} bind:getGeoJSON/>
-      {#each geoJsonData?.features || [] as feat}
-        {#if feat?.properties?.lock_id}
-          <Marker latLng={feat?.properties?.centre} icon={lockIcon(zoom)}/>
-        {/if}
-      {/each}
     </Map>
   </div>
   <div class={rightBarClass}>

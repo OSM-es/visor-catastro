@@ -29,7 +29,7 @@ class Tasks(Resource):
         df = geopandas.GeoDataFrame.from_postgis(sql=sql, con=models.db.get_engine())
         get_status = lambda v: models.Task.Status(v).name
         get_diff = lambda v: models.Task.Difficulty(v).name
-        get_centre = lambda v: (to_shape(v).x, to_shape(v).y)
+        get_centre = lambda v: (to_shape(v).y, to_shape(v).x)
         df['difficulty'] = df['difficulty'].map(get_diff)
         df['status'] = df[['ad_status', 'bu_status']].max(axis=1).map(get_status)
         df['ad_status'] = df['ad_status'].map(get_status)

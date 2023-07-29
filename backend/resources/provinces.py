@@ -21,7 +21,7 @@ class Provinces(Resource):
         sql = q.statement
         df = geopandas.GeoDataFrame.from_postgis(sql=sql, con=models.db.get_engine())
         get_mapped = lambda v: models.Task.query_mapped(models.Task.query_by_provcode(v)).count()
-        get_centre = lambda v: (to_shape(v).x, to_shape(v).y)
+        get_centre = lambda v: (to_shape(v).y, to_shape(v).x)
         df['mapped_count'] = df['provcode'].map(get_mapped)
         df['centre'] = df['centre'].map(get_centre)
         data = df.to_json().encode('utf-8')
