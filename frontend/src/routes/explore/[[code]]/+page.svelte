@@ -1,19 +1,20 @@
 <script>
   import { Progressbar, Spinner } from 'flowbite-svelte'
   import { afterNavigate, goto } from '$app/navigation'
-  import { GeoJSON } from 'svelte-leafletjs'
+  import { GeoJSON, Marker } from 'svelte-leafletjs'
   import { locale } from '$lib/translations'
   import { page } from '$app/stores'
+  import 'leaflet.pattern'
 
   import TaskList from './TaskList.svelte'
   import ProjList from './ProjList.svelte'
+  import { lockIcon } from '$lib/components/maps/lockSymbol.js'
 
   import { TASK_COLORS, TASK_LOCKED_COLOR, TASK_DIFFICULTY_VALUES, TASK_STATUS_VALUES, TASK_TYPE_VALUES, TASK_THR, MUN_THR } from '$lib/config'
   import Map from '$lib/components/maps/Map.svelte'
 
   export let data
 
-  
   let map, geoJsonData, hoveredFeature, previewFeature, getUrl, getGeoJSON
   let muncode, type, difficulty, ad_status, bu_status
   let loading = false
@@ -22,6 +23,7 @@
   let zoom = data.zoom
   let project
   let timer
+  let pattern
 
   $: code = $page?.params?.code
 
@@ -44,7 +46,6 @@
     map.getMap().fitBounds(getGeoJSON().getBounds())
     map.getMap().setZoom(zoom)
   }
-
 
   afterNavigate(async ({from, to}) => {
     if (
@@ -94,7 +95,7 @@
     }
   }
 
-	function handleClick(event, feature) {
+  function handleClick(event, feature) {
     const t = target(zoom)
     if (event.originalEvent.detail === 1) {
       timer = setTimeout(() => {
@@ -117,8 +118,33 @@
 
   function setStyle(feature) {
     let style
+
+    if (!pattern) {
+      const shape = new L.PatternPath({
+        x: 12,
+        y: 12,
+        color: 'red',
+        d: "M18.364 18.364C21.8787 14.8492 21.8787 9.15076 18.364 5.63604C14.8492 2.12132 9.15076 2.12132 5.63604 5.63604M18.364 18.364C14.8492 21.8787 9.15076 21.8787 5.63604 18.364C2.12132 14.8492 2.12132 9.15076 5.63604 5.63604M18.364 18.364L5.63604 5.63604",
+        fill: false,
+        opacity: 1,
+      })
+      pattern = new L.Pattern({width:50, height:50})
+      pattern.addShape(shape)
+      pattern.addTo(map.getMap())
+    }
+
     if (target(zoom) === 'tasks') {
+      const options = {
+        color: feature.properties.lock_id ? TASK_LOCKED_COLOR : TASK_COLORS[feature.properties.bu_status],
+        spaceColor: feature.properties.lock_id ? TASK_LOCKED_COLOR : TASK_COLORS[feature.properties.ad_status],
+        opacity: 1,
+        spaceOpacity: 1,
+        angle: -45,
+      }
+      const stripes = new L.StripePattern(options)
+      stripes.addTo(map.getMap())
       style = { 
+        fillPattern: stripes,
         fillColor: feature.properties.lock_id ? TASK_LOCKED_COLOR : TASK_COLORS[feature.properties.status],
         fillOpacity: feature.properties.bu_status == feature.properties.ad_status ? 1 : 0.5,
         dashArray: null,
@@ -127,8 +153,9 @@
       }
     } else {
       style = { 
+        fillPattern: feature?.properties?.update_id ? pattern : null,
         fillColor: 'blue',
-        fillOpacity: 0.2,
+        fillOpacity: feature?.properties?.update_id ? 0.6 : 0.2,
         weight: 2,
       }
     }
@@ -174,7 +201,7 @@
     return info
   }
 
-  const geoJsonOptions = {
+  const geoJsonOptions ={
     style: setStyle,
     onEachFeature: function(feature, layer) {
       layer.bindTooltip(featInfo(feature.properties))
@@ -196,6 +223,11 @@
       on:moveend={handleMoveEnd}
     >
       <GeoJSON data={tasks} options={geoJsonOptions} bind:getGeoJSON/>
+      {#each geoJsonData?.features || [] as feat}
+        {#if feat?.properties?.lock_id}
+          <Marker latLng={feat?.properties?.centre} icon={lockIcon(zoom)}/>
+        {/if}
+      {/each}
     </Map>
   </div>
   <div class={rightBarClass}>

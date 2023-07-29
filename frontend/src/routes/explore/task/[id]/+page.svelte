@@ -1,7 +1,8 @@
 <script>
-  import { Avatar, Badge, Indicator, Listgroup, Tooltip } from 'flowbite-svelte'
+  import { Avatar, Badge, Button, Indicator, Listgroup, Tooltip } from 'flowbite-svelte'
   import { Clock } from 'svelte-heros-v2'
   import { afterNavigate } from '$app/navigation'
+  import { goto } from '$app/navigation'
   import RelativeTime from 'svelte-relative-time'
 
   import { TASK_TYPE_VALUES, TASK_DIFFICULTY_VALUES, TASK_ACTION_VALUES, TASK_ACTION_TEXT } from '$lib/config'
@@ -73,7 +74,7 @@
       />
       {#if fixmes}<FixmesLayer data={fixmes}/>{/if}
     </Map>
-  </div>
+  </div>municip
   <div class="md:max-w-md w-full flex-grow overflow-scroll px-4 border-l-2 border-gray-200 dark:border-gray-600">
     <div class="sticky top-0 z-10 bg-white dark:bg-neutral-900">
       <div class="prose dark:prose-invert pt-4">
@@ -112,42 +113,52 @@
           <span class="font-bold {taskColor}">
             {TASK_DIFFICULTY_VALUES[data.task.difficulty]}</span>.
         </p>
-        {#if !data.task.lock || data.task.lock?.buildings}
-          <TaskActions
-            title={'buildings'}
-            status={data.task.bu_status}
-            mapper={data.task.bu_mapper}
-            user={data.user}
-            task={data.task}
-            exitUrl={getUrl}
-          />
-        {/if}
-        {#if isSplitted(data.task) || (data.task.lock?.addresses && !data.task.lock?.buildings)}
-          <TaskActions
-            title={'addresses'}
-            status={data.task.ad_status}
-            mapper={data.task.ad_mapper}
-            user={data.user}
-            task={data.task}
-            exitUrl={getUrl}
-          />
-        {/if}
-        {#if fixmes && data.task.bu_status !== 'VALIDATED'}
-          <h4>Anotaciones:</h4>
-          <ol class="mt-0">
-            {#each fixmes?.features as fixme}
-              <li class="my-0">
-                <a
-                  href="{fixme.geometry.coordinates}"
-                  on:click={centerMap}
-                  data-sveltekit-preload-data="off"
-                >
-                  {fixme.properties.type}
-                  {fixme.properties.fixme}
-                </a>
-              </li>
-            {/each}
-          </ol>
+        {#if data.task.municipality.lock }
+          <p class="text-danger-500 font-bold">Municipio bloqueado para actualización.</p>
+          <Button
+            on:click={() => goto(`/explore?map=${getUrl(-1)}`)}
+            color="alternative"
+          >
+            Cancelar
+          </Button>
+        {:else}
+          {#if !data.task.lock || data.task.lock?.buildings}
+            <TaskActions
+              title={'buildings'}
+              status={data.task.bu_status}
+              mapper={data.task.bu_mapper}
+              user={data.user}
+              task={data.task}
+              exitUrl={getUrl}
+            />
+          {/if}
+          {#if isSplitted(data.task) || (data.task.lock?.addresses && !data.task.lock?.buildings)}
+            <TaskActions
+              title={'addresses'}
+              status={data.task.ad_status}
+              mapper={data.task.ad_mapper}
+              user={data.user}
+              task={data.task}
+              exitUrl={getUrl}
+            />
+          {/if}
+          {#if fixmes && data.task.bu_status !== 'VALIDATED'}
+            <h4>Anotaciones:</h4>
+            <ol class="mt-0">
+              {#each fixmes?.features as fixme}
+                <li class="my-0">
+                  <a
+                    href="{fixme.geometry.coordinates}"
+                    on:click={centerMap}
+                    data-sveltekit-preload-data="off"
+                  >
+                    {fixme.properties.type}
+                    {fixme.properties.fixme}
+                  </a>
+                </li>
+              {/each}
+            </ol>
+          {/if}
         {/if}
       </div>
       <div class:hidden={tab !== 'fotos'}>
