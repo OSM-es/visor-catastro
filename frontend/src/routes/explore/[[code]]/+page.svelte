@@ -9,6 +9,7 @@
   import TaskList from './TaskList.svelte'
   import ProjList from './ProjList.svelte'
   import { lockIcon } from '$lib/components/maps/lockSymbol.js'
+  import { exploreCode } from '$lib/stores.js'
 
   import { TASK_COLORS, TASK_LOCKED_COLOR, TASK_DIFFICULTY_VALUES, TASK_STATUS_VALUES, TASK_TYPE_VALUES, TASK_THR, MUN_THR } from '$lib/config'
   import Map from '$lib/components/maps/Map.svelte'
@@ -52,6 +53,7 @@
       from?.route?.id === '/explore/[[code]]'
       && to?.route?.id === '/explore/[[code]]'
     ) {
+      exploreCode.set(code)
       await fetchData()
       if (code && code !== from?.params?.code) {
         project = geoJsonData.features[0].properties

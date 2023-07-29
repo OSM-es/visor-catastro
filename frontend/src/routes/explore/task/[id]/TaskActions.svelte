@@ -4,6 +4,7 @@
 	import { enhance } from '$app/forms'
   import { goto } from '$app/navigation'
   import { TASK_ACTION_TEXT } from '$lib/config'
+  import { exploreCode } from '$lib/stores.js'
   import EditorButton from './EditorButton.svelte'
 
   export let title
@@ -36,7 +37,8 @@
   }
 
   function exit() {
-    goto(`/explore?map=${exitUrl(-1)}`)
+    const url = $exploreCode ? `/explore/${$exploreCode}` : '/explore'
+    goto(`${url}?map=${exitUrl(-1)}`)
   }
 </script>
 

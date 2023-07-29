@@ -6,6 +6,7 @@
   import RelativeTime from 'svelte-relative-time'
 
   import { TASK_TYPE_VALUES, TASK_DIFFICULTY_VALUES, TASK_ACTION_VALUES, TASK_ACTION_TEXT } from '$lib/config'
+  import { exploreCode } from '$lib/stores.js'
   import FotosFachada from '$lib/components/FotosFachada.svelte'
   import Map from '$lib/components/maps/Map.svelte'
   import ConsLayer from '$lib/components/maps/ConsLayer.svelte'
@@ -23,8 +24,8 @@
   let map, center, zoom, initialCenter, initialZoom, getConsLayer, getUrl
   let fixmes = data.task?.fixmes
   let scrollImage, viewImage, imageCount
-  let taskColor = 'text-success-500'
   let tab = 'edicion'
+  let taskColor = 'text-success-500'
   if (data.task.difficulty === 'MODERATE') taskColor = 'text-warning-500'
   if (data.task.difficulty === 'CHALLENGING') taskColor = 'text-danger-500'
 
@@ -50,8 +51,14 @@
     }
     return false
   }
+  
+  function exit() {
+    const url = $exploreCode ? `/explore/${$exploreCode}` : '/explore'
+    goto(`${url}?map=${getUrl(-1)}`)
+  }
 
-  afterNavigate(({to}) => {
+  afterNavigate(({from, to}) => {
+    console.info(from?.params?.code)
     if (to.route.id === '/explore/task/[id]') {
       viewImage = to.url.searchParams.get('ref')
       map.getMap().fitBounds(getConsLayer().getBounds())
@@ -74,11 +81,11 @@
       />
       {#if fixmes}<FixmesLayer data={fixmes}/>{/if}
     </Map>
-  </div>municip
+  </div>
   <div class="md:max-w-md w-full flex-grow overflow-scroll px-4 border-l-2 border-gray-200 dark:border-gray-600">
     <div class="sticky top-0 z-10 bg-white dark:bg-neutral-900">
       <div class="prose dark:prose-invert pt-4">
-        <h3>Catastro de {data.task.municipality.name} ({data.task.muncode}) · #{data.task.id}</h3>
+        <h3>Catastro de {$exploreCode} {data.task.municipality.name} ({data.task.muncode}) · #{data.task.id}</h3>
       </div>
       <Tabs bind:tab>
         <TabItem key={'edicion'}>Edición</TabItem>
@@ -115,12 +122,7 @@
         </p>
         {#if data.task.municipality.lock }
           <p class="text-danger-500 font-bold">Municipio bloqueado para actualización.</p>
-          <Button
-            on:click={() => goto(`/explore?map=${getUrl(-1)}`)}
-            color="alternative"
-          >
-            Cancelar
-          </Button>
+          <Button on:click={exit} color="alternative">Cancelar</Button>
         {:else}
           {#if !data.task.lock || data.task.lock?.buildings}
             <TaskActions
