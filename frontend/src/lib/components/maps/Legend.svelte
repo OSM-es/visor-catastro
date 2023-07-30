@@ -40,7 +40,7 @@
       {#if collapsed}<ChevronDown size="14"/>{:else}<ChevronUp size="14"/>{/if}
     </span>
   </h1>
-  <div class:hidden={collapsed}>
+  <div class:hidden={collapsed} class="content">
     <slot/>
   </div>
 </div>
@@ -60,9 +60,11 @@
     display: flex;
     align-items: center;
     text-decoration: underline;
-    margin-bottom: 0.4rem;
   }
   .legend h1 span {
     margin-left: 0.25rem;
+  }
+  .legend .content {
+    margin-top: 0.4rem;
   }
 </style>
