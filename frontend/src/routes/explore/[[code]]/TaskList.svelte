@@ -4,6 +4,7 @@
 
   import { goto } from '$app/navigation'
 
+  import TaskStatus from './TaskStatus.svelte'
   import SortTable from '$lib/components/tables/SortTable.svelte'
   import SortTableHeadCell from '$lib/components/tables/SortTableHeadCell.svelte'
   import FilterTableHeadCell from '$lib/components/tables/FilterTableHeadCell.svelte'
@@ -28,6 +29,12 @@
   const dispatch = createEventDispatcher()
   const tdClass = 'px-2 py-0.5 whitespace-nowrap'
   const trClass = 'hover:bg-amber-400 cursor-pointer border-b last:border-b-0 odd:bg-white even:bg-gray-50 odd:dark:bg-gray-800 even:dark:bg-gray-700'
+
+  function diffColor(difficulty) {
+    if (difficulty === 'EASY') return 'text-success-500'
+    if (difficulty === 'MODERATE') return 'text-warning-500'
+    return 'text-danger-500'
+  }
 </script>
 
 <SortTable
@@ -86,9 +93,17 @@
           <TableBodyCell {tdClass}>{task.muncode}</TableBodyCell>
         {/if}
         <TableBodyCell {tdClass}>{TASK_TYPE_VALUES[task.type]}</TableBodyCell>
-        <TableBodyCell {tdClass}>{TASK_DIFFICULTY_VALUES[task.difficulty]}</TableBodyCell>
-        <TableBodyCell {tdClass}>{task.lock_id ? 'Bloqueada' : TASK_STATUS_VALUES[task.bu_status]}</TableBodyCell>
-        <TableBodyCell {tdClass}>{task.lock_id ? 'Bloqueada' : TASK_STATUS_VALUES[task.ad_status]}</TableBodyCell>
+        <TableBodyCell {tdClass}>
+          <span class={diffColor(task.difficulty)}>
+            {TASK_DIFFICULTY_VALUES[task.difficulty]}
+          </span>
+        </TableBodyCell>
+        <TableBodyCell {tdClass}>
+          <TaskStatus status={task.lock_id ? 'LOCKED' : task.bu_status}/>
+        </TableBodyCell>
+        <TableBodyCell {tdClass}>
+          <TaskStatus status={task.lock_id ? 'LOCKED' : task.ad_status}/>
+        </TableBodyCell>
       </tr>
     {/each}
   </TableBody>

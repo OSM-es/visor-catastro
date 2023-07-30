@@ -1,18 +1,19 @@
 <script>
   import { Progressbar, Spinner } from 'flowbite-svelte'
   import { afterNavigate, goto } from '$app/navigation'
-  import { GeoJSON, Marker } from 'svelte-leafletjs'
+  import { GeoJSON } from 'svelte-leafletjs'
   import { locale } from '$lib/translations'
   import { page } from '$app/stores'
   import 'leaflet.pattern'
 
   import TaskList from './TaskList.svelte'
+  import TaskStatus from './TaskStatus.svelte'
   import ProjList from './ProjList.svelte'
-  import { lockIcon } from '$lib/components/maps/lockSymbol.js'
   import { exploreCode } from '$lib/stores.js'
 
-  import { TASK_COLORS, TASK_LOCKED_COLOR, TASK_DIFFICULTY_VALUES, TASK_STATUS_VALUES, TASK_TYPE_VALUES, TASK_THR, MUN_THR } from '$lib/config'
+  import { AREA_BORDER, TASK_COLORS, TASK_LOCKED_COLOR, TASK_DIFFICULTY_VALUES, TASK_STATUS_VALUES, TASK_TYPE_VALUES, TASK_THR, MUN_THR } from '$lib/config'
   import Map from '$lib/components/maps/Map.svelte'
+  import Legend from '$lib/components/maps/Legend.svelte'
 
   export let data
 
@@ -150,7 +151,7 @@
         fillOpacity: 1,
         dashArray: null,
         weight: 1,
-        color: '#3388ff', 
+        color: AREA_BORDER, 
       }
     } else {
       style = { 
@@ -224,6 +225,17 @@
       on:moveend={handleMoveEnd}
     >
       <GeoJSON data={tasks} options={geoJsonOptions} bind:getGeoJSON/>
+      {#if zoom >= TASK_THR}
+        <Legend>
+          <TaskStatus status="READY"/>
+          <TaskStatus status="MAPPED"/>
+          <TaskStatus status="INVALIDATED"/>
+          <TaskStatus status="VALIDATED"/>
+          <TaskStatus status="NEED_UPDATE"/>
+          <TaskStatus status="MIXED"/>
+          <TaskStatus status="LOCKED"/>
+        </Legend>
+      {/if}
     </Map>
   </div>
   <div class={rightBarClass}>
@@ -269,7 +281,7 @@
                   <span>Mapeado:</span>
                   <span>{fmt.format(project.mapped_count / project?.task_count)}</span>
                 </p>
-                  <Progressbar
+                <Progressbar
                   progress = {100 * project.mapped_count / project.task_count}
                   size="h-4"
                   color="gray"

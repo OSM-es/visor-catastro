@@ -45,6 +45,7 @@ export const TASK_ACTION_TEXT = {
   INVALIDATED: 'se necesita más mapeo',
 }
 
+export const AREA_BORDER = '#3388ff'
 export const TASK_COLORS = {
   READY: '#FFFFFF66',
   MAPPED: '#1E90FF99',

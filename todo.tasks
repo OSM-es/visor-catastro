@@ -8,11 +8,7 @@ Mapa:
     ☐ Capas wms según zona
     ☐ Guardar bounds del mapa. Osm recuerda el zoom de la última visita
     ☐ Cuadro de búsqueda de municipios y otras localidades ¿dónde lo ponemos?
-    ☐ En la vista de tareas mostrar una leyenda minimizable
-    ☐ Ponerle icono de candado a tareas bloqueadas
-    ☐ Mostrar estadísticas del municipio
     ☐ En chrome la lista de tareas sale con barras de desplazamiento no necesarias
-    ☐ Mostrar patrón de rayas para tareas que tengan disinto estado de edificios y direcciones
 
 Edición tarea:
     ☐ Descarga de archivo de tarea
