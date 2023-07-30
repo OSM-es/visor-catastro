@@ -114,6 +114,7 @@
 	}
 
   function handleMouseover(feature, layer) {
+    layer?.bringToFront()
     hoveredFeature = feature
     previewFeature = layer ? feature : null
     updateStyle(feature, layer)
@@ -203,12 +204,12 @@
     return info
   }
 
-  const geoJsonOptions ={
+  const geoJsonOptions = {
     style: setStyle,
     onEachFeature: function(feature, layer) {
       layer.bindTooltip(featInfo(feature.properties))
       layer.on('click', (event) => handleClick(event, feature))
-      layer.on('dblclick', (event) => (clearTimeout(timer)))
+      layer.on('dblclick', () => (clearTimeout(timer)))
       layer.on('mouseover', () => handleMouseover(feature, layer))
       layer.on('mouseout', () => handleMouseover(null, null))
     },
