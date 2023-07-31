@@ -40,7 +40,7 @@
   }
 
   function isSplitted(task) {
-    const needMapping = ['READY', 'INVALIDATED', 'NEED_UPDATE']
+    const needMapping = ['MAPPING', 'INVALIDATED', 'NEED_UPDATE']
     if (task.bu_status !== task.ad_status) {
       return !needMapping.includes(task.bu_status) || !needMapping.includes(task.ad_status)
     }
@@ -79,7 +79,7 @@
   <div class="md:max-w-md w-full flex-grow overflow-scroll px-4 border-l-2 border-gray-200 dark:border-gray-600">
     <div class="sticky top-0 z-10 bg-white dark:bg-neutral-900">
       <div class="prose dark:prose-invert pt-4">
-        <h3>Catastro de {$exploreCode} {data.task.municipality.name} ({data.task.muncode}) · #{data.task.id}</h3>
+        <h3>Catastro de {data.task.municipality.name} ({data.task.muncode}) · #{data.task.id}</h3>
       </div>
       <Tabs bind:tab>
         <TabItem key={'edicion'}>Edición</TabItem>
@@ -139,7 +139,7 @@
             />
           {/if}
           {#if fixmes && data.task.bu_status !== 'VALIDATED'}
-            <FixmeList {fixmes} {map} bind:selected={selectedFixme}/>
+            <FixmeList {fixmes} {map} bind:selected={selectedFixme} lock={data.task.lock}/>
           {/if}
         {/if}
       </div>
