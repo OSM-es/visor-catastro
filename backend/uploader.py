@@ -110,7 +110,6 @@ def province(prov_code):
     if prov is None:
         prov = Province(provcode=prov_code, name=name)
     prov.geom = geom
-    prov.centre = from_shape(shape['shape'].point_on_surface())
     db.session.add(prov)
     db.session.commit()
     return exit(f"Registrada geometría de {prov_code} {name}")

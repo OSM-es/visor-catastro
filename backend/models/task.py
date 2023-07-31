@@ -3,7 +3,7 @@ from enum import Enum
 from pytz import UTC
 
 from geoalchemy2 import Geometry, Index
-from geoalchemy2.shape import from_shape, to_shape
+from geoalchemy2.shape import from_shape
 from sqlalchemy import and_, func
 
 from models import db, History, Municipality, TaskHistory, TaskLock, OsmUser
@@ -113,7 +113,6 @@ class Task(db.Model):
     update_id = db.Column(db.Integer, db.ForeignKey('task_update.id'), nullable=True)
     update = db.relationship(Update, back_populates='task', uselist=False)
     geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
-    centre = db.Column(Geometry("POINT", srid=4326))
     __table_args__ = (Index('codes_index', 'localid', 'muncode'), )
 
     @staticmethod
@@ -148,7 +147,6 @@ class Task(db.Model):
         if task.type == 'R&uacute;stica': task.type = 'Rústica'
         shape = feature['geometry']
         task.geom = from_shape(shape)
-        task.centre = from_shape(shape.point_on_surface())
         return task
 
     @staticmethod
@@ -213,7 +211,6 @@ class Task(db.Model):
             u.task.zone = u.zone
             u.task.type = u.type
             u.task.geom = u.geom
-            u.task.centre = from_shape(to_shape(u.geom).point_on_surface())
             u.task.set_need_update()
             u.task.update = None
         Task.Update.query.filter(Task.Update.muncode == mun_code).delete()

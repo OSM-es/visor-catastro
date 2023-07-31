@@ -3,7 +3,6 @@ import gzip
 from flask import abort, request
 from flask_restful import Resource
 from shapely import bounds, buffer, GeometryCollection
-from geoalchemy2.shape import to_shape
 import geopandas
 import osm2geojson
 
@@ -29,12 +28,10 @@ class Tasks(Resource):
         df = geopandas.GeoDataFrame.from_postgis(sql=sql, con=models.db.get_engine())
         get_status = lambda v: models.Task.Status(v).name
         get_diff = lambda v: models.Task.Difficulty(v).name
-        get_centre = lambda v: (to_shape(v).y, to_shape(v).x)
         df['difficulty'] = df['difficulty'].map(get_diff)
         df['status'] = df[['ad_status', 'bu_status']].max(axis=1).map(get_status)
         df['ad_status'] = df['ad_status'].map(get_status)
         df['bu_status'] = df['bu_status'].map(get_status)
-        df['centre'] = df['centre'].map(get_centre)
         q = Municipality.query.filter(Municipality.muncode.in_(df.muncode.unique()))
         municip = {m.muncode: m.name for m in q.all()}
         df['name'] = df['muncode'].map(lambda v: municip[v])
