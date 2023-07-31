@@ -13,7 +13,6 @@ export const actions = {
     const formData = await request.formData()
     const data = Object.fromEntries(formData)
 
-    console.info(data)
     const result = await locals.api.put(
       `task/${params.id}`, data, locals.user.token
     )
