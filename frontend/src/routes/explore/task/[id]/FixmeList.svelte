@@ -5,6 +5,8 @@
   export let map
   export let selected
 
+  $: document.getElementById(`fixme_${selected}`)?.scrollIntoView({block: 'center'})
+
   function centerMap(event, fixme) {
     const point = fixme.geometry.coordinates
     map.getMap().panTo([point[1], point[0]])
@@ -16,7 +18,10 @@
 <h4>Anotaciones:</h4>
 <ol class="mt-0">
   {#each fixmes?.features as fixme}
-    <li class={'my-0 ' + (fixme.properties.id === selected ? 'bg-neutral-200 dark:bg-neutral:800' : '')}>
+    <li 
+      id={`fixme_${fixme.properties.id}`}
+      class={'my-0 ' + (fixme.properties.id === selected ? 'bg-neutral-200 dark:bg-neutral:800' : '')}
+    >
       <a
         href="{fixme.properties.id}"
         on:click={(event) => centerMap(event, fixme)}

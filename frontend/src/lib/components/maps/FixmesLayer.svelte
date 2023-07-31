@@ -47,15 +47,16 @@
 
   $: options = { pointToLayer: (geoJsonPoint, latlng) => createFixme(geoJsonPoint, latlng, selected) }
 
-  function createFixme(geoJsonPoint, latlng, selected) {
+  function createFixme(geoJsonPoint, latlng, _selected) {
     let marker = L.marker(
       latlng,
       {
-        icon: fixmeIcon(geoJsonPoint.properties.id === selected),
+        icon: fixmeIcon(geoJsonPoint.properties.id === _selected),
         riseOnHover: true,
-        zIndexOffset: geoJsonPoint.properties.id === selected ? 100 : 0
+        zIndexOffset: geoJsonPoint.properties.id === _selected ? 100 : 0
       }
     )
+    marker.on('click', (event) => selected = event.target.feature.properties.id)
     const text = `${FIXME_MSG[geoJsonPoint.properties.type]} ${geoJsonPoint.properties?.fixme || ''}`
     return marker.bindTooltip(text)
   }
