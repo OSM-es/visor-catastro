@@ -17,7 +17,7 @@ def getStreet(tags):
 
 
 class Streets(Resource):
-    def get(self, id, cat_name):
+    def get(self, id, cat_name=None):
         task = models.Task.query.get(id)
         if not task: abort(404)
         mun_code = task.muncode
@@ -31,6 +31,7 @@ class Streets(Resource):
             for f in geojson['features']
             if f['properties'].get('tags', {}).get('addr:cat_name', '')
         }
+        if not cat_name and task_streets: cat_name = list(task_streets)[0]
 
         bounds = to_shape(municipality.geom).bounds
         streets = []
@@ -42,13 +43,14 @@ class Streets(Resource):
         ).all():
             streets.append(st.asdict())
             streets[-1]['in_task'] = st.cat_name in task_streets
+            if not cat_name: cat_name = st.cat_name
             if cat_name == st.cat_name:
                 cat_name = st.cat_name
                 street = st
         if not street: abort(404)
 
         user = get_current_user()
-        if not street.is_locked() and user:
+        if street and not street.is_locked() and user:
             street.set_lock(user)
 
         fn = models.Task.get_path(mun_code, 'address.osm')
@@ -61,6 +63,7 @@ class Streets(Resource):
         ]
         shape = shapely.buffer(shapely.from_geojson(json.dumps(addresses)), 0.001)
         xml = getOsmStreets(shape.bounds)
+        osm_streets = None
         if xml:
             osm_streets = osm2geojson.xml2geojson(xml)
 

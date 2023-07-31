@@ -58,7 +58,6 @@
   }
 
   afterNavigate(({from, to}) => {
-    console.info(from?.params?.code)
     if (to.route.id === '/explore/task/[id]') {
       viewImage = to.url.searchParams.get('ref')
       map.getMap().fitBounds(getConsLayer().getBounds())

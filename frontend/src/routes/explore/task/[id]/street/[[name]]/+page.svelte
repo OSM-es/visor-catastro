@@ -74,7 +74,7 @@
 
   beforeNavigate(() => {
     if (data.user) {
-      const url = `/papi/street/${$street.mun_code}/${$street.cat_name}/lock`
+      const url = `/papi/street/${$street?.mun_code}/${$street.cat_name}/lock`
       fetch(url, {method: 'DELETE'})
     }
   })

@@ -27,7 +27,7 @@
   
   $: target = !task.lock || (title === 'buildings' ? task?.lock?.buildings : task?.lock?.addresses)
   $: isMapper = user && [mapper?.osm_id, mapper?.import_id].includes(user.id)
-  $: needMapping = ['READY', 'INVALIDATED', 'NEED_MAPPING'].includes(status)
+  $: needMapping = ['READY', 'INVALIDATED', 'NEED_UPDATE'].includes(status)
 
   function updateStatus() {
     return async ({ update }) => {
@@ -105,7 +105,7 @@
       {#if status === 'INVALIDATED'}
         <p>Tarea marcada como que <span class="text-danger-500">necesita más mapeo</span>.</p>
       {:else if status === 'NEED_UPDATE'}
-        <p>Tarea importada que <span class="text-danger-500">necesita actualizar</span>.</p>
+        <p>Tarea importada que necesita <span class="text-danger-500">actualizar</span>.</p>
       {/if}
       {#if task.streets?.length}
         {#if streetsToValidate.length}
@@ -124,7 +124,7 @@
         {:else}
           <p>
             Revisión de 
-            <a href={`/explore/${task.muncode}/street`}>nombres de calle</a>
+            <a href={`/explore/task/${task.id}/street`}>nombres de calle</a>
             <span class="text-success-500">completa</span>.
           </p>
         {/if}

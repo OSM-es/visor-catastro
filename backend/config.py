@@ -52,7 +52,6 @@ class Config:
     OSM3S_URLS = [
         'https://osm3s.cartobase.es/api/interpreter',
         'http://overpass-api.de/api/interpreter',
-        'http://overpass.osm.rambler.ru/cgi/interpreter',
     ]
 
     # Catastro
