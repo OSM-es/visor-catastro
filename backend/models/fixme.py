@@ -55,11 +55,11 @@ class Fixme(db.Model):
 
     def __str__(self):
         shape = to_shape(self.geom)
-        return f"{shape} {self.text}"
+        return f"{shape} {self.type} {self.text}"
 
     def to_feature(self):
         shape = to_shape(self.geom)
-        data = {'type': Fixme.Type(self.type).name, 'fixme': self.text}
+        data = {'id': self.id,'type': Fixme.Type(self.type).name, 'fixme': self.text}
         return osm2geojson.shape_to_feature(shape, data)
 
     def is_update(self):

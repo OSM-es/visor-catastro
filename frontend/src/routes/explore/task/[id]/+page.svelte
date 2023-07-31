@@ -1,11 +1,9 @@
 <script>
-  import { Avatar, Badge, Button, Indicator, Listgroup, Tooltip } from 'flowbite-svelte'
-  import { Clock } from 'svelte-heros-v2'
+  import { Button, Indicator } from 'flowbite-svelte'
   import { afterNavigate } from '$app/navigation'
   import { goto } from '$app/navigation'
-  import RelativeTime from 'svelte-relative-time'
 
-  import { FIXME_MSG, TASK_TYPE_VALUES, TASK_DIFFICULTY_VALUES, TASK_ACTION_VALUES, TASK_ACTION_TEXT } from '$lib/config'
+  import { TASK_TYPE_VALUES, TASK_DIFFICULTY_VALUES } from '$lib/config'
   import { exploreCode } from '$lib/stores.js'
   import FotosFachada from '$lib/components/FotosFachada.svelte'
   import Map from '$lib/components/maps/Map.svelte'
@@ -16,6 +14,8 @@
   import Tabs from '$lib/components/tabs/Tabs.svelte'
   import TabItem from '$lib/components/tabs/TabItem.svelte'
   import TaskActions from './TaskActions.svelte'
+  import FixmeList from './FixmeList.svelte'
+  import HistoryList from './HistoryList.svelte'
   
   export let data
 
@@ -23,6 +23,7 @@
 
   let map, center, zoom, initialCenter, initialZoom, getConsLayer, getUrl
   let fixmes = data.task?.fixmes
+  let selectedFixme = null
   let scrollImage, viewImage, imageCount
   let tab = 'edicion'
   let taskColor = 'text-success-500'
@@ -31,12 +32,6 @@
 
   const rtf = new Intl.RelativeTimeFormat('es', {numeric: 'auto'})
   const indicatorClass = 'font-bold text-white dark:text-gray-800 mb-0.5 '
-
-  function centerMap(event) {
-    const point = event.target.attributes.href.value.split(',')
-    map.getMap().panTo([point[1], point[0]])
-    event.preventDefault()
-  }
 
   function showBuilding({ detail }) {
     const ref = detail
@@ -78,7 +73,7 @@
         bind:getConsLayer
         bind:imageRef={scrollImage}
       />
-      {#if fixmes}<FixmesLayer data={fixmes}/>{/if}
+      {#if fixmes}<FixmesLayer data={fixmes} bind:selected={selectedFixme}/>{/if}
     </Map>
   </div>
   <div class="md:max-w-md w-full flex-grow overflow-scroll px-4 border-l-2 border-gray-200 dark:border-gray-600">
@@ -144,21 +139,7 @@
             />
           {/if}
           {#if fixmes && data.task.bu_status !== 'VALIDATED'}
-            <h4>Anotaciones:</h4>
-            <ol class="mt-0">
-              {#each fixmes?.features as fixme}
-                <li class="my-0">
-                  <a
-                    href="{fixme.geometry.coordinates}"
-                    on:click={centerMap}
-                    data-sveltekit-preload-data="off"
-                  >
-                    {FIXME_MSG[fixme.properties.type]}
-                    {fixme.properties.fixme || ''}
-                  </a>
-                </li>
-              {/each}
-            </ol>
+            <FixmeList {fixmes} {map} bind:selected={selectedFixme}/>
           {/if}
         {/if}
       </div>
@@ -173,31 +154,7 @@
         />
       </div>
       <div class:hidden={tab !== 'historial'}>
-        {#if data.task.history?.length}
-        <Listgroup items={data.task.history} let:item>
-          <div class="flex items-center space-x-4">
-            <Avatar src={item.avatar} data-name={item.user}/>
-            <p>
-              {TASK_ACTION_VALUES[item.action]}
-              {TASK_ACTION_TEXT[item.text]}
-              {#if item.addresses != item.buildings}
-                {item.buildings ? 'edificios' : 'direcciones'}
-              {/if}
-              <Badge color="black" border>
-                <Clock size=14 variation="solid" class="mr-1"/>
-                <RelativeTime date={new Date(item.date)} locale={'es-ES'}/>
-              </Badge>
-            </p>
-          </div>
-        </Listgroup>
-        <Tooltip triggeredBy="[data-name]" on:show={e => name = e.target.dataset.name}>
-          {name}
-        </Tooltip>
-        {:else}
-          <div class="prose dark:prose-invert pt-4">
-            <p>No ha habido actividad.</p>
-          </div>
-        {/if}
+        <HistoryList items={data.task.history}/>
       </div>
     </div>
   </div>

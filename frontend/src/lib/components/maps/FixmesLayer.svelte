@@ -1,10 +1,15 @@
 <script>
+  import {getContext} from 'svelte';
+  import L from 'leaflet'
   import { GeoJSON } from 'svelte-leafletjs'
 
   import { FIXME_MSG } from '$lib/config'
 
   export let data
+  export let selected = null
 
+  
+  const {getMap} = getContext(L)
 
   const fixmeTextStyle = `
     position: absolute;
@@ -15,31 +20,42 @@
     font-weight: bold;
   `
 
-  const fixmeIconStyle = `
-    width: 30px;
-    height: 30px;
-    border-radius: 50% 50% 50% 0;
-    background: red;
-    position: absolute;
-    transform: rotate(-45deg);
-    left: -15px;
-    top: -35px;
-    border: 2px solid #FFFFFF;
-  `
+  function fixmeIconStyle(selected) {
+    return `
+      width: 30px;
+      height: 30px;
+      border-radius: 50% 50% 50% 0;
+      background: ${selected ? 'red' : 'darkred'};
+      position: absolute;
+      transform: rotate(-45deg);
+      left: -15px;
+      top: -35px;
+      border: 2px solid #FFFFFF;
+    `
+  }
 
-  const fixmeIcon = L.divIcon({
-    className: "fixme",
-    iconAnchor: [0, 0],
-    labelAnchor: [-6, 0],
-    popupAnchor: [0, -36],
-    tooltipAnchor: [15, -20],
-    html: `<span style="${fixmeIconStyle}"></span><span style="${fixmeTextStyle}">!</span>`
-  })
+  function fixmeIcon(selected) {
+    return L.divIcon({
+      className: "fixme",
+      iconAnchor: [0, 0],
+      labelAnchor: [-6, 0],
+      popupAnchor: [0, -36],
+      tooltipAnchor: [15, -20],
+      html: `<span style="${fixmeIconStyle(selected)}"></span><span style="${fixmeTextStyle}">!</span>`
+    })
+  }
 
-  const options = { pointToLayer: createFixme }
+  $: options = { pointToLayer: (geoJsonPoint, latlng) => createFixme(geoJsonPoint, latlng, selected) }
 
-  function createFixme(geoJsonPoint, latlng) {
-    let marker = L.marker(latlng, { icon: fixmeIcon })
+  function createFixme(geoJsonPoint, latlng, selected) {
+    let marker = L.marker(
+      latlng,
+      {
+        icon: fixmeIcon(geoJsonPoint.properties.id === selected),
+        riseOnHover: true,
+        zIndexOffset: geoJsonPoint.properties.id === selected ? 100 : 0
+      }
+    )
     const text = `${FIXME_MSG[geoJsonPoint.properties.type]} ${geoJsonPoint.properties?.fixme || ''}`
     return marker.bindTooltip(text)
   }
