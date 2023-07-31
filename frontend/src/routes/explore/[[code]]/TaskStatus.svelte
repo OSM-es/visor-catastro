@@ -45,7 +45,7 @@
     .legend-item span.validated {
       background-color: var(--validated);
     }
-    .legend-item span.update {
+    .legend-item span.need_update {
       background-color: var(--update);
     }
     .legend-item span.stripe {

@@ -45,6 +45,21 @@ export const TASK_ACTION_TEXT = {
   INVALIDATED: 'se necesita más mapeo',
 }
 
+export const FIXME_MSG = {
+  CA2O_PART_BIGGER: 'Parte mayor que edificio',
+  CA2O_SMALL_AREA: 'Área demasiado pequeña',
+  CA2O_BIG_AREA: 'Área demasiado grande',
+  CA2O_MISSING_PARTS: 'Partes no cubren edificio',
+  CA2O_GEOS: 'Error de validación GEOS:',
+  UPDATE_DEL: 'Eliminar',
+  UPDATE_ADD: 'Añadir',
+  UPDATE_TAGS: 'Han cambiado las etiquetas',
+  UPDATE_GEOM: 'Ha cambiado la geometría',
+  UPDATE_FULL: 'Cambian tanto etiquetas como geometría',
+  UPDATE_ORPHAN: 'Tarea eliminada',
+  UPDATE_DEL_CHECK: 'Comprobar si hay que eliminar',
+}
+
 export const AREA_BORDER = '#3388ff'
 export const TASK_COLORS = {
   READY: '#FFFFFF66',

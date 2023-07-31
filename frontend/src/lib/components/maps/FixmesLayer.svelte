@@ -1,6 +1,8 @@
 <script>
   import { GeoJSON } from 'svelte-leafletjs'
 
+  import { FIXME_MSG } from '$lib/config'
+
   export let data
 
 
@@ -38,7 +40,8 @@
 
   function createFixme(geoJsonPoint, latlng) {
     let marker = L.marker(latlng, { icon: fixmeIcon })
-    return marker.bindTooltip(geoJsonPoint.properties?.fixme)
+    const text = `${FIXME_MSG[geoJsonPoint.properties.type]} ${geoJsonPoint.properties?.fixme || ''}`
+    return marker.bindTooltip(text)
   }
 </script>
 

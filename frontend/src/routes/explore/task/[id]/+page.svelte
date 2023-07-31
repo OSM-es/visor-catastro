@@ -5,7 +5,7 @@
   import { goto } from '$app/navigation'
   import RelativeTime from 'svelte-relative-time'
 
-  import { TASK_TYPE_VALUES, TASK_DIFFICULTY_VALUES, TASK_ACTION_VALUES, TASK_ACTION_TEXT } from '$lib/config'
+  import { FIXME_MSG, TASK_TYPE_VALUES, TASK_DIFFICULTY_VALUES, TASK_ACTION_VALUES, TASK_ACTION_TEXT } from '$lib/config'
   import { exploreCode } from '$lib/stores.js'
   import FotosFachada from '$lib/components/FotosFachada.svelte'
   import Map from '$lib/components/maps/Map.svelte'
@@ -154,8 +154,8 @@
                     on:click={centerMap}
                     data-sveltekit-preload-data="off"
                   >
-                    {fixme.properties.type}
-                    {fixme.properties.fixme}
+                    {FIXME_MSG[fixme.properties.type]}
+                    {fixme.properties.fixme || ''}
                   </a>
                 </li>
               {/each}
