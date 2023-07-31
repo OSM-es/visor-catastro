@@ -223,7 +223,7 @@ def load_ca2o_fixmes(task, data, src_date):
         geom = from_shape(f['shape'].point_on_surface())
         msg = f['properties']['tags']['fixme']
         type = Fixme.Type.from_ca2o(msg)
-        text = msg.split(':')[2].strip() if type == Fixme.Type.CA2O_GEOS else None
+        text = msg.split(':')[1].strip() if type == Fixme.Type.CA2O_GEOS else None
         fixme = Fixme(geom=geom, type=type.value, text=text, src_date=src_date)
         task.fixmes.append(fixme)
 
