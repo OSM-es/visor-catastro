@@ -17,7 +17,7 @@
 
   export let data
 
-  let map, geoJsonData, hoveredFeature, previewFeature, getUrl, getGeoJSON
+  let map, geoJsonData, activeItem, getUrl, getGeoJSON
   let muncode, type, difficulty, ad_status, bu_status
   let loading = false
   let delayed = false
@@ -90,14 +90,6 @@
     goto(`${$page.url.pathname}?map=${getUrl()}`, { replaceState: true })
   }
 
-  function updateStyle(feature, layer) {
-    if (layer) {
-      layer.setStyle(setStyle(feature))
-    } else {
-      geoJsonData = geoJsonData
-    }
-  }
-
   function handleClick(event, feature) {
     const t = target(zoom)
     if (event.originalEvent.detail === 1) {
@@ -114,13 +106,15 @@
 	}
 
   function handleMouseover(feature, layer) {
+    if (activeItem && !layer) {
+      activeItem = null
+    } else if (!activeItem && layer) {
+      activeItem = feature
+    }
     layer?.bringToFront()
-    hoveredFeature = feature
-    previewFeature = layer ? feature : null
-    updateStyle(feature, layer)
   }
 
-  function setStyle(feature) {
+  function setStyle(feature, activeItem) {
     let style
 
     if (!pattern) {
@@ -150,22 +144,20 @@
       style = {
         fillPattern: feature.properties.lock_id ? pattern : stripes,
         fillOpacity: 1,
-        dashArray: null,
-        weight: 1,
-        color: AREA_BORDER, 
       }
     } else {
       style = { 
         fillPattern: feature?.properties?.update_id ? pattern : null,
         fillColor: 'blue',
         fillOpacity: feature?.properties?.update_id ? 0.6 : 0.2,
-        weight: 2,
       }
     }
-    if (feature.properties.id === hoveredFeature?.properties?.id) {
-      style.dashArray = '5,5'
+    if (feature.properties.id === activeItem?.properties?.id) {
       style.weight = 2
       style.color = 'black'
+    } else {
+      style.weight = 1
+      style.color = AREA_BORDER 
     }
     return style
   }
@@ -204,12 +196,12 @@
     return info
   }
 
-  const geoJsonOptions = {
-    style: setStyle,
+  $: geoJsonOptions = {
+    style: (feature) => setStyle(feature, activeItem),
     onEachFeature: function(feature, layer) {
       layer.bindTooltip(featInfo(feature.properties))
       layer.on('click', (event) => handleClick(event, feature))
-      layer.on('dblclick', () => (clearTimeout(timer)))
+      layer.on('dblclick', () => clearTimeout(timer))
       layer.on('mouseover', () => handleMouseover(feature, layer))
       layer.on('mouseout', () => handleMouseover(null, null))
     },
@@ -254,7 +246,7 @@
             bind:difficulty
             bind:ad_status
             bind:bu_status
-            activeItem={hoveredFeature?.id}
+            bind:activeItem
             on:click={(event) => handleClick(event.detail.feature)}
             on:mouseover={(event) => handleMouseover(event.detail.feature)}
             on:mouseout={() => handleMouseover()}
@@ -300,7 +292,7 @@
           <ProjList
             data={geoJsonData?.features}
             target={target(zoom)}
-            activeItem={hoveredFeature?.id}
+            bind:activeItem
             {map}
             on:mouseover={(event) => handleMouseover(event.detail.feature)}
             on:mouseout={() => handleMouseover()}

@@ -1,5 +1,4 @@
 <script>
-	import { createEventDispatcher } from 'svelte'
   import { TableBody, TableBodyCell, TableHead } from 'flowbite-svelte'
   import { goto } from '$app/navigation'
   import SortTable from '$lib/components/tables/SortTable.svelte'
@@ -15,7 +14,6 @@
 
   let items = []
 
-  const dispatch = createEventDispatcher()
   const tdClass = 'px-2 py-0.5 whitespace-nowrap'
   const trClass = 'hover:bg-amber-400 cursor-pointer border-b last:border-b-0 odd:bg-white even:bg-gray-50 odd:dark:bg-gray-800 even:dark:bg-gray-700'
   const fmt = new Intl.NumberFormat($locale, { maximumFractionDigits: 2, style: "percent" })
@@ -62,9 +60,9 @@
         <!-- svelte-ignore a11y-mouse-events-have-key-events -->
         <tr
           on:click={() => goto('/explore/' + code(item, target))}
-          on:mouseover={() => dispatch('mouseover', { feature: data.find(t => code(t.properties, target) === item.muncode) })}
-          on:mouseout={() => dispatch('mouseout')}
-          class={trClass + (String(i) === active ? ' !bg-amber-400' : '')}
+          on:mouseover={() => activeItem = data.find(t => code(t.properties, target) === item.muncode)}
+          on:mouseout={() => activeItem = null}
+          class={trClass + (String(i) === active?.id ? ' !bg-amber-400' : '')}
         >
           <TableBodyCell {tdClass}>{code(item, target)}</TableBodyCell>
           <TableBodyCell {tdClass}>{item.name}</TableBodyCell>

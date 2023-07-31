@@ -1,5 +1,4 @@
 <script>
-	import { createEventDispatcher } from 'svelte'
   import { TableBody, TableBodyCell, TableHead } from 'flowbite-svelte'
 
   import { goto } from '$app/navigation'
@@ -26,7 +25,6 @@
     return i
   }, {}) || []
   
-  const dispatch = createEventDispatcher()
   const tdClass = 'px-2 py-0.5 whitespace-nowrap'
   const trClass = 'hover:bg-amber-400 cursor-pointer border-b last:border-b-0 odd:bg-white even:bg-gray-50 odd:dark:bg-gray-800 even:dark:bg-gray-700'
 
@@ -85,9 +83,9 @@
       <!-- svelte-ignore a11y-mouse-events-have-key-events -->
       <tr
         on:click={() => goto('/explore/task/' + task.id)}
-        on:mouseover={() => dispatch('mouseover', { feature: tasks.find(t => t.properties.id === task.id) })}
-        on:mouseout={() => dispatch('mouseout')}
-        class={trClass + (String(i) === active ? ' !bg-amber-400' : '')}
+        on:mouseover={() => activeItem = tasks.find(t => t.properties.id === task.id)}
+        on:mouseout={() => activeItem = null}
+        class={trClass + (String(i) === active?.id ? ' !bg-amber-400' : '')}
       >
         {#if munCount > 1 || muncode}
           <TableBodyCell {tdClass}>{task.muncode}</TableBodyCell>
