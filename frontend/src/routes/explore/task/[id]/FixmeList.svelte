@@ -1,4 +1,5 @@
 <script>
+	import { enhance } from '$app/forms'
   import { Checkbox } from 'flowbite-svelte'
 
   import { FIXME_MSG } from '$lib/config'
@@ -7,6 +8,8 @@
   export let map
   export let selected
   export let lock
+
+  let submit = []
 
   $: scrollIntoViewIfVisible(document.getElementById(`fixme_${selected}`))
 
@@ -25,19 +28,33 @@
       }
     }
   }
+
+  function updateStatus() {
+    return ({ update }) => {
+      update({ reset: false })
+    }
+  }
 </script>
 
 <h4>Anotaciones:</h4>
 <ol class="mt-0">
-  {#each fixmes?.features as fixme}
+  {#each fixmes?.features as fixme, i}
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <li 
       id={`fixme_${fixme.properties.id}`}
       class={'my-0 cursor-pointer ' + (fixme.properties.id === selected ? 'bg-neutral-200 dark:bg-neutral:800' : '')}
       on:click={(event) => centerMap(event, fixme)}
     >
-      <form class="inline mr-1">
-        <Checkbox disabled={!lock}/>
+      <form use:enhance={updateStatus} method="POST" action="?/fixme" class="inline mr-1">
+        <input name="id" value={fixme.properties.id} hidden/>
+        <Checkbox
+          name="validated"
+          disabled={!lock}
+          checked={fixme.properties.validated}
+          class={lock ? '' : 'text-neutral-500'}
+          on:change={() => submit[i].click()}
+        />
+        <button bind:this={submit[i]} type="submit" hidden></button>
       </form>
       {FIXME_MSG[fixme.properties.type]}
       {fixme.properties.fixme || ''}

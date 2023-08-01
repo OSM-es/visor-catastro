@@ -43,7 +43,7 @@
 </script>
 
 {#if target}
-  <form use:enhance={updateStatus} method="POST">
+  <form use:enhance={updateStatus} method="POST" action="?/task">
     {#if task.bu_status !== task.ad_status}
       <h4>{title === 'buildings' ? 'Edificios' : 'Direcciones'}</h4>
     {/if}

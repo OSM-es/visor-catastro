@@ -49,6 +49,7 @@ class Fixme(db.Model):
     type = db.Column(db.Integer)
     src_date = db.Column(db.Date, nullable=False)
     text = db.Column(db.String)
+    validated = db.Column(db.Boolean)
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=True)
     task = db.relationship('Task', back_populates='fixmes')
     geom = db.Column(Geometry("POINT", srid=4326))
@@ -59,7 +60,12 @@ class Fixme(db.Model):
 
     def to_feature(self):
         shape = to_shape(self.geom)
-        data = {'id': self.id,'type': Fixme.Type(self.type).name, 'fixme': self.text}
+        data = {
+            'id': self.id,
+            'type': Fixme.Type(self.type).name,
+            'fixme': self.text,
+            'validated': self.validated,
+        }
         return osm2geojson.shape_to_feature(shape, data)
 
     def is_update(self):

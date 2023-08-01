@@ -61,9 +61,6 @@ Tasking manager:
     ☐ Detectar proyectos existentes en TM, impedir edición, redirigir a ellos.
     ☐ Contemplar importar proyecto
 
-Fixmes:
-    ☐ Añadir casilla de verificación para que el usuario pueda llevar la cuenta de los revisados.
-
 Página acerca de:
     ☐ Convertir la página de aterrizaje actual / en /about.
       Redirigir usuarios no registrados a ella.
