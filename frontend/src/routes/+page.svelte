@@ -1,6 +1,9 @@
 <script>
-  import { Button, ButtonGroup } from 'flowbite-svelte';
+  import { Button } from 'flowbite-svelte'
   import banner from '$lib/images/visor-catastro.svg'
+  import StatsSection from './StatsSection.svelte'
+
+  export let data
 </script>
   
 <div class="flex flex-col flex-grow max-w-5xl lg:px-20 px-4 mx-auto mt-8">
@@ -16,6 +19,11 @@
       Comenzar a mapear
     </Button>
   </div>
+  {#await data.streamed.stats}
+    <span></span>
+  {:then value}
+    <StatsSection stats={value}/>
+  {/await}
   <div class="bg-gray-100 dark:bg-gray-800 p-4">
     <article class="prose max-w-none lg:prose-xl dark:prose-invert mx-auto">
       <p>

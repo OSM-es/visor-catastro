@@ -26,7 +26,7 @@
   }, {}) || []
   
   const tdClass = 'px-2 py-0.5 whitespace-nowrap'
-  const trClass = 'hover:bg-amber-400 cursor-pointer border-b last:border-b-0 odd:bg-white even:bg-gray-50 odd:dark:bg-gray-800 even:dark:bg-gray-700'
+  const trClass = 'cursor-pointer border-b last:border-b-0 odd:bg-white even:bg-gray-50 odd:dark:bg-gray-800 even:dark:bg-gray-700'
 
   function diffColor(difficulty) {
     if (difficulty === 'EASY') return 'text-success-500'

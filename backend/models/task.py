@@ -221,6 +221,36 @@ class Task(db.Model):
     def get_path(mun_code, filename):
         return Municipality.get_path(mun_code) + '/tasks/' + filename
 
+    @staticmethod
+    def count_buildings(muncode=None):
+        q = Task.query.with_entities(
+            func.sum(Task.buildings)
+        ).filter(
+            Task.bu_status != 0
+        )
+        if muncode: q = q.filter_by(muncode = muncode)
+        return q.scalar() or 0
+
+    @staticmethod
+    def count_addresses(muncode=None):
+        q = Task.query.with_entities(
+            func.sum(Task.addresses)
+        ).filter(
+            Task.ad_status != 0
+        )
+        if muncode: q = q.filter_by(muncode = muncode)
+        return q.scalar() or 0
+
+    @staticmethod
+    def count_mappers(muncode=None):
+        q = Task.query.join(
+            TaskLock
+        ).with_entities(
+            func.count(TaskLock.user_id.distinct())
+        )
+        if muncode: q = q.filter(Task.muncode == muncode)
+        return q.scalar() or 0
+
     def path(self):
         return Task.get_path(self.muncode, self.localId + '.osm.gz')
 

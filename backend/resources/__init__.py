@@ -4,6 +4,7 @@ from resources.fixme import Fixme
 from resources.municipalities import Municipalities
 from resources.provinces import Provinces
 from resources.user import User
+from resources.stats import Stats
 from resources.streets import Streets, Street, StreetLock
 from resources.tasks import Tasks, Task
 
