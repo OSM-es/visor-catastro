@@ -101,6 +101,8 @@ class Task(db.Model):
     buildings = db.Column(db.Integer)
     # Número de direcciones. Algunas están en un nodo (entrada), otras en un edificio.
     addresses = db.Column(db.Integer)
+    # Número de piscinas
+    pools = db.Column(db.Integer)
     difficulty = db.Column(db.Integer)  # Ver Difficulty
     # Es usado por la consulta get del recurso tasks para saber el estado sin hacer join
     lock_id = db.Column(db.Integer, db.ForeignKey('task_lock.id'), nullable=True)

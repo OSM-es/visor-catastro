@@ -160,16 +160,18 @@ def merge_tasks(zoning):
 
 def calc_difficulty(task, data):
     """Obtiene los datos necesarios para calcular la dificultad."""
-    (buildings, parts, addresses) = (0, 0, 0)
+    (buildings, parts, addresses, pools) = (0, 0, 0, 0)
     for feat in data:
         tags = feat['properties'].get('tags', {})
         buildings += 1 if 'building' in tags else 0
         parts += 1 if 'building:part' in tags else 0
         addresses += 1 if 'addr:cat_name' in tags else 0
+        pools += 1 if tags.get('leisure') == 'swimming_pool' else 0
     difficulty = Task.Difficulty.get_from_complexity(buildings, parts, addresses)
     task.buildings = buildings
     task.parts = parts
     task.addresses = addresses
+    task.pools = pools
     task.difficulty = difficulty.value
 
 def load_tasks(mun_code, tasks, src_date):
