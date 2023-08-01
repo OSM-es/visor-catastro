@@ -30,9 +30,9 @@
   $: needMapping = ['READY', 'INVALIDATED', 'NEED_UPDATE'].includes(status)
 
   function updateStatus() {
-    return async ({ update }) => {
+    return async ({ result, update }) => {
       await update({ reset: false })
-      if (!task?.lock) exit()
+      if (result.type === 'success' && !task?.lock) exit()
     }
   }
 

@@ -16,7 +16,9 @@
         </span>
       </h1>
       <p>
-        {#if $page.status === 404}
+        {#if $page.status === 401}
+          Operación no autorizada.
+        {:else if $page.status === 404}
           No se encontró la página que estás buscando.
         {:else}
           Se ha producido un problema.

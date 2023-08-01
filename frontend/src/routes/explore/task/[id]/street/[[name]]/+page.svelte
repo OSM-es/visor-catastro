@@ -119,9 +119,9 @@
   }
 
   function dontReset() {
-    return async ({ update }) => {
+    return async ({ result, update }) => {
       await update({ reset: false })
-      invalidateAll()
+      if (result.type === 'success') invalidateAll()
     }
   }
 
