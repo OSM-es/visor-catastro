@@ -19,19 +19,12 @@
 
   let map, geoJsonData, activeItem, getUrl, getGeoJSON
   let muncode, type, difficulty, ad_status, bu_status
-  let loading = false
-  let delayed = false
   let center = data.center
   let zoom = data.zoom
   let project
   let timer
   let pattern
-
-  $: code = $page?.params?.code
-
-  const geojsonUrl = (target, code, bounds) => {
-    return `${data.api}/${target}?${code ? 'code=' + code : ''}&bounds=${bounds}`
-  }
+  
   const rightBarClass = 'md:max-w-md w-full flex-grow overflow-scroll px-4 '
     + 'border-l-2 border-neutral-300 dark:border-neutral-500 dark:bg-neutral-800'
 
@@ -42,7 +35,17 @@
   )
   const fmt = new Intl.NumberFormat($locale, { maximumFractionDigits: 2, style: "percent" })
 
+  $: code = $page?.params?.code
   $: tasks = filterTasks(geoJsonData, muncode, type, difficulty, ad_status, bu_status)
+  $: promise = fetchData(map, zoom, code)
+  
+  
+  async function fetchData(map, zoom, code) {
+    if (!map) return null
+    const bounds = map?.getMap().getBounds().toBBoxString()
+    geoJsonData = await data.streamed.tasks(target(zoom), code, bounds)
+    return geoJsonData
+  }
 
   function setZoom(zoom) {
     map.getMap().fitBounds(getGeoJSON().getBounds())
@@ -55,7 +58,6 @@
       && to?.route?.id === '/explore/[[code]]'
     ) {
       exploreCode.set(code)
-      await fetchData()
       if (code && code !== from?.params?.code) {
         project = geoJsonData.features[0].properties
         map.getMap().fitBounds(getGeoJSON().getBounds())
@@ -73,17 +75,6 @@
       if (bu_status) data = data.filter(t => t.properties.bu_status === bu_status)
     }
     return { type: 'FeatureCollection', features: data }
-  }
-
-  async function fetchData() {
-    loading = true
-    delayed = false
-    setTimeout(() => (delayed = true), 500)
-    const code = $page.params?.code
-    const bounds = map.getMap().getBounds().toBBoxString()
-    const response = await fetch(geojsonUrl(target(zoom), code, bounds))
-    geoJsonData = await response.json()
-    loading = false
   }
 
   function handleMoveEnd() {
@@ -233,78 +224,80 @@
   </div>
   <div class={rightBarClass}>
     <div class="h-full max-h-0">
-      {#if loading && delayed}
+      {#await promise}
         <p class="mt-4">Cargando datos... 
           <Spinner size={4} />
         </p>
-      {:else if target(zoom) === 'tasks'}
-        {#if geoJsonData?.features?.length > 0}
-          <TaskList
-            tasks={tasks.features}
-            bind:muncode
-            bind:type
-            bind:difficulty
-            bind:ad_status
-            bind:bu_status
-            bind:activeItem
-            on:click={(event) => handleClick(event.detail.feature)}
-            on:mouseover={(event) => handleMouseover(event.detail.feature)}
-            on:mouseout={() => handleMouseover()}
-          />
-        {:else}
-          <p class="w-full bg-neutral-100 dark:bg-neutral-700 p-2 mt-3">
-            No hay tareas aquí
-          </p>
-        {/if}
-      {:else}
-        {#if code}
-        <div class="prose dark:prose-invert pt-3">
-          <h3>{project?.name} ({code})</h3>
-        </div>
-        {/if}
-        {#if code?.length === 5}
-          <div class="space-y-6 pt-4">
-            <div class="!space-y-1">
-              <p class="flex justify-between">
-                <span>Tareas:</span>
-                <span>{project?.task_count}</span>
-              </p>
-              {#if project?.task_count}
-                <p class="flex justify-between">
-                  <span>Mapeado:</span>
-                  <span>{fmt.format(project.mapped_count / project?.task_count)}</span>
-                </p>
-                <Progressbar
-                  progress = {100 * project.mapped_count / project.task_count}
-                  size="h-4"
-                  color="gray"
-                />
-              {/if}
-            </div>
-            <p>
-              Haz <button class="text-primary-600" on:click={() => setZoom(TASK_THR)}>zoom</button>
-              para ver las tareas o
-              <a class="text-primary-600" href="/explore">explora</a>
-              el resto de municipios.
-            </p>
-          </div>
-        {:else}
-          <ProjList
-            data={geoJsonData?.features}
-            target={target(zoom)}
-            bind:activeItem
-            {map}
-            on:mouseover={(event) => handleMouseover(event.detail.feature)}
-            on:mouseout={() => handleMouseover()}
-          />
-          {#if code?.length == 2}
-            <p class="pt-4">
-              <a class="text-primary-600" href="/explore">Explora</a>
-              el resto de provincias.
+      {:then geoJsonData}
+        {#if target(zoom) === 'tasks'}
+          {#if geoJsonData?.features?.length > 0}
+            <TaskList
+              tasks={tasks.features}
+              bind:muncode
+              bind:type
+              bind:difficulty
+              bind:ad_status
+              bind:bu_status
+              bind:activeItem
+              on:click={(event) => handleClick(event.detail.feature)}
+              on:mouseover={(event) => handleMouseover(event.detail.feature)}
+              on:mouseout={() => handleMouseover()}
+            />
+          {:else}
+            <p class="w-full bg-neutral-100 dark:bg-neutral-700 p-2 mt-3">
+              No hay tareas aquí
             </p>
           {/if}
+        {:else}
+          {#if code}
+          <div class="prose dark:prose-invert pt-3">
+            <h3>{project?.name} ({code})</h3>
+          </div>
+          {/if}
+          {#if code?.length === 5}
+            <div class="space-y-6 pt-4">
+              <div class="!space-y-1">
+                <p class="flex justify-between">
+                  <span>Tareas:</span>
+                  <span>{project?.task_count}</span>
+                </p>
+                {#if project?.task_count}
+                  <p class="flex justify-between">
+                    <span>Mapeado:</span>
+                    <span>{fmt.format(project.mapped_count / project?.task_count)}</span>
+                  </p>
+                  <Progressbar
+                    progress = {100 * project.mapped_count / project.task_count}
+                    size="h-4"
+                    color="gray"
+                  />
+                {/if}
+              </div>
+              <p>
+                Haz <button class="text-primary-600" on:click={() => setZoom(TASK_THR)}>zoom</button>
+                para ver las tareas o
+                <a class="text-primary-600" href="/explore">explora</a>
+                el resto de municipios.
+              </p>
+            </div>
+          {:else}
+            <ProjList
+              data={geoJsonData?.features}
+              target={target(zoom)}
+              bind:activeItem
+              {map}
+              on:mouseover={(event) => handleMouseover(event.detail.feature)}
+              on:mouseout={() => handleMouseover()}
+            />
+            {#if code?.length == 2}
+              <p class="pt-4">
+                <a class="text-primary-600" href="/explore">Explora</a>
+                el resto de provincias.
+              </p>
+            {/if}
+          {/if}
         {/if}
-      {/if}
+      {/await}
     </div>
   </div>
 </div>
