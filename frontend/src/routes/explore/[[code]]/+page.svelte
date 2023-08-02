@@ -37,13 +37,16 @@
 
   $: code = $page?.params?.code
   $: tasks = filterTasks(geoJsonData, muncode, type, difficulty, ad_status, bu_status)
-  $: promise = fetchData(map, zoom, code)
+  $: dataPromise = fetchData(map, zoom, code)
   
   
   async function fetchData(map, zoom, code) {
     if (!map) return null
     const bounds = map?.getMap().getBounds().toBBoxString()
     geoJsonData = await data.streamed.tasks(target(zoom), code, bounds)
+    if (code && geoJsonData.features.length) {
+      project = geoJsonData.features[0].properties
+    }
     return geoJsonData
   }
 
@@ -52,15 +55,13 @@
     map.getMap().setZoom(zoom)
   }
 
-  afterNavigate(async ({from, to}) => {
-    if (
-      from?.route?.id === '/explore/[[code]]'
-      && to?.route?.id === '/explore/[[code]]'
-    ) {
+  afterNavigate(async ({to}) => {
+    if (to?.route?.id === '/explore/[[code]]') {
       exploreCode.set(code)
-      if (code && code !== from?.params?.code) {
-        project = geoJsonData.features[0].properties
-        map.getMap().fitBounds(getGeoJSON().getBounds())
+      if (code & !to?.url?.searchParams?.get('map')) {
+        setTimeout(() => {
+          map.getMap().fitBounds(getGeoJSON().getBounds())
+        }, 1000)
       }
     }
   })
@@ -78,7 +79,7 @@
   }
 
   function handleMoveEnd() {
-    goto(`${$page.url.pathname}?map=${getUrl()}`, { replaceState: true })
+    if (geoJsonData) goto(`${$page.url.pathname}?map=${getUrl()}`, { replaceState: true })
   }
 
   function handleClick(event, feature) {
@@ -224,10 +225,8 @@
   </div>
   <div class={rightBarClass}>
     <div class="h-full max-h-0">
-      {#await promise}
-        <p class="mt-4">Cargando datos... 
-          <Spinner size={4} />
-        </p>
+      {#await dataPromise}
+        <p class="mt-4">Cargando datos... <Spinner size={4} /></p>
       {:then geoJsonData}
         {#if target(zoom) === 'tasks'}
           {#if geoJsonData?.features?.length > 0}

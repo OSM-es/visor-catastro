@@ -3,7 +3,7 @@ export async function load({ data, url }) {
 
   const view = url.searchParams.get('map')?.split('/')
   const geojsonUrl = (target, code, bounds) => {
-    return `${data.api}/${target}?${code ? 'code=' + code : ''}&bounds=${bounds}`
+    return `${data.api}/${target}?${code ? 'code=' + code : ''}${bounds ? '&bounds=' + bounds : ''}`
   }
 
   if (view?.length === 3) {
@@ -12,6 +12,9 @@ export async function load({ data, url }) {
   }
 
   const tasks = (target, code, bounds) => {
+    if (target !== 'tasks' && code) {
+      bounds = null
+    }
     return new Promise(async (resolve) => {
       const url = geojsonUrl(target, code, bounds)
       const response = await fetch(url)
