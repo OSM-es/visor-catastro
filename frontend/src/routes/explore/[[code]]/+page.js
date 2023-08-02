@@ -11,7 +11,7 @@ export async function load({ data, url }) {
     center = [view[1], view[2]]
   }
 
-  const tasks = (target, code, bounds) => {
+  const geoJsonData = (target, code, bounds) => {
     if (target !== 'tasks' && code) {
       bounds = null
     }
@@ -22,11 +22,20 @@ export async function load({ data, url }) {
     })
   }
 
+  const stats = (code) => {
+    return new Promise(async (resolve) => {
+      const url = data.api + '/stats/' + code
+      const response = await fetch(url)
+      return resolve(response.json())
+    })
+  }
+
   return {
     center,
     zoom,
     streamed: {
-      tasks
+      geoJsonData,
+      stats,
     }
   }
 }

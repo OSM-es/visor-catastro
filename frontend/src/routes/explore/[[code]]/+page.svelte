@@ -9,11 +9,11 @@
   import TaskList from './TaskList.svelte'
   import TaskStatus from './TaskStatus.svelte'
   import ProjList from './ProjList.svelte'
-  import { exploreCode } from '$lib/stores.js'
-
-  import { AREA_BORDER, TASK_COLORS, TASK_LOCKED_COLOR, TASK_DIFFICULTY_VALUES, TASK_STATUS_VALUES, TASK_TYPE_VALUES, TASK_THR, MUN_THR } from '$lib/config'
+  import StatsSection from '$lib/components/StatsSection.svelte'
   import Map from '$lib/components/maps/Map.svelte'
   import Legend from '$lib/components/maps/Legend.svelte'
+  import { exploreCode } from '$lib/stores.js'
+  import { AREA_BORDER, TASK_COLORS, TASK_LOCKED_COLOR, TASK_DIFFICULTY_VALUES, TASK_STATUS_VALUES, TASK_TYPE_VALUES, TASK_THR, MUN_THR } from '$lib/config'
 
   export let data
 
@@ -38,16 +38,21 @@
   $: code = $page?.params?.code
   $: tasks = filterTasks(geoJsonData, muncode, type, difficulty, ad_status, bu_status)
   $: dataPromise = fetchData(map, zoom, code)
+  $: statsPromise = fetchStats(code)
   
   
   async function fetchData(map, zoom, code) {
     if (!map) return null
     const bounds = map?.getMap().getBounds().toBBoxString()
-    geoJsonData = await data.streamed.tasks(target(zoom), code, bounds)
+    geoJsonData = await data.streamed.geoJsonData(target(zoom), code, bounds)
     if (code && geoJsonData.features.length) {
       project = geoJsonData.features[0].properties
     }
     return geoJsonData
+  }
+
+  async function fetchStats(code) {
+    if (code) return await data.streamed.stats(code)
   }
 
   function setZoom(zoom) {
@@ -58,7 +63,7 @@
   afterNavigate(async ({to}) => {
     if (to?.route?.id === '/explore/[[code]]') {
       exploreCode.set(code)
-      if (code & !to?.url?.searchParams?.get('map')) {
+      if (code && !to?.url?.searchParams?.get('map')) {
         setTimeout(() => {
           map.getMap().fitBounds(getGeoJSON().getBounds())
         }, 1000)
@@ -226,7 +231,7 @@
   <div class={rightBarClass}>
     <div class="h-full max-h-0">
       {#await dataPromise}
-        <p class="mt-4">Cargando datos... <Spinner size={4} /></p>
+        <p class="mt-4">Cargando datos... <Spinner size={4}/></p>
       {:then geoJsonData}
         {#if target(zoom) === 'tasks'}
           {#if geoJsonData?.features?.length > 0}
@@ -247,53 +252,59 @@
               No hay tareas aquí
             </p>
           {/if}
-        {:else}
-          {#if code}
+        {:else if target(zoom) === 'municipalities' && code?.length === 5}
           <div class="prose dark:prose-invert pt-3">
-            <h3>{project?.name} ({code})</h3>
+            <h3>{project?.name} ({project?.muncode})</h3>
           </div>
-          {/if}
-          {#if code?.length === 5}
-            <div class="space-y-6 pt-4">
-              <div class="!space-y-1">
+          <div class="space-y-6 pt-4">
+            <div class="!space-y-1">
+              <p class="flex justify-between">
+                <span>Tareas:</span>
+                <span>{project?.task_count}</span>
+              </p>
+              {#if project?.task_count}
                 <p class="flex justify-between">
-                  <span>Tareas:</span>
-                  <span>{project?.task_count}</span>
+                  <span>Mapeado:</span>
+                  <span>{fmt.format(project.mapped_count / project?.task_count)}</span>
                 </p>
-                {#if project?.task_count}
-                  <p class="flex justify-between">
-                    <span>Mapeado:</span>
-                    <span>{fmt.format(project.mapped_count / project?.task_count)}</span>
-                  </p>
-                  <Progressbar
-                    progress = {100 * project.mapped_count / project.task_count}
-                    size="h-4"
-                    color="gray"
-                  />
-                {/if}
-              </div>
-              <p>
-                Haz <button class="text-primary-600" on:click={() => setZoom(TASK_THR)}>zoom</button>
-                para ver las tareas o
-                <a class="text-primary-600" href="/explore">explora</a>
-                el resto de municipios.
-              </p>
+                <Progressbar
+                  progress = {100 * project.mapped_count / project.task_count}
+                  size="h-4"
+                  color="gray"
+                />
+              {/if}
             </div>
-          {:else}
-            <ProjList
-              data={geoJsonData?.features}
-              target={target(zoom)}
-              bind:activeItem
-              {map}
-              on:mouseover={(event) => handleMouseover(event.detail.feature)}
-              on:mouseout={() => handleMouseover()}
-            />
-            {#if code?.length == 2}
-              <p class="pt-4">
-                <a class="text-primary-600" href="/explore">Explora</a>
-                el resto de provincias.
-              </p>
-            {/if}
+            {#await statsPromise}
+              <p class="mt-4">Cargando datos... <Spinner size={4}/></p>
+            {:then stats}
+              <StatsSection {stats} users={false}/>
+            {/await}
+            <p>
+              Haz <button class="text-primary-600" on:click={() => setZoom(TASK_THR)}>zoom</button>
+              para ver las tareas o
+              <a class="text-primary-600" href="/explore">explora</a>
+              el resto de municipios.
+            </p>
+          </div>
+        {:else}
+          {#if target(zoom) === 'provinces' && code?.length === 2}
+            <div class="prose dark:prose-invert pt-3">
+              <h3>{project?.name} ({project?.provcode})</h3>
+            </div>
+          {/if}
+          <ProjList
+            data={geoJsonData?.features}
+            target={target(zoom)}
+            bind:activeItem
+            {map}
+            on:mouseover={(event) => handleMouseover(event.detail.feature)}
+            on:mouseout={() => handleMouseover()}
+          />
+          {#if code?.length == 2}
+            <p class="pt-4">
+              <a class="text-primary-600" href="/explore">Explora</a>
+              el resto de provincias.
+            </p>
           {/if}
         {/if}
       {/await}

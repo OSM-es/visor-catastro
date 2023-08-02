@@ -1,7 +1,7 @@
 <script>
   import { Button } from 'flowbite-svelte'
   import banner from '$lib/images/visor-catastro.svg'
-  import StatsSection from './StatsSection.svelte'
+  import StatsSection from '$lib/components/StatsSection.svelte'
 
   export let data
 </script>
