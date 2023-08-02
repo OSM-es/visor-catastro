@@ -9,13 +9,7 @@ export async function load({ fetch, locals }) {
     } else {
       throw redirect(302, '/explore')
     }
-  }
-  const resp = await fetch(locals.api.base + '/stats')
-  console.info(resp)
-  
-  return {
-    streamed: {
-      stats: resp.json()
-    }
+  } else {
+    throw redirect(302, '/about')
   }
 }

@@ -53,17 +53,12 @@ Tutorial #9:
     ☐ Edición de tareas
 
 Estadísticas:
-    ☐ Página de estadísticas globales
-    ☐ por municipio
+    ☐ Página de estadísticas por municipio
     ☐ ¿otros?
 
 Tasking manager:
     ☐ Detectar proyectos existentes en TM, impedir edición, redirigir a ellos.
     ☐ Contemplar importar proyecto
-
-Página acerca de:
-    ☐ Convertir la página de aterrizaje actual / en /about.
-      Redirigir usuarios no registrados a ella.
 
 Gestor de notificaciones #3:
     ☐ Implementar correo-e

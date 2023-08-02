@@ -8,7 +8,7 @@
     NavHamburger,
     ToolbarButton,
   } from 'flowbite-svelte'
-  import { BookOpen, Bars3CenterLeft, Map } from 'svelte-heros-v2'
+  import { BookOpen, Bars3CenterLeft, InformationCircle, Map } from 'svelte-heros-v2'
   
   import { getContext } from 'svelte'
   import { invalidate } from '$app/navigation'
@@ -76,6 +76,11 @@
     <NavLi href="/explore" active={activeUrl.startsWith('/explore')} class={_liClass}>
       <ResponsiveIcon title={$t('menu.explore')} max={'md:max-lg'} min={'max-sm:hidden lg'}>
         <Map class="w-5 m-1"/>
+      </ResponsiveIcon>
+    </NavLi>
+    <NavLi href="/about" active={activeUrl.startsWith('/aboout')} class={_liClass}>
+      <ResponsiveIcon title={$t('menu.about')} max={'md:max-lg'} min={'max-sm:hidden lg'}>
+        <InformationCircle class="w-5 m-1"/>
       </ResponsiveIcon>
     </NavLi>
   </NavUl>
