@@ -152,31 +152,25 @@ class Task(db.Model):
         return task
 
     @staticmethod
-    def status_stats(mun_code):
-        q = Task.query_by_muncode(mun_code)
-        ad_stats = q.with_entities(
-            Task.ad_status, func.count(Task.ad_status)
-        ).group_by(
-            Task.ad_status
-        ).all()
-        bu_stats = q.with_entities(
-            Task.bu_status, func.count(Task.bu_status)
-        ).group_by(
-            Task.bu_status
-        ).all()
-        status = {s.value: {} for s in Task.Status}
-        for s in ad_stats:
-            status[s[0]]['ad'] = s[1]
-        for s in bu_stats:
-            status[s[0]]['bu'] = s[1]
-        return [
-            {
-                'status': Task.Status(k).name,
-                'addresses': v.get('ad', 0),
-                'buildings': v.get('bu', 0)
-            }
-            for k, v in status.items()
-        ]
+    def status_stats(mun_code, attr):
+        statuses = [s.value for s in Task.Status]
+        stats = [0] * len(Task.Status)
+        f = getattr(Task, attr)
+        q = Task.query_by_muncode(mun_code).with_entities(
+            f, func.count(f)
+        ).group_by(f)
+        for k, v in q.all():
+            stats[statuses.index(k)] = v
+        return stats
+
+    @staticmethod
+    def count_locks(code, type, attr):
+        f = getattr(TaskLock, attr)
+        t = TaskLock.Action(type).name
+        c = Task.query_by_code(code).join(TaskLock).filter(
+            and_(TaskLock.text == t, f)
+        ).count()
+        return c
 
     @staticmethod
     def get_match(feature):

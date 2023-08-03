@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.11.7",
+    "chart.js": "^4.3.2",
     "classnames": "^2.3.2",
     "exifreader": "^4.12.1",
     "flowbite": "^1.6.5",
@@ -33,6 +34,7 @@
     "leaflet.pattern": "^0.1.0",
     "lodash": "^4.17.21",
     "sass": "^1.64.0",
+    "svelte-chartjs": "^3.1.2",
     "svelte-relative-time": "^0.0.3",
     "sveltekit-i18n": "^2.3.0",
     "viewerjs": "^1.11.3"
