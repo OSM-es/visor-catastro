@@ -11,23 +11,17 @@ export async function load({ data, url }) {
     center = [view[1], view[2]]
   }
 
-  const geoJsonData = (target, code, bounds) => {
-    if (target !== 'tasks' && code) {
-      bounds = null
-    }
-    return new Promise(async (resolve) => {
-      const url = geojsonUrl(target, code, bounds)
-      const response = await fetch(url)
-      return resolve(response.json())
-    })
+  const geoJsonData = async (target, code, bounds) => {
+    if (target !== 'tasks' && code) bounds = null
+    const url = geojsonUrl(target, code, bounds)
+    const response = await fetch(url)
+    return await response.json()
   }
 
-  const stats = (code) => {
-    return new Promise(async (resolve) => {
-      const url = data.api + '/stats/' + code
-      const response = await fetch(url)
-      return resolve(response.json())
-    })
+  const stats = async (code) => {
+    const url = data.api + '/stats/' + code
+    const response = await fetch(url)
+    return await response.json()
   }
 
   return {

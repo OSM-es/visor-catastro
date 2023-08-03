@@ -23,6 +23,8 @@
     <span></span>
   {:then value}
     <StatsSection stats={value}/>
+  {:catch}
+    <span></span>
   {/await}
   <div class="bg-gray-100 dark:bg-gray-800 p-4">
     <article class="prose max-w-none lg:prose-xl dark:prose-invert mx-auto">

@@ -1,10 +1,13 @@
 export async function load({ locals, fetch, params }) {
-  const url = `${locals.api.base}/stats/${params.code}/tasks`
-  const response = await fetch(url)
+  const taskStatus = async () => {
+    const url = `${locals.api.base}/stats/${params.code}/tasks`
+    const resp = await fetch(url)  
+    return await resp.json()
+  }
   
   return {
     streamed: {
-      taskStatus: response.json()
+      taskStatus: taskStatus()
     }
   }
 }

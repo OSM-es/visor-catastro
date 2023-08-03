@@ -275,7 +275,7 @@
               {/if}
             </div>
             {#await statsPromise}
-              <p class="mt-4">Cargando datos... <Spinner size={4}/></p>
+              <p class="mt-4">Cargando estadísticas... <Spinner size={4}/></p>
             {:then stats}
               <StatsSection {stats} users={false}/>
             {/await}
