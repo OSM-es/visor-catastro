@@ -24,7 +24,7 @@
   {#await data.streamed.stats}
     <span></span>
   {:then value}
-    <StatsSection stats={value}/>
+    <StatsSection stats={value} size={'text-5xl'}/>
   {:catch}
     <span></span>
   {/await}

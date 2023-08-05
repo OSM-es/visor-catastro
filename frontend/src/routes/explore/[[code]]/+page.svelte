@@ -279,7 +279,7 @@
             {#await statsPromise}
               <p class="mt-4">{$t('common.loading')} <Spinner size={4}/></p>
             {:then stats}
-              <StatsSection {stats} users={false}/>
+              <StatsSection {stats} omit={['users']} size={'text-4xl'}/>
             {/await}
             <p>
               <button class="text-primary-600" on:click={() => setZoom(TASK_THR)}>
