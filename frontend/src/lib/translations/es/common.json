@@ -8,5 +8,10 @@
     "logout": "Cerrar sesión",
     "loading": "Cargando datos...",
     "filter": "Filtro ...",
-    "nofilter": "Ninguno"
+    "nofilter": "Ninguno",
+    "back": "Go back",
+    "Save": "Guardar",
+    "save": "guardar",
+    "yes": "Si",
+    "no": "No"
 }

@@ -3,7 +3,7 @@
   import { Clock } from 'svelte-heros-v2'
   import RelativeTime from 'svelte-relative-time'
 
-  import { TASK_ACTION_VALUES, TASK_ACTION_TEXT } from '$lib/config'
+  import { t } from '$lib/translations'
 
   export let items
 </script>
@@ -13,10 +13,10 @@
     <div class="flex items-center space-x-4">
       <Avatar src={item.avatar} data-name={item.user}/>
       <p>
-        {TASK_ACTION_VALUES[item.action]}
-        {TASK_ACTION_TEXT[item.text]}
+        {$t('task.' + item.action)}
+        {$t('task.' + item.text)}
         {#if item.addresses != item.buildings}
-          {item.buildings ? 'edificios' : 'direcciones'}
+          {item.buildings ? $t('buildings') : $t('addresses')}
         {/if}
         <Badge color="black" border>
           <Clock size=14 variation="solid" class="mr-1"/>
@@ -30,6 +30,6 @@
   </Tooltip>
 {:else}
   <div class="prose dark:prose-invert pt-4">
-    <p>No ha habido actividad.</p>
+    <p>{$t('task.nohistory')}</p>
   </div>
 {/if}

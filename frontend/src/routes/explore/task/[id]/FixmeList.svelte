@@ -1,8 +1,8 @@
 <script>
-	import { enhance } from '$app/forms'
   import { Checkbox } from 'flowbite-svelte'
 
-  import { FIXME_MSG } from '$lib/config'
+  import { enhance } from '$app/forms'
+  import { t } from '$lib/translations'
 
   export let fixmes
   export let map
@@ -36,7 +36,7 @@
   }
 </script>
 
-<h4>Anotaciones:</h4>
+<h4>{$t('task.checks')}:</h4>
 <ol class="mt-0">
   {#each fixmes?.features as fixme, i}
     <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -56,7 +56,7 @@
         />
         <button bind:this={submit[i]} type="submit" hidden></button>
       </form>
-      {FIXME_MSG[fixme.properties.type]}
+      {$t('explore.' + fixme.properties.type)}
       {fixme.properties.fixme || ''}
     </li>
   {/each}

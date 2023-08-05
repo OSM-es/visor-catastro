@@ -8,5 +8,10 @@
     "logout": "Logout",
     "loading": "Loading data...",
     "filter": "Filter ...",
-    "nofilter": "No filter"
+    "nofilter": "No filter",
+    "back": "Regresar",
+    "Save": "Save",
+    "save": "save",
+    "yes": "Yes",
+    "no": "No"
 }

@@ -3,7 +3,7 @@
   import L from 'leaflet'
   import { GeoJSON } from 'svelte-leafletjs'
 
-  import { FIXME_MSG } from '$lib/config'
+  import { t } from '$lib/translations'
 
   export let data
   export let selected = null
@@ -57,7 +57,7 @@
       }
     )
     marker.on('click', (event) => selected = event.target.feature.properties.id)
-    const text = `${FIXME_MSG[geoJsonPoint.properties.type]} ${geoJsonPoint.properties?.fixme || ''}`
+    const text = `${$t('explore.' + geoJsonPoint.properties.type)} ${geoJsonPoint.properties?.fixme || ''}`
     return marker.bindTooltip(text)
   }
 </script>

@@ -79,13 +79,13 @@
   <div class="md:max-w-md w-full flex-grow overflow-scroll px-4 border-l-2 border-gray-200 dark:border-gray-600">
     <div class="sticky top-0 z-10 bg-white dark:bg-neutral-900">
       <div class="prose dark:prose-invert pt-4">
-        <h3>Catastro de {data.task.municipality.name} ({data.task.muncode}) · #{data.task.id}</h3>
+        <h3>{$t('explore.cadastreof')} {data.task.municipality.name} ({data.task.muncode}) · #{data.task.id}</h3>
       </div>
       <Tabs bind:tab>
-        <TabItem key={'edicion'}>Edición</TabItem>
+        <TabItem key={'edicion'}>{$t('task.edit')}</TabItem>
         {#if imageCount}
           <TabItem key={'fotos'}>
-            Fotos
+            {$t('task.images')}
             <Indicator color="blue" size="lg" placement="center-right">
               <span class={indicatorClass + (imageCount < 10 ? 'text-xs' : 'text-[0.6rem]')}>
                 {#if imageCount < 100}{imageCount}{/if}
@@ -94,7 +94,7 @@
           </TabItem>
         {/if}
         <TabItem key={'historial'}>
-          Historial
+          {$t('task.history')}
           {#if data.task.history?.length}
             <Indicator color="blue" size="lg" placement="center-right">
               <span class={indicatorClass + (data.task.history.length < 10 ? 'text-xs' : 'text-[0.6rem]')}>
@@ -108,15 +108,12 @@
     <div class="h-full max-h-0">
       <div class:hidden={tab !== 'edicion'} class="prose dark:prose-invert pt-4">
         <p>
-          Tarea tipo
-          <span class="font-bold">{$t('explore.' + data.task.type)}</span>,
-          dificultad
-          <span class="font-bold {taskColor}">
-            {$t('explore.' + data.task.difficulty)}</span>.
+          {@html $t('task.type', { type: $t('explore.' + data.task.type) })},
+          {@html $t('task.diff', { diff: $t('explore.' + data.task.difficulty), taskColor })}
         </p>
         {#if data.task.municipality.lock }
-          <p class="text-danger-500 font-bold">Municipio bloqueado para actualización.</p>
-          <Button on:click={exit} color="alternative">Cancelar</Button>
+          <p class="text-danger-500 font-bold">{$t('task.updatelock')}</p>
+          <Button on:click={exit} color="alternative">{$t('common.back')}</Button>
         {:else}
           {#if !data.task.lock || data.task.lock?.buildings}
             <TaskActions

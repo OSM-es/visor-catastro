@@ -25,13 +25,13 @@ export const config = {
       locale: 'es',
       key: 'explore',
       loader: async () => (await import('./es/explore.json')).default,
-      routes: ['/explore', /\/explore\/[0-9]{2,5}/],
+      routes: [/\/explore.*/],
     },
     {
       locale: 'en',
       key: 'explore',
       loader: async () => (await import('./en/explore.json')).default,
-      routes: ['/explore', /\/explore\/[0-9]{2,5}/],
+      routes: [/\/explore.*/],
     },
     {
       locale: 'es',
@@ -47,15 +47,27 @@ export const config = {
     },
     {
       locale: 'es',
+      key: 'task',
+      loader: async () => (await import('./es/task.json')).default,
+      routes: [/\/explore\/task\/.+/],
+    },
+    {
+      locale: 'en',
+      key: 'task',
+      loader: async () => (await import('./en/task.json')).default,
+      routes: [/\/explore\/task\/.+/],
+    },
+    {
+      locale: 'es',
       key: 'stats',
       loader: async () => (await import('./es/stats.json')).default,
-      routes: ['/about'],
+      routes: ['/about', /\/explore\/[0-9]{2,5}.*/],
     },
     {
       locale: 'en',
       key: 'stats',
       loader: async () => (await import('./en/stats.json')).default,
-      routes: ['/about'],
+      routes: ['/about', /\/explore\/[0-9]{2,5}.*/],
     },
     {
       locale: 'es',

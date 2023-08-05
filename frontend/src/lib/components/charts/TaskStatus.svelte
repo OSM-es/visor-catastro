@@ -2,14 +2,23 @@
   import { Doughnut } from 'svelte-chartjs'
 
   import {
+    Chart as ChartJS,
+    Title,
+    Tooltip,
+    Legend,
+    ArcElement,
+    CategoryScale,
+  } from 'chart.js'
+  
+  ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale)
+
+  import {
     AREA_BORDER,
-    TASK_ACTION_VALUES,
-    TASK_ACTION_TEXT,
     TASK_COLORS,
   } from '$lib/config.js'
+  import { t } from '$lib/translations'
 
   export let stats
-  console.info(stats)
 
   const options = {
     backgroundColor: [
@@ -35,31 +44,24 @@
   }
 
   const data = {
-    labels: stats.labels,
+    labels: getLabels(stats.labels),
     datasets: [
       {
-        label: 'Edificios',
+        label: $t('explore.Buildings'),
         data: stats.buildings,
         ...options,
       },
       {
-        label: 'Direcciones',
+        label: $t('explore.Addresses'),
         data: stats.addresses,
         ...options,
       },
     ],
   }
 
-  import {
-    Chart as ChartJS,
-    Title,
-    Tooltip,
-    Legend,
-    ArcElement,
-    CategoryScale,
-  } from 'chart.js'
-  
-  ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale)
+  function getLabels(labels) {
+    return labels.map((label) => $t('explore.' + label))
+  }
 </script>
   
 <Doughnut

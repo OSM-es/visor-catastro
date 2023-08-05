@@ -1,9 +1,9 @@
-<script>
-  import { goto } from '$app/navigation'
-
+<script>  
   import { Button } from 'flowbite-svelte'
-
+  
+  import { goto } from '$app/navigation'
   import { login } from '$lib/user'
+  import { t } from '$lib/translations'
 
   export let action
   export let user
@@ -20,15 +20,15 @@
 
 {#if task.currentLock && task.currentLock !== task.id}
   <p>
-    Tienes otra tarea bloqueada
-    <Button on:click={gotoCurrentTask}>Complétala</Button>
+    {$t('task.userlockanothertask')}
+    <Button on:click={gotoCurrentTask}>{$t('task.completeit')}</Button>
   </p>
 {:else if user?.role == 'READ_ONLY'}
-  <p>Usuario sin permiso de edición</p>
+  <p>{$t('task.readonly')}</p>
 {:else if user?.role}
   <slot/>
 {:else if !user}
-  <Button on:click={login}>Regístrate para {action}</Button>
+  <Button on:click={login}>{$t('task.signin', { action })}</Button>
 {:else}
-  <Button on:click={doTutorial}>Completa el tutorial para {action}</Button>
+  <Button on:click={doTutorial}>{$t('task.dotutorial', { action })}</Button>
 {/if}

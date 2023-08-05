@@ -3,7 +3,7 @@
 
 	import { enhance } from '$app/forms'
   import { goto } from '$app/navigation'
-  import { TASK_ACTION_TEXT } from '$lib/config'
+  import { t } from '$lib/translations'
   import { exploreCode } from '$lib/stores.js'
   import EditorButton from './EditorButton.svelte'
 
@@ -45,7 +45,7 @@
 {#if target}
   <form use:enhance={updateStatus} method="POST" action="?/task">
     {#if task.bu_status !== task.ad_status}
-      <h4>{title === 'buildings' ? 'Edificios' : 'Direcciones'}</h4>
+      <h4 class="capitalize">{title === 'buildings' ? $t('explore.buildings') : $t('explore.addresses')}</h4>
     {/if}
 
     {#if needMapping && !task.lock}
@@ -60,24 +60,20 @@
     {/if}
 
     {#if task.lock && !task.isOwner}
-      <p>
-        Tarea
-        <span class="font-bold text-danger-500">bloqueada</span> para
-        {TASK_ACTION_TEXT[task.lock.text]} por otro usuario.
-      </p>
+      <p>{@html $t('task.islocked', { lock: $t('task.' + task.lock.text) })}</p>
     {:else if task.lock?.text === 'MAPPING'}
         <p>TODO: Aquí faltan enlaces para descargar el archivo de la tarea</p>
-        <p>¿Esta tarea está completamente mapeada?</p>
-        <EditorButton {user} {task} action={'guardar'}>
+        <p>{$t('task.ismapped')}</p>
+        <EditorButton {user} {task} action={$t('common.save')}>
           <Button type="submit" name="status" value="MAPPED" class="mr-4">
-            Si, guardar
+            {$t('task.save')}
           </Button>
         </EditorButton>
     {:else if task.lock?.text === 'VALIDATION'}
       <p>TODO: Aquí faltan enlaces para descargar el archivo de la tarea,
         y el área.
       </p>
-      <p>¿Esta tarea está bien mapeada?</p>
+      <p>{$t('task.isvalid')}</p>
       <div class="flex space-x-8 mb-8">
         <Radio
           type="radio"
@@ -85,7 +81,7 @@
           value="VALIDATED"
           bind:group={validationStatus}
         >
-          Si
+          {$t('common.yes')}
         </Radio>
         <Radio
           type="radio"
@@ -93,54 +89,50 @@
           value="INVALIDATED"
           bind:group={validationStatus}
         >
-          No
+          {$t('common.no')}
       </Radio>
       </div>
-      <EditorButton {user} {task} action={'validar'}>
+      <EditorButton {user} {task} action={$t('task.VALIDATION')}>
         <Button type="submit" class="mr-4">
-          {validationStatus === 'VALIDATED' ? 'Validar' : 'Invalidar' }
+          {validationStatus === 'VALIDATED' ? $t('task.validate') : $t('task.invalidate') }
         </Button>
       </EditorButton>
     {:else if needMapping}
       {#if status === 'INVALIDATED'}
-        <p>Tarea marcada como que <span class="text-danger-500">necesita más mapeo</span>.</p>
+        {@html $t('task.invalidatedtext')}
       {:else if status === 'NEED_UPDATE'}
-        <p>Tarea importada que necesita <span class="text-danger-500">actualizar</span>.</p>
-      {/if}
+        {@html $t('task.updatetext')}
+    {/if}
       {#if task.streets?.length}
         {#if streetsToValidate.length}
-          <h5>Nombres de calle:</h5>
+          <h5>{$t('task.streets')}</h5>
           <Listgroup active items={streets} let:item class="not-prose">
             {item.cat_name}
             <Badge color={item.validated ? 'green' : 'red'}>
-              {item.validated ? 'Confirmado' : 'Pendiente'}
+              {item.validated ? $t('task.confirmed') : $t('task.pending')}
             </Badge>
           </Listgroup>
           <p class="text-danger-500">
-            Falta revisar {streetsToValidate.length}
-            {streetsToValidate.length > 1 ? 'nombres' : 'nombre'}
-            para poder importar direcciones.
+            {$t('task.pendingstreets', { streets: streetsToValidate.length})}
           </p>
         {:else}
           <p>
-            Revisión de 
-            <a href={`/explore/task/${task.id}/street`}>nombres de calle</a>
-            <span class="text-success-500">completa</span>.
-          </p>
+            {@html $t('task.streetscompleted', { url: `/explore/task/${task.id}/street` })}
+        </p>
         {/if}
       {/if}
       {#if canSelectImport}
-        <p>
-          Voy a importar
+        <p class="capitalize">
+          {$t('task.willimport')}
           <Checkbox name="buildings" value="true" bind:checked={buildings}>
-            Edificios
+            {$t('explore.buildings')}
           </Checkbox>
           <Checkbox name="addresses" value="true" bind:checked={addresses}>
-            Direcciones
+            {$t('explore.addresses')}
           </Checkbox>
         </p>
       {/if}
-      <EditorButton {user} {task} action={'importar'}>
+      <EditorButton {user} {task} action={$t('task.MAPPING')}>
         <Button
           type="submit"
           name="lock"
@@ -148,34 +140,33 @@
           class="mr-4 w-48"
           disabled={!buildings && !addresses}
         >
-          Importar {buildings ? (addresses ? 'todo' : 'edificios') : (addresses ? 'direcciones' : '')}
+          {buildings ? (addresses ? $t('task.mapall') : $t('task.mapbuildings')) : (addresses ? $t('task.mapaddresses') : '')}
         </Button>
       </EditorButton>
     {:else if status === 'MAPPED'}
       <p>
-        Tarea <span class="text-success-500 font-bold">
-          mapeada</span>{#if isMapper},
-          otro usuario debe validarla.{/if}
+        {@html $t('task.mappedtext')}{#if isMapper},
+          {$t('task.needvalidation')}{/if}
       </p>
       {#if !isMapper && !task.lock}
-        <EditorButton {user} {task} action={'validar'}>
+        <EditorButton {user} {task} action={$t('task.VALIDATION')}>
           <Button type="submit" name="lock" value="VALIDATION" class="mr-4">
-            Valídala
+            {$t('task.validateit')}
           </Button>
         </EditorButton>
       {/if}
     {:else if status === 'VALIDATED'}
       <p>
-        Tarea mapeada y <span class="text-success-500 font-bold">validada</span>.
+        {@html $t('task.validatedtext')}
       </p>
     {/if}
     {#if title === 'addresses' || task.ad_status === task.bu_status || task.lock}
       {#if user && task.lock && task.isOwner}
         <Button type="submit" name="lock" value="UNLOCK" color="alternative">
-          {task.lock.text === 'MAPPING' ? 'No, detener mapeo' : 'Detener validación'}
+          {task.lock.text === 'MAPPING' ? $t('task.stopmapping') : $t('task.stopvalidation')}
         </Button>
       {:else if !task.currentLock}
-        <Button on:click={exit} color="alternative">Seleccionar otra tarea</Button>
+        <Button on:click={exit} color="alternative">{$t('task.selectanother')}</Button>
       {/if}
     {/if}
   </form>
