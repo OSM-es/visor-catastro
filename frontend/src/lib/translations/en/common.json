@@ -6,5 +6,7 @@
     "login": "Login",
     "signup": "Sign up",
     "logout": "Logout",
-    "loading": "Loading data..."
+    "loading": "Loading data...",
+    "filter": "Filter ...",
+    "nofilter": "No filter"
 }

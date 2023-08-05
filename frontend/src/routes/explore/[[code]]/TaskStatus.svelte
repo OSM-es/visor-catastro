@@ -1,6 +1,7 @@
 <script>
-    import { AREA_BORDER, TASK_COLORS, TASK_STATUS_VALUES } from '$lib/config'
     import { NoSymbol } from 'svelte-heros-v2'
+    import { AREA_BORDER, TASK_COLORS } from '$lib/config'
+    import { t } from '$lib/translations'
 
     export let status
 
@@ -16,11 +17,11 @@
   
   <p class="legend-item" {style}>
     {#if status === 'MIXED'}
-      <span class="stripe"></span> Edificios/direcciones
+      <span class="stripe"></span> {$t('explore.mixed')}
     {:else if status === 'LOCKED'}
-      <NoSymbol size="18" color="red" strokeWidth="4" class="mr-2"/> Bloqueada
-    {:else if TASK_STATUS_VALUES[status] !== undefined}
-      <span class={status.toLowerCase()}></span> {TASK_STATUS_VALUES[status]}
+      <NoSymbol size="18" color="red" strokeWidth="4" class="mr-2"/> {$t('explore.locked')}
+    {:else}
+      <span class={status.toLowerCase()}></span> {$t('explore.' + status)}
     {/if}
   </p>
   

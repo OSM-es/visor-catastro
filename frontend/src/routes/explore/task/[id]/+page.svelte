@@ -2,8 +2,8 @@
   import { Button, Indicator } from 'flowbite-svelte'
   import { afterNavigate } from '$app/navigation'
   import { goto } from '$app/navigation'
+  import { t } from '$lib/translations'
 
-  import { TASK_TYPE_VALUES, TASK_DIFFICULTY_VALUES } from '$lib/config'
   import { exploreCode } from '$lib/stores.js'
   import FotosFachada from '$lib/components/FotosFachada.svelte'
   import Map from '$lib/components/maps/Map.svelte'
@@ -109,10 +109,10 @@
       <div class:hidden={tab !== 'edicion'} class="prose dark:prose-invert pt-4">
         <p>
           Tarea tipo
-          <span class="font-bold">{TASK_TYPE_VALUES[data.task.type]}</span>,
+          <span class="font-bold">{$t('explore.' + data.task.type)}</span>,
           dificultad
           <span class="font-bold {taskColor}">
-            {TASK_DIFFICULTY_VALUES[data.task.difficulty]}</span>.
+            {$t('explore.' + data.task.difficulty)}</span>.
         </p>
         {#if data.task.municipality.lock }
           <p class="text-danger-500 font-bold">Municipio bloqueado para actualización.</p>

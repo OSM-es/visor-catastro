@@ -1,9 +1,9 @@
 <script>
   import { TableBody, TableBodyCell, TableHead } from 'flowbite-svelte'
   import { goto } from '$app/navigation'
+  import { locale, t } from '$lib/translations'
   import SortTable from '$lib/components/tables/SortTable.svelte'
   import SortTableHeadCell from '$lib/components/tables/SortTableHeadCell.svelte'
-  import { locale } from '$lib/translations'
 
   import { TASK_THR, MUN_THR } from '$lib/config'
 
@@ -37,20 +37,20 @@
   >
     <caption class="text-left mb-2">
       {#if target === 'provinces'}
-        Selecciona una provincia o haz
-        <button class="text-primary-600" on:click={() => setZoom(MUN_THR)}>zoom</button>
-        para ver los municipios.
+        {$t('explore.select', { item: $t('explore.prov')})}
+        <button class="text-primary-600 lowercase" on:click={() => setZoom(MUN_THR)}>{$t('explore.zoom')}</button>
+        {$t('explore.formuns')}
       {:else}
-        Selecciona un municipio o haz
-        <button class="text-primary-600" on:click={() => setZoom(TASK_THR)}>zoom</button>
-        para ver las tareas.
+        {$t('explore.select', { item: $t('explore.mun')})}
+        <button class="text-primary-600 lowercase" on:click={() => setZoom(TASK_THR)}>{$t('explore.zoom')}</button>
+        {$t('explore.fortasks')}
       {/if}
     </caption>
     <TableHead defaultRow={false} theadClass="sticky top-0 bg-neutral-100 dark:bg-neutral-700">
       <tr class="text-xs uppercase">
-        <SortTableHeadCell thClass="p-2" key={key(target)}>Código</SortTableHeadCell>
-        <SortTableHeadCell thClass="p-2" key='name'>Nombre</SortTableHeadCell>
-        <SortTableHeadCell thClass="p-2" key='task_count'>Tareas</SortTableHeadCell>
+        <SortTableHeadCell thClass="p-2" key={key(target)}>{$t('explore.code')}</SortTableHeadCell>
+        <SortTableHeadCell thClass="p-2" key='name'>{$t('explore.name')}</SortTableHeadCell>
+        <SortTableHeadCell thClass="p-2" key='task_count'>{$t('explore.tasks')}</SortTableHeadCell>
         <SortTableHeadCell thClass="p-2" key='mapped_count'>Mapeado</SortTableHeadCell>
       </tr>
     </TableHead>

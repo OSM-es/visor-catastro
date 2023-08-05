@@ -2,7 +2,7 @@
   import { Progressbar, Spinner } from 'flowbite-svelte'
   import { afterNavigate, goto } from '$app/navigation'
   import { GeoJSON } from 'svelte-leafletjs'
-  import { locale } from '$lib/translations'
+  import { locale, t } from '$lib/translations'
   import { page } from '$app/stores'
   import 'leaflet.pattern'
 
@@ -13,7 +13,7 @@
   import Map from '$lib/components/maps/Map.svelte'
   import Legend from '$lib/components/maps/Legend.svelte'
   import { exploreCode } from '$lib/stores.js'
-  import { AREA_BORDER, TASK_COLORS, TASK_LOCKED_COLOR, TASK_DIFFICULTY_VALUES, TASK_STATUS_VALUES, TASK_TYPE_VALUES, TASK_THR, MUN_THR } from '$lib/config'
+  import { AREA_BORDER, TASK_COLORS, TASK_LOCKED_COLOR, TASK_THR, MUN_THR } from '$lib/config'
 
   export let data
 
@@ -161,32 +161,34 @@
 
   function getStatus(feat) {
     if (feat.lock_id) {
-      return 'Bloqueada'
+      return $t('explore.locked')
     } else if (feat.bu_status === feat.ad_status) {
-      return TASK_STATUS_VALUES[feat.bu_status]
+      return $t('explore.' + feat.bu_status)
     } else {
-      return `${TASK_STATUS_VALUES[feat.bu_status]} (edificios), ${TASK_STATUS_VALUES[feat.ad_status]} (direcciones)`
+      let st = `${$t('explore.' + feat.bu_status)} (${$t('explore.buildings')})`
+      st += `, ${$t('explore.' + feat.ad_status)} (${$t('explore.addresses')})`
+      return st
     }
   }
 
   function featInfo(feat) {
     let info = ''
     if (feat.provcode) {
-      info = `<ul><li>Provincia: ${feat.name} (${feat.provcode})</li>`
+      info = `<ul><li>${$t('explore.Prov')}: ${feat.name} (${feat.provcode})</li>`
     } else {
-      info = `<ul><li>Municipio: ${feat.name} (${feat.muncode})</li>`
+      info = `<ul><li>${$t('explore.Mun')}: ${feat.name} (${feat.muncode})</li>`
     }
     if (feat.localid) {
       info += `
-        <li>Tipo: ${TASK_TYPE_VALUES[feat.type]}</li>
-        <li>Dificultad: ${TASK_DIFFICULTY_VALUES[feat.difficulty]}</li>
-        <li>Estado: ${getStatus(feat)}</li>
+        <li>${$t('explore.type')}: ${$t('explore.' + feat.type)}</li>
+        <li>${$t('explore.diff')}: ${$t('explore.' + feat.difficulty)}</li>
+        <li>${$t('explore.status')}: ${getStatus(feat)}</li>
       `
     } else {
       const mapped = feat.mapped_count / feat.task_count
       info += `
-        <li>Tareas: ${feat.task_count}</li>
-        <li>Mapeado: ${fmt.format(mapped)}</li>
+        <li>${$t('explore.tasks')}: ${feat.task_count}</li>
+        <li>${$t('explore.mapped')}: ${fmt.format(mapped)}</li>
       `
     }
     info += '</ul>'
@@ -216,7 +218,7 @@
     >
       <GeoJSON data={tasks} options={geoJsonOptions} bind:getGeoJSON/>
       {#if zoom >= TASK_THR}
-        <Legend>
+        <Legend title={$t('explore.legend')}>
           <TaskStatus status="READY"/>
           <TaskStatus status="MAPPED"/>
           <TaskStatus status="INVALIDATED"/>
@@ -231,7 +233,7 @@
   <div class={rightBarClass}>
     <div class="h-full max-h-0">
       {#await dataPromise}
-        <p class="mt-4">Cargando datos... <Spinner size={4}/></p>
+        <p class="mt-4">{$t('common.loading')} <Spinner size={4}/></p>
       {:then geoJsonData}
         {#if target(zoom) === 'tasks'}
           {#if geoJsonData?.features?.length > 0}
@@ -249,7 +251,7 @@
             />
           {:else}
             <p class="w-full bg-neutral-100 dark:bg-neutral-700 p-2 mt-3">
-              No hay tareas aquí
+              {$t('explore.noitems', { items: $t('tasks') })}
             </p>
           {/if}
         {:else if target(zoom) === 'municipalities' && code?.length === 5}
@@ -259,12 +261,12 @@
           <div class="space-y-6 pt-4">
             <div class="!space-y-1">
               <p class="flex justify-between">
-                <span>Tareas:</span>
+                <span>{$t('explore.tasks')}:</span>
                 <span>{project?.task_count}</span>
               </p>
               {#if project?.task_count}
                 <p class="flex justify-between">
-                  <span>Mapeado:</span>
+                  <span>{$t('explore.mapped')}:</span>
                   <span>{fmt.format(project.mapped_count / project?.task_count)}</span>
                 </p>
                 <Progressbar
@@ -275,16 +277,15 @@
               {/if}
             </div>
             {#await statsPromise}
-              <p class="mt-4">Cargando estadísticas... <Spinner size={4}/></p>
+              <p class="mt-4">{$t('common.loading')} <Spinner size={4}/></p>
             {:then stats}
               <StatsSection {stats} users={false}/>
             {/await}
             <p>
-              Haz <button class="text-primary-600" on:click={() => setZoom(TASK_THR)}>zoom</button>
-              para ver las tareas o
-              <a class="text-primary-600" href="/explore">explora</a>
-              el resto de municipios.
-            </p>
+              <button class="text-primary-600" on:click={() => setZoom(TASK_THR)}>
+                {$t('explore.zoom')}
+              </button>
+              {@html $t('explore.fortasksorprovs')}</p>
           </div>
         {:else}
           {#if target(zoom) === 'provinces' && code?.length === 2}
@@ -302,8 +303,7 @@
           />
           {#if code?.length == 2}
             <p class="pt-4">
-              <a class="text-primary-600" href="/explore">Explora</a>
-              el resto de provincias.
+              {@html $t('explore.remainingprovs')}
             </p>
           {/if}
         {/if}

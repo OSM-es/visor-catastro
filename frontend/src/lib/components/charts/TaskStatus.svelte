@@ -6,7 +6,6 @@
     TASK_ACTION_VALUES,
     TASK_ACTION_TEXT,
     TASK_COLORS,
-    TASK_STATUS_VALUES,
   } from '$lib/config.js'
 
   export let stats

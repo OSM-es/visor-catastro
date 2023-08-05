@@ -7,5 +7,6 @@
     "signup": "Registrarse",
     "logout": "Cerrar sesión",
     "loading": "Cargando datos...",
+    "filter": "Filtro ...",
     "nofilter": "Ninguno"
 }

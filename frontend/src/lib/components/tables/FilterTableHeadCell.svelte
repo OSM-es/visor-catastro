@@ -1,7 +1,8 @@
 <script>
 	import { getContext } from 'svelte'
-
   import { Select, TableHeadCell } from 'flowbite-svelte'
+
+  import { t } from '$lib/translations'
 
   const table = getContext('table')
   
@@ -22,10 +23,10 @@
   }
   
   function getItems() {
-    return ([['', 'Ninguno']].concat(Object.entries(items))).map(([value, name]) => ({ value, name }))
+    return ([['', $t('common.nofilter')]].concat(Object.entries(items))).map(([value, name]) => ({ value, name }))
   }
 </script>
 
 <TableHeadCell padding={thClass}>
-  <Select size="sm" items={getItems()} bind:value placeholder="Filtro ..." class="py-0.5"/>
+  <Select size="sm" items={getItems()} bind:value placeholder={$t('common.filter')} class="py-0.5"/>
 </TableHeadCell>

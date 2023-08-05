@@ -10,25 +10,6 @@ export const PUBLIC_MAX_NE = env.PUBLIC_MAX_NE.split(',') || [50, 20]
 export const TASK_THR = 15
 export const MUN_THR = 8
 
-export const TASK_TYPE_VALUES = {
-  Urbana: 'Urbana',
-  Rústica: 'Rústica',
-}
-
-export const TASK_DIFFICULTY_VALUES = {
-  EASY: 'Fácil',
-  MODERATE: 'Moderada',
-  CHALLENGING: 'Desafiante',
-}
-
-export const TASK_STATUS_VALUES = {
-  READY: 'Disponible',
-  MAPPED: 'Mapeada',
-  VALIDATED: 'Validada',
-  INVALIDATED: 'Se necesita más mapeo',
-  NEED_UPDATE: 'Necesita actualizar',
-}
-
 export const TASK_ACTION_VALUES = {
   LOCKED: 'Bloqueado para',
   STATE_CHANGE: 'Marcado como',
