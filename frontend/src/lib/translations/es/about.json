@@ -1,0 +1,10 @@
+{
+    "title": "Gestor de tareas de importación del Catastro Español a OpenStreetMap",
+    "learn": "Aprender más",
+    "start": "Comenzar a mapear",
+    "this": "Prototipo para acceso directo a los archivos de importación.",
+    "disclaimer": "Por el momento es una simple maqueta con la parte de la interacción del usuario.",
+    "goal": "El objetivo es poder colaborar sin pasos intermedios: compruébalo en",
+    "contrib": "Se aceptan contribuciones en {{target}}",
+    "contact": "Contacta en {{target}}"
+}

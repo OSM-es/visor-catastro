@@ -7,6 +7,7 @@
     DropdownItem,
   } from 'flowbite-svelte'
 
+  import { t } from '$lib/translations'
   import { login, logout, signup } from '$lib/user'
 
   export let user
@@ -23,12 +24,12 @@
   </Chevron>
 </Button>
 <Dropdown placement="bottom-end" triggeredBy="#avatar-menu" class="dark:bg-neutral-700">
-  <DropdownItem><a href="/settings">Ajustes</a></DropdownItem>
-  <DropdownItem on:click={logout}>Cerrar sesión</DropdownItem>
+  <DropdownItem><a href="/settings">{$t('common.settings')}</a></DropdownItem>
+  <DropdownItem on:click={logout}>{$t('common.logout')}</DropdownItem>
 </Dropdown>
 {:else}
 <Button outline size="sm" color="light" class="max-md:hidden" on:click={signup}>
-  Registrarse
+  {$t('common.signup')}
 </Button>
-<Button id="login" outline size="sm" on:click={login}>Iniciar sesión</Button>
+<Button id="login" outline size="sm" on:click={login}>{$t('common.login')}</Button>
 {/if}

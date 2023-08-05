@@ -1,0 +1,10 @@
+{
+    "title": "Spanish Cadastre to OpenStreetMap Import Tasking Manager",
+    "learn": "Learn more",
+    "start": "Start mapping",
+    "this": "Prototype for direct access to import files.",
+    "disclaimer": "At the moment it is a simple mockup with the user interaction part.",
+    "goal": "The goal is to be able to collaborate without intermediate steps: check it out at",
+    "contrib": "Contributions are welcome in {{target}}",
+    "contact": "Contact in {{target}}"
+}

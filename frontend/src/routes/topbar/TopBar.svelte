@@ -49,7 +49,6 @@
   <div class="flex items-center">
     <span hidden={!activeUrl.startsWith('/learn')}>
       <ToolbarButton
-        name="Abre tabla de contenido"
         class="px-1.5 lg:hidden"
         on:click={toggleDrawer}
       >
@@ -69,17 +68,17 @@
       </div>
     {/if}
     <NavLi href="/learn" active={activeUrl.startsWith('/learn')} class={_liClass}>
-      <ResponsiveIcon title={$t('menu.learn')} max={'md:max-lg'} min={'max-sm:hidden lg'}>
+      <ResponsiveIcon title={$t('common.learn')} max={'md:max-lg'} min={'max-sm:hidden lg'}>
         <BookOpen class="w-5 m-1"/>
       </ResponsiveIcon>
     </NavLi>
     <NavLi href="/explore" active={activeUrl.startsWith('/explore')} class={_liClass}>
-      <ResponsiveIcon title={$t('menu.explore')} max={'md:max-lg'} min={'max-sm:hidden lg'}>
+      <ResponsiveIcon title={$t('common.explore')} max={'md:max-lg'} min={'max-sm:hidden lg'}>
         <Map class="w-5 m-1"/>
       </ResponsiveIcon>
     </NavLi>
     <NavLi href="/about" active={activeUrl.startsWith('/aboout')} class={_liClass}>
-      <ResponsiveIcon title={$t('menu.about')} max={'md:max-lg'} min={'max-sm:hidden lg'}>
+      <ResponsiveIcon title={$t('common.about')} max={'md:max-lg'} min={'max-sm:hidden lg'}>
         <InformationCircle class="w-5 m-1"/>
       </ResponsiveIcon>
     </NavLi>
