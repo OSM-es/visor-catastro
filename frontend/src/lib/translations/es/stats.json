@@ -2,5 +2,6 @@
     "buildings": "Edificios mapeados",
     "addresses": "Direcciones mapeadas",
     "users": "Mapeadores totales",
-    "mappers": "Mapeadores en línea"
+    "mappers": "Mapeadores en línea",
+    "taskstatus": "Tareas por estado"
 }

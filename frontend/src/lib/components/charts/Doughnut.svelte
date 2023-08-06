@@ -23,7 +23,7 @@
   }
 
   function formatTooltip(context) {
-    let label = context.label
+    let label = context.dataset.label
     if (label) label += ': '
     label += context.dataset.data[context.dataIndex]
     return label + '%'
@@ -34,6 +34,7 @@
   data={setPercents(data)}
   options={{
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: { position: 'right', labels: { boxWidth: 24 } },
       tooltip: { callbacks: { label: (context) => formatTooltip(context) } },

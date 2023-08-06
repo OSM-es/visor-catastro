@@ -28,7 +28,7 @@ class TasksStatus(Resource):
         ad_stats.append(ad_map_locks)
         ad_stats.append(ad_val_locks)
         return {
-            'labels': labels,
-            'buildings': bu_stats,
-            'addresses': ad_stats,
+            'buildings': dict(zip(labels, bu_stats)),
+            'addresses': dict(zip(labels, ad_stats)),
+            'splitted': bu_stats != ad_stats
         }

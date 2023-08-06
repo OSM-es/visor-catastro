@@ -2,5 +2,6 @@
     "buildings": "Buildings mapped",
     "addresses": "Addresses mapped",
     "users": "Total mappers",
-    "mappers": "Mappers online"
+    "mappers": "Mappers online",
+    "taskstatus": "Tasks by status"
 }
