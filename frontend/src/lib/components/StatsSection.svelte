@@ -7,8 +7,9 @@
   export let omit = []
   export let size = 'text-3xl'
   export let ns = 'stats'
+  export let gap = 'gap-x-12'
   
-  let divClass = 'flex flex-wrap mb-16 gap-x-36'
+  let divClass = `flex flex-wrap ${gap} gap-y-8`
   if (Object.keys(stats).length < 5) divClass += ' justify-between'
 </script>
 

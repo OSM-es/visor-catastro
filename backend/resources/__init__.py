@@ -1,7 +1,7 @@
 from flask_restful import Resource
 
 from resources.fixme import Fixme
-from resources.municipalities import Municipalities
+from resources.municipalities import Municipalities, Municipality
 from resources.provinces import Provinces
 from resources.user import User
 from resources.stats import Stats, TasksStatus 

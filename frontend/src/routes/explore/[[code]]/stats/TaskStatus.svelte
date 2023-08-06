@@ -1,4 +1,5 @@
 <script>
+  import { Card } from 'flowbite-svelte'
   import Doughnut from '$lib/components/charts/Doughnut.svelte'
   import StatsSection from '$lib/components/StatsSection.svelte'
   import { AREA_BORDER, TASK_COLORS } from '$lib/config.js'
@@ -54,17 +55,17 @@
 
 <h2 class="text-2xl font-bold mb-8">{$t('stats.taskstatus')}</h2>
 <div class="flex flex-col md:flex-row md:gap-20">
-  <div class="w-full md:w-1/3">
+  <Card class="w-full md:w-1/3 h-96" size="xl">
     <Doughnut data={getData(stats)}/>
-  </div>
-  <div class="w-full md:w-2/3">
+  </Card>
+  <Card class="w-full md:w-2/3 min-h-96" size="xl">
     {#if stats.splitted}
       <h3 class="text-xl font-bold mb-4">{$t('Buildings')} / {$t('addresses')}</h3>
-      <StatsSection stats={stats.buildings} stats2={stats.addresses} ns={'explore'}/>
+      <StatsSection stats={stats.buildings} stats2={stats.addresses} ns={'explore'} gap={'gap-x-24'}/>
       {:else}
-      <StatsSection stats={stats.buildings} ns={'explore'}/>
+      <StatsSection stats={stats.buildings} ns={'explore'} gap={'gap-x-24'}/>
     {/if}
     <!--h3 class="text-xl font-bold mb-4">{$t('Addresses')}</h3>
     <StatsSection stats={stats.addresses} ns={'explore'}/-->
-  </div>
+  </Card>
 </div>

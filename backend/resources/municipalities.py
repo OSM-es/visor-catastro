@@ -1,8 +1,7 @@
 import datetime
 
-from flask import request
+from flask import request, abort
 from flask_restful import Resource
-from geoalchemy2.shape import to_shape
 import geopandas
 
 import models
@@ -32,3 +31,10 @@ class Municipalities(Resource):
         df['mapped_count'] = df['muncode'].map(get_mapped)
         data = df.to_json(default=convertDate).encode('utf-8')
         return data
+
+class Municipality(Resource):
+    def get(self, code):
+        mun = models.Municipality.get_by_code(code)
+        if not mun:
+            abort(404)
+        return mun.asdict()

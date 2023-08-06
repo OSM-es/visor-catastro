@@ -8,7 +8,9 @@
 </script>
 
 <div class="m-8">
-  <!--h1>{$t('explore.cadastreof')} {data.task.municipality.name} ({data.code})</h1-->
+  <h1 class="text-3xl font-bold mb-12">
+    {$t('explore.cadastreof')} {data.municipality.name} ({data.municipality.muncode})
+  </h1>
   {#await data.streamed.taskStatus}
     <p class="mt-4">{$t('common.loading')} <Spinner size={4}/></p>
   {:then stats}

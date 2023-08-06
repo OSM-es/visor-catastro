@@ -28,7 +28,7 @@
   {:catch}
     <span></span>
   {/await}
-  <div class="bg-gray-100 dark:bg-gray-800 p-4">
+  <div class="bg-gray-100 dark:bg-gray-800 px-4 mt-16">
     <article class="prose max-w-none lg:prose-xl dark:prose-invert mx-auto">
       <p>
         {$t('about.this')}
