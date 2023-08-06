@@ -35,6 +35,18 @@ export const config = {
     },
     {
       locale: 'es',
+      key: 'settings',
+      loader: async () => (await import('./es/settings.json')).default,
+      routes: ['/settings'],
+    },
+    {
+      locale: 'en',
+      key: 'settings',
+      loader: async () => (await import('./en/settings.json')).default,
+      routes: ['/settings'],
+    },
+    {
+      locale: 'es',
       key: 'about',
       loader: async () => (await import('./es/about.json')).default,
       routes: ['/about'],

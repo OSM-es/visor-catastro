@@ -35,7 +35,6 @@
     "selectanother": "Select another task",
     "checks": "Checks",
     "signin": "Sign in for {{action}}",
-    "dotutorial": "Complete the tutorial for {{action}}",
     "type": "Task type <span class=\"font-bold\">{{type}}</span>",
     "diff": "<span class=\"font-bold {{taskColor}}\">{{diff}}</span> difficulty",
     "islocked": "Task <span class=\"font-bold text-danger-500\">locked</span> for {{lock}} by another user.",

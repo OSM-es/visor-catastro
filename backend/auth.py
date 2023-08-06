@@ -118,6 +118,7 @@ def authorize():
         elif user.osm_user:
             user.import_user = osm_user
         passTutorial(user)
+    user.update_mapping_level(data['user']['changesets']['count'])
     if user.osm_user or user.import_user:
         db.session.add(user)
     db.session.add(osm_user)

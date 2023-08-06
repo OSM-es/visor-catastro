@@ -1,0 +1,12 @@
+{
+    "BEGINNER": "Beginner mapper",
+    "INTERMEDIATE": "Intermediate mapper",
+    "ADVANCED": "Advanced mapper",
+    "settings": "Settings",
+    "locale": "Language",
+    "email": "Email",
+    "osmdetails": "OpenStreetMap details",
+    "accountcreated": "Account created",
+    "changesets": "Changesets",
+    "privacy": "Your email address will be used only to send you notifications and updates about visor-catastro. It will not be shared with other users or organizations."
+}

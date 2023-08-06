@@ -54,6 +54,10 @@ class Config:
         'http://overpass-api.de/api/interpreter',
     ]
 
+    # Nivel mapeador
+    MAPPER_LEVEL_INTERMEDIATE = int(os.getenv("MAPPER_LEVEL_INTERMEDIATE", 250))
+    MAPPER_LEVEL_ADVANCED = int(os.getenv("MAPPER_LEVEL_ADVANCED", 500))
+
     # Catastro
     FOTO_FACHADA_URL = 'http://ovc.catastro.meh.es/OVCServWeb/OVCWcfLibres/OVCFotoFachada.svc/RecuperarFotoFachadaGet?ReferenciaCatastral='
     CACHE_TYPE = 'FileSystemCache'

@@ -1,0 +1,12 @@
+{
+    "BEGINNER": "Mapeador principiante",
+    "INTERMEDIATE": "Mapeador intermedio",
+    "ADVANCED": "Mapeador avanzado",
+    "settings": "Ajustes",
+    "locale": "Idioma",
+    "email": "Correo electrónico",
+    "osmdetails": "Detalles de OpenStreetMap",
+    "accountcreated": "Cuenta creada",
+    "changesets": "Conjuntos de cambios",
+    "privacy": "Su dirección de correo electrónico se utilizará únicamente para enviarle notificaciones y actualizaciones sobre visor-catastro. No se compartirá con otros usuarios u organizaciones."
+}

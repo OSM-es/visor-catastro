@@ -1,5 +1,7 @@
 from enum import Enum
 
+from flask import current_app
+
 from models import db
 from models.utils import JSONEncodedDict, MutableDict
 
@@ -46,6 +48,11 @@ class User(db.Model):
         MAPPER = 0
         ADMIN = 1
 
+    class MappingLevel(Enum):
+        BEGINNER = 1
+        INTERMEDIATE = 2
+        ADVANCED = 3
+
     id = db.Column(db.Integer, primary_key=True)
     locale = db.Column(db.String)
     role = db.Column(db.Integer, default=Role.READ_ONLY.value)
@@ -53,6 +60,7 @@ class User(db.Model):
         MutableDict.as_mutable(JSONEncodedDict),
         default={'passed': [], 'next': 'login'},
     )
+    mapping_level = db.Column(db.Integer, default=MappingLevel.BEGINNER.value)
     email = db.Column(db.String, nullable=True)
     osm_id = db.Column(
         db.Integer,
@@ -76,7 +84,17 @@ class User(db.Model):
             'email': self.email,
             'locale': self.locale,
             'role': User.Role(self.role).name,
+            'mapping_level': User.MappingLevel(self.mapping_level).name,
             'osm_id': self.osm_id,
             'import_id': self.import_id,
         }
 
+    def update_mapping_level(self, changeset_count):
+        intermediate_level = current_app.config["MAPPER_LEVEL_INTERMEDIATE"]
+        advanced_level = current_app.config["MAPPER_LEVEL_ADVANCED"]
+        mapping_level = User.MappingLevel.BEGINNER.value
+        if changeset_count > advanced_level:
+            mapping_level = User.MappingLevel.ADVANCED.value
+        elif intermediate_level < changeset_count < advanced_level:
+            mapping_level = User.MappingLevel.INTERMEDIATE.value
+        self.mapping_level = max(self.mapping_level, mapping_level)

@@ -30,5 +30,5 @@
 {:else if !user}
   <Button on:click={login}>{$t('task.signin', { action })}</Button>
 {:else}
-  <Button on:click={doTutorial}>{$t('task.dotutorial', { action })}</Button>
+  <Button on:click={doTutorial}>{$t('common.dotutorial', { action })}</Button>
 {/if}

@@ -35,7 +35,6 @@
     "selectanother": "Seleccionar otra tarea",
     "checks": "Comprobaciones",
     "signin": "Regístrate para {{action}}",
-    "dotutorial": "Completa el tutorial para {{action}}",
     "type": "Tarea tipo <span class=\"font-bold\">{{type}}</span>",
     "diff": "dificultad <span class=\"font-bold {{taskColor}}\">{{diff}}</span>",
     "islocked": "Tarea <span class=\"font-bold text-danger-500\">bloqueada</span> para {{lock}} por otro usuario.",

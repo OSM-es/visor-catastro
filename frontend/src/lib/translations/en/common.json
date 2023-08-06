@@ -13,5 +13,8 @@
     "Save": "Save",
     "save": "save",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "send": "Send",
+    "edit": "edit",
+    "dotutorial": "Complete the tutorial for {{action}}"
 }

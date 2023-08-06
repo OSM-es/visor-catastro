@@ -38,11 +38,9 @@ Ajustes usuario:
 Página de usuario:
     ☐ Estadísticas de contribuciones
     ☐ Lista de taras
-    ☐ Clasificar nivel de mapeadores
     ☐ Datos públicos
 
 Internacionalización #8:
-    ☐ Sacar cadenas
     ☐ Buscar traductores
 
 Tutorial #9:
@@ -54,6 +52,9 @@ Tutorial #9:
 
 Estadísticas:
     ☐ Página de estadísticas por municipio
+       ☐ Contribuidores
+       ☐ Línea de tiempo
+       ☐ Estadísticas de tiempo 
     ☐ ¿otros?
 
 Tasking manager:

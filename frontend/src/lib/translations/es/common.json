@@ -13,5 +13,8 @@
     "Save": "Guardar",
     "save": "guardar",
     "yes": "Si",
-    "no": "No"
+    "no": "No",
+    "send": "Enviar",
+    "edit": "editar",
+    "dotutorial": "Completa el tutorial para {{action}}"
 }
