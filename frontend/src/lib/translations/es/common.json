@@ -1,4 +1,7 @@
 {
+    "BEGINNER": "Mapeador principiante",
+    "INTERMEDIATE": "Mapeador intermedio",
+    "ADVANCED": "Mapeador avanzado",
     "learn": "Aprende",
     "explore": "Explora",
     "about": "Acerca de",

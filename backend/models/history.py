@@ -1,10 +1,11 @@
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import column, func, or_
+from sqlalchemy import column, func, or_, and_
 from sqlalchemy.orm import declarative_mixin
 
-from models import db, OsmUser
+from models import db, OsmUser, User
+import models
 
 TASK_LOCK_TIMEOUT = 86400
 
@@ -81,6 +82,46 @@ class TaskHistory(TaskHistoryMixin, History):
             'addresses': self.addresses,
             'buildings': self.buildings,
         }
+
+    @staticmethod
+    def _count_contributors(muncode, _target='MAPPED'):
+        return TaskHistory.query.join(
+            OsmUser
+        ).join(
+            User, or_(User.osm_id == OsmUser.id, User.import_id == OsmUser.id)
+        ).join(
+            models.Task
+        ).filter_by(
+            muncode = muncode
+        ).filter(
+            and_(TaskHistory.action == 2, TaskHistory.text == _target)
+        ).distinct(
+            User.id
+        ).count()
+
+    @staticmethod
+    def count_mappers(muncode):
+        return TaskHistory._count_contributors(muncode, 'MAPPED')
+
+    @staticmethod
+    def count_validators(muncode):
+        return TaskHistory._count_contributors(muncode, 'VALIDATED')
+
+    @staticmethod
+    def get_contributors(muncode):
+        return TaskHistory.query.join(
+            OsmUser
+        ).join(
+            User, or_(User.osm_id == OsmUser.id, User.import_id == OsmUser.id)
+        ).join(
+            models.Task
+        ).filter_by(
+            muncode = muncode
+        ).filter(
+            TaskHistory.action == 2
+        ).with_entities(
+            User
+        ).distinct().all()
 
 
 class TaskLock(HistoryMixin, TaskHistoryMixin, db.Model):

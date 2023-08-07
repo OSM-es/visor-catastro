@@ -2,6 +2,17 @@
     "buildings": "Edificios mapeados",
     "addresses": "Direcciones mapeadas",
     "users": "Mapeadores totales",
-    "mappers": "Mapeadores en línea",
-    "taskstatus": "Tareas por estado"
+    "onlinemappers": "Mapeadores en línea",
+    "mappers": "Mapeadores",
+    "validators": "Validadores",
+    "taskstatus": "Tareas por estado",
+    "contributors": "Colaboradores",
+    "contribtotal": "Total de colaboradores",
+    "experience1": "Menos de un mes",
+    "experience2": "1 a 3 meses",
+    "experience3": "3 a 6 meses",
+    "experience4": "6 a 12 meses",
+    "experience5": "Más de 1 año",
+    "usersbylevel": "Usuarios por nivel",
+    "usersbyexperience": "Usuarios por experiencia en Visor Catastro"
 }

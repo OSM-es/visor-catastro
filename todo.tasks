@@ -9,6 +9,11 @@ Mapa:
     ☐ Guardar bounds del mapa. Osm recuerda el zoom de la última visita
     ☐ Cuadro de búsqueda de municipios y otras localidades ¿dónde lo ponemos?
     ☐ En chrome la lista de tareas sale con barras de desplazamiento no necesarias
+    ☐ Añadir lista colaboradores con visualización en el mapa
+    ☐ Mostrar porcentaje validado en lista de municipios
+    ☐ explore/mun: Enlaces a más estadísticas y Changesets en OSMCha
+    ☐ explore/mun: barra de progreso con tres niveles para porcentaje validado/mapeado
+    ☐ color municipio por progreso (azul no mapeado, ambar mapeando, rojo 100% mapeado, verde 100% validado), leyenda
 
 Edición tarea:
     ☐ Descarga de archivo de tarea
@@ -52,7 +57,6 @@ Tutorial #9:
 
 Estadísticas:
     ☐ Página de estadísticas por municipio
-       ☐ Contribuidores
        ☐ Línea de tiempo
        ☐ Estadísticas de tiempo 
     ☐ ¿otros?
@@ -64,6 +68,7 @@ Tasking manager:
 Gestor de notificaciones #3:
     ☐ Implementar correo-e
     ☐ Estudiar si se puede usar la api OSM para mandar mensajes
+    ☐ Actualizar mensajes y changesets OSM
     
 Actualización:
     ☐ Notificar por correo cambios de geometría o nombre de municipio

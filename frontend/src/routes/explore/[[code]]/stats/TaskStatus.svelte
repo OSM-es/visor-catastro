@@ -1,11 +1,11 @@
 <script>
-  import { Card } from 'flowbite-svelte'
+  import { Card, CardPlaceholder } from 'flowbite-svelte'
   import Doughnut from '$lib/components/charts/Doughnut.svelte'
   import StatsSection from '$lib/components/StatsSection.svelte'
   import { AREA_BORDER, TASK_COLORS } from '$lib/config.js'
   import { t } from '$lib/translations'
 
-  export let stats
+  export let fetchData
 
   const options = {
     backgroundColor: [
@@ -53,19 +53,24 @@
   }
 </script>
 
-<h2 class="text-2xl font-bold mb-8">{$t('stats.taskstatus')}</h2>
-<div class="flex flex-col md:flex-row md:gap-20">
-  <Card class="w-full md:w-1/3 h-96" size="xl">
-    <Doughnut data={getData(stats)}/>
-  </Card>
-  <Card class="w-full md:w-2/3 min-h-96" size="xl">
-    {#if stats.splitted}
-      <h3 class="text-xl font-bold mb-4">{$t('Buildings')} / {$t('addresses')}</h3>
-      <StatsSection stats={stats.buildings} stats2={stats.addresses} ns={'explore'} gap={'gap-x-24'}/>
-      {:else}
-      <StatsSection stats={stats.buildings} ns={'explore'} gap={'gap-x-24'}/>
-    {/if}
-    <!--h3 class="text-xl font-bold mb-4">{$t('Addresses')}</h3>
-    <StatsSection stats={stats.addresses} ns={'explore'}/-->
-  </Card>
+<div>
+  <h2 class="text-2xl font-bold mb-4">{$t('stats.taskstatus')}</h2>
+  <div class="flex flex-col md:flex-row gap-x-8 gap-y-4">
+    {#await fetchData}
+      <CardPlaceholder class="w-full md:w-1/3 h-96" size="xl"/>
+      <CardPlaceholder class="w-full md:w-2/3 h-96" size="2xl"/>
+    {:then stats}
+      <Card class="w-full md:w-1/3 h-96" size="xl">
+        <Doughnut data={getData(stats)}/>
+      </Card>
+      <Card class="w-full md:w-2/3 min-h-96" size="xl">
+        {#if stats.splitted}
+          <h3 class="text-xl font-bold mb-4">{$t('explore.Buildings')} / {$t('explore.addresses')}</h3>
+          <StatsSection stats={stats.buildings} stats2={stats.addresses} ns={'explore'} gap={'gap-x-24'}/>
+          {:else}
+          <StatsSection stats={stats.buildings} ns={'explore'} gap={'gap-x-24'}/>
+        {/if}
+      </Card>
+    {/await}
+  </div>
 </div>

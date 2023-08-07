@@ -2,6 +2,17 @@
     "buildings": "Buildings mapped",
     "addresses": "Addresses mapped",
     "users": "Total mappers",
-    "mappers": "Mappers online",
-    "taskstatus": "Tasks by status"
+    "onlinemappers": "Mappers online",
+    "mappers": "Mappers",
+    "validators": "Validators",
+    "taskstatus": "Tasks by status",
+    "contributors": "Contributors",
+    "contribtotal": "Contributors total",
+    "experience1": "Less than 1 month",
+    "experience2": "1 to 3 months",
+    "experience3": "3 to 6 months",
+    "experience4": "6 to 12 months",
+    "experience5": "More than 1 year",
+    "usersbylevel": "Users by level",
+    "usersbyexperience": "Users by experience on Visor Catastro"
 }

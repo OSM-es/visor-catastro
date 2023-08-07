@@ -25,6 +25,7 @@ class OsmUser(db.Model):
         return {
             'id': self.id,
             'display_name': self.display_name,
+            'img': self.img,
             'user': self.user.asdict() if self.user else None,
         }
 
@@ -62,6 +63,10 @@ class User(db.Model):
     )
     mapping_level = db.Column(db.Integer, default=MappingLevel.BEGINNER.value)
     email = db.Column(db.String, nullable=True)
+    date_registered = db.Column(
+        db.DateTime(timezone=True),
+        server_default=db.func.now(),
+    )
     osm_id = db.Column(
         db.Integer,
         db.ForeignKey('osm_user.id'),
@@ -85,6 +90,7 @@ class User(db.Model):
             'locale': self.locale,
             'role': User.Role(self.role).name,
             'mapping_level': User.MappingLevel(self.mapping_level).name,
+            'date_registered': self.date_registered.isoformat(),
             'osm_id': self.osm_id,
             'import_id': self.import_id,
         }
@@ -97,4 +103,4 @@ class User(db.Model):
             mapping_level = User.MappingLevel.ADVANCED.value
         elif intermediate_level < changeset_count < advanced_level:
             mapping_level = User.MappingLevel.INTERMEDIATE.value
-        self.mapping_level = max(self.mapping_level, mapping_level)
+        self.mapping_level = max(self.mapping_level or User.MappingLevel.BEGINNER.value, mapping_level)

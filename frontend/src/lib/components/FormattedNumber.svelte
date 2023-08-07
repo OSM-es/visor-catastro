@@ -4,7 +4,7 @@
   export let value
 
 	$: formattedNumber = Number(value).toLocaleString(locale, {
-		notation: 'compact',
+		notation: value > 9999 ? 'compact' : 'standard',
 		compactDisplay: 'short'
 	})
 </script>

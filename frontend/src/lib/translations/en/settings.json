@@ -1,7 +1,4 @@
 {
-    "BEGINNER": "Beginner mapper",
-    "INTERMEDIATE": "Intermediate mapper",
-    "ADVANCED": "Advanced mapper",
     "settings": "Settings",
     "locale": "Language",
     "email": "Email",
