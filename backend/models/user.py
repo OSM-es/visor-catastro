@@ -62,6 +62,10 @@ class User(db.Model):
     )
     mapping_level = db.Column(db.Integer, default=MappingLevel.BEGINNER.value)
     email = db.Column(db.String, nullable=True)
+    date_registered = db.Column(
+        db.DateTime(timezone=True),
+        server_default=db.func.now(),
+    )
     osm_id = db.Column(
         db.Integer,
         db.ForeignKey('osm_user.id'),
