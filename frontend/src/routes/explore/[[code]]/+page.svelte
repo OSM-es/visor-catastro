@@ -37,12 +37,13 @@
 
   $: code = $page?.params?.code
   $: tasks = filterTasks(geoJsonData, muncode, type, difficulty, ad_status, bu_status)
-  $: dataPromise = fetchData(map, zoom, code)
+  $: dataPromise = fetchData(map, center, zoom, code)
   $: statsPromise = fetchStats(code)
   
   
-  async function fetchData(map, zoom, code) {
+  async function fetchData(map, center, zoom, code) {
     if (!map) return null
+    center = center
     const bounds = map?.getMap().getBounds().toBBoxString()
     geoJsonData = await data.streamed.geoJsonData(target(zoom), code, bounds)
     if (code && geoJsonData.features.length) {
