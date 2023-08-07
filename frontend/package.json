@@ -7,22 +7,20 @@
     "build": "vite build",
     "preview": "vite preview"
   },
-  "devDependencies": {
+  "dependencies": {
     "@sveltejs/adapter-node": "^1.2.4",
-    "@sveltejs/kit": "^1.20.4",
+    "@sveltejs/kit": "^1.5.0",
     "@tailwindcss/typography": "^0.5.9",
     "autoprefixer": "^10.4.7",
     "mdsvex": "^0.10.6",
     "postcss": "^8.4.14",
     "postcss-load-config": "^4.0.1",
-    "svelte": "^4.0.0",
+    "svelte": "^3.54.0",
     "svelte-heros-v2": "^0.6.5",
     "svelte-leafletjs": "^0.10.0",
     "svelte-preprocess": "^5.0.3",
     "tailwindcss": "^3.3.2",
-    "vite": "^4.3.0"
-  },
-  "dependencies": {
+    "vite": "^4.3.0",
     "@popperjs/core": "^2.11.7",
     "chart.js": "^4.3.2",
     "classnames": "^2.3.2",
