@@ -3,14 +3,14 @@
 
   import {
     Chart as ChartJS,
-    Title,
+    Colors,
     Tooltip,
     Legend,
     ArcElement,
     CategoryScale,
   } from 'chart.js'
   
-  ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale)
+  ChartJS.register(Colors, Tooltip, Legend, ArcElement, CategoryScale)
 
   export let data
 

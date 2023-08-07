@@ -12,6 +12,7 @@ class Stats(Resource):
             'mappers': models.Task.count_mappers(code),
         }
 
+
 class TasksStatus(Resource):
     def get(self, code=None):
         labels = [s.name for s in models.Task.Status]
@@ -31,4 +32,14 @@ class TasksStatus(Resource):
             'buildings': dict(zip(labels, bu_stats)),
             'addresses': dict(zip(labels, ad_stats)),
             'splitted': bu_stats != ad_stats
+        }
+
+
+class ContributorStats(Resource):
+    def get(self, code):
+        contributors = models.TaskHistory.get_contributors(code)
+        return {
+            'mappers': models.TaskHistory.count_mappers(code),
+            'validators': models.TaskHistory.count_validators(code),
+            'contributors': [u.import_user.asdict() for u in contributors],
         }
