@@ -25,6 +25,7 @@ class OsmUser(db.Model):
         return {
             'id': self.id,
             'display_name': self.display_name,
+            'img': self.img,
             'user': self.user.asdict() if self.user else None,
         }
 
@@ -89,6 +90,7 @@ class User(db.Model):
             'locale': self.locale,
             'role': User.Role(self.role).name,
             'mapping_level': User.MappingLevel(self.mapping_level).name,
+            'date_registered': self.date_registered.isoformat(),
             'osm_id': self.osm_id,
             'import_id': self.import_id,
         }
