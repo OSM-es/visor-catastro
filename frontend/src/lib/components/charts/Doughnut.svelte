@@ -14,24 +14,17 @@
 
   export let data
 
-  function setPercents(data) {
-    data.datasets.forEach((dataset, i) => {
-      const total = dataset.data.reduce((a, b) => a + b, 0)
-      dataset.data = dataset.data.map((v) => Math.round((v / total) * 100));
-    })
-    return data
-  }
-
   function formatTooltip(context) {
-    let label = context.dataset.label
+    const total = context.dataset.data.reduce((a, b) => a + b, 0)
+    let label = context.dataset.label || ''
     if (label) label += ': '
-    label += context.dataset.data[context.dataIndex]
-    return label + '%'
+    label += `${context.raw} (${Math.round((context.raw / total) * 100)}%)`
+    return label
   }
 </script>
   
 <Doughnut
-  data={setPercents(data)}
+  {data}
   options={{
     responsive: true,
     maintainAspectRatio: false,
