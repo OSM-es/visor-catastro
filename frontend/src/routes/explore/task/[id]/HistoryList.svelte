@@ -16,7 +16,7 @@
         {$t('task.' + item.action)}
         {$t('task.' + item.text)}
         {#if item.addresses != item.buildings}
-          {item.buildings ? $t('buildings') : $t('addresses')}
+          {item.buildings ? $t('explore.buildings') : $t('explore.addresses')}
         {/if}
         <Badge color="black" border>
           <Clock size=14 variation="solid" class="mr-1"/>
