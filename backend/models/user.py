@@ -101,4 +101,4 @@ class User(db.Model):
             mapping_level = User.MappingLevel.ADVANCED.value
         elif intermediate_level < changeset_count < advanced_level:
             mapping_level = User.MappingLevel.INTERMEDIATE.value
-        self.mapping_level = max(self.mapping_level, mapping_level)
+        self.mapping_level = max(self.mapping_level or User.MappingLevel.BEGINNER.value, mapping_level)
