@@ -4,6 +4,7 @@
   import { Button, ButtonGroup, Select } from 'flowbite-svelte'
   import { ArrowUturnLeft, Check, LockClosed, XMark } from 'svelte-heros-v2'
 
+  import { t } from '$lib/translations'
   import ResponsiveIcon from '$lib/components/ResponsiveIcon.svelte'
 
   export let osmStreets
@@ -64,13 +65,13 @@
       on:click={undoStreet}
       class={btnClass}
     >
-      <ResponsiveIcon title="Deshacer">
+      <ResponsiveIcon title={$t('common.undo')}>
         <ArrowUturnLeft size=18/>
       </ResponsiveIcon>
     </Button>
   {:else}
     <Button type="submit" name="validated" value="true" class={btnClass}>
-      <ResponsiveIcon title="Confirmar">
+      <ResponsiveIcon title={$t('common.confirm')}>
         <Check size=18/>
       </ResponsiveIcon>
     </Button>

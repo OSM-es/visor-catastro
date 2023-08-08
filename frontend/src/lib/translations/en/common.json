@@ -19,5 +19,8 @@
     "no": "No",
     "send": "Send",
     "edit": "edit",
+    "undo": "Undo",
+    "confirm": "Confirm",
+    "catastro": "Cadastre",
     "dotutorial": "Complete the tutorial for {{action}}"
 }

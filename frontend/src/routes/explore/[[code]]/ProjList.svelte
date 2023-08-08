@@ -50,7 +50,7 @@
       <tr class="text-xs uppercase">
         <SortTableHeadCell thClass="p-2" key={key(target)}>{$t('explore.code')}</SortTableHeadCell>
         <SortTableHeadCell thClass="p-2" key='name'>{$t('explore.name')}</SortTableHeadCell>
-        <SortTableHeadCell thClass="p-2" key='task_count'>{$t('explore.tasks')}</SortTableHeadCell>
+        <SortTableHeadCell thClass="p-2" key='task_count'>{$t('explore.Tasks')}</SortTableHeadCell>
         <SortTableHeadCell thClass="p-2" key='mapped_count'>Mapeado</SortTableHeadCell>
       </tr>
     </TableHead>

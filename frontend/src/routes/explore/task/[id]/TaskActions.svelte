@@ -122,13 +122,13 @@
         {/if}
       {/if}
       {#if canSelectImport}
-        <p class="capitalize">
+        <p>
           {$t('task.willimport')}
           <Checkbox name="buildings" value="true" bind:checked={buildings}>
-            {$t('explore.buildings')}
+            {$t('explore.Buildings')}
           </Checkbox>
           <Checkbox name="addresses" value="true" bind:checked={addresses}>
-            {$t('explore.addresses')}
+            {$t('explore.Addresses')}
           </Checkbox>
         </p>
       {/if}
@@ -140,7 +140,7 @@
           class="mr-4 w-48"
           disabled={!buildings && !addresses}
         >
-          {buildings ? (addresses ? $t('task.mapall') : $t('task.mapbuildings')) : (addresses ? $t('task.mapaddresses') : '')}
+          {buildings ? (addresses ? $t('task.mapall') : $t('task.mapbuildings')) : $t('task.mapaddresses')}
         </Button>
       </EditorButton>
     {:else if status === 'MAPPED'}

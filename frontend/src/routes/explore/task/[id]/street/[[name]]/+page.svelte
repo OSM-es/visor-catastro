@@ -1,4 +1,5 @@
 <script>
+  import { t } from '$lib/translations'
   import { onMount, setContext } from 'svelte'
   import { writable } from 'svelte/store'
 	import { enhance } from '$app/forms'
@@ -50,7 +51,8 @@
   $: index = items.findIndex((st) => st.cat_name === $street.cat_name)
   $: street.set(data.street)
   $: streetsToValidate = streets?.filter(s => s.validated) || []
-
+  $: isLocked = data?.street?.is_locked && data?.user?.id !== data?.street?.owner?.id
+  
   const focusEditor = debounce(() => {
     const editor = document.getElementById('editor')
     editor?.scrollIntoView({ block: 'center', behavior: 'smooth' })
@@ -73,7 +75,7 @@
   })
 
   beforeNavigate(() => {
-    if (data.user) {
+    if (data?.user) {
       const url = `/papi/street/${$street?.mun_code}/${$street.cat_name}/lock`
       fetch(url, {method: 'DELETE'})
     }
@@ -124,10 +126,6 @@
       if (result.type === 'success') invalidateAll()
     }
   }
-
-  function isLocked() {
-    return data.street.is_locked && data.user.id !== data.street.owner?.id
-  }
 </script>
 
 <div class="flex flex-col flex-grow">
@@ -142,7 +140,7 @@
         </div>
         <div class="flex flex-row space-x-1 items-center">
           <Checkbox id="filterTask" bind:checked={filterTask}/>
-          <Label for="filterTask">En la tarea</Label>
+          <Label for="filterTask">{$t('task.intask')}</Label>
         </div>
       </div>
       <div>
@@ -162,16 +160,16 @@
           </Button>
           <Popover triggeredBy="#edit" placement="bottom-start" arrow={false} offset=2 class="flex flex-row" defaultClass="p-0">
             {#if zoom < 19}
-              <p class="text-sm mx-3 my-2 whitespace-nowrap">Haz zoom para editar</p>
+              <p class="text-sm mx-3 my-2 whitespace-nowrap">{$t('task.zoomtoedit')}</p>
             {:else}
               <Listgroup class="divide-none w-36" active>
-                <ListgroupItem on:click={gotoOsm}>Editar en OSM</ListgroupItem>
-                <ListgroupItem>Editar con JOSM</ListgroupItem>
+                <ListgroupItem on:click={gotoOsm}>{$t('task.editinosm')}</ListgroupItem>
+                <ListgroupItem>{$t('task.editwithjosm')}</ListgroupItem>
               </Listgroup>
             {/if}
           </Popover>
           <Button href="/explore/task/{$page.params?.id}" class="!px-2">
-            <ResponsiveIcon title="Regresar a la tarea">
+            <ResponsiveIcon title={$t('task.backto')}>
               <ArrowUturnDown size=18/>
             </ResponsiveIcon>
           </Button>
@@ -195,10 +193,10 @@
       <SortTable data={streets} bind:items bind:getTable divClass="relative overflow-scroll h-40" striped>
         <TableHead defaultRow={false} theadClass="sticky top-0 bg-neutral-100 dark:bg-neutral-700">
           <tr class="text-xs uppercase"> 
-            <SortTableHeadCell key='cat_name' thClass="px-4 py-2 w-1/3">Catastro</SortTableHeadCell>
+            <SortTableHeadCell key='cat_name' thClass="px-4 py-2 w-1/3">{$t('common.catastro')}</SortTableHeadCell>
             <SortTableHeadCell key='osm_name' thClass="px-4 py-2 w-1/3">Osm</SortTableHeadCell>
-            <SortTableHeadCell key='validated' thClass="px-4 py-2 w-1/6">Estado</SortTableHeadCell>
-            <SortTableHeadCell key='source' thClass="px-4 py-2 w-1/6">Source</SortTableHeadCell>
+            <SortTableHeadCell key='validated' thClass="px-4 py-2 w-1/6">{$t('explore.status')}</SortTableHeadCell>
+            <SortTableHeadCell key='source' thClass="px-4 py-2 w-1/6">{$t('task.source')}</SortTableHeadCell>
           </tr>
         </TableHead>
         <TableBody>
@@ -210,20 +208,22 @@
                   <input name="cat_name" value={street.cat_name} hidden/>
                   {street.cat_name}
                 </td>
-                {#if data?.user && !isLocked()}
+                {#if data?.user && !isLocked}
                   <StreetEdit osmStreets={data.osmStreets}></StreetEdit>
                 {:else}
-                  {#if isLocked()}
+                  {#if isLocked}
                     <td class="px-4 py-0">
-                      Edición bloqueada por {street.owner.display_name}
+                      {$t('task.lockedby', { user: street.owner.display_name })}
                     </td>
                   {:else}
                     <td>
-                      <Button size="sm" on:click={login} class="!px-2 h-8 focus:!ring-0">Registrate para editar</Button>
+                      <Button size="sm" on:click={login} class="!px-2 h-8 focus:!ring-0">
+                        {$t('task.signin', { action: $t('common.edit') })}
+                      </Button>
                     </td>
                   {/if}
                   <td class="px-4 py-0">
-                    {#if isLocked()}
+                    {#if isLocked}
                       <LockClosed size=18/>
                     {:else if street.validated}
                       <Check size=18/>

@@ -195,7 +195,7 @@
     } else {
       const mapped = feat.mapped_count / feat.task_count
       info += `
-        <li>${$t('explore.tasks')}: ${feat.task_count}</li>
+        <li>${$t('explore.Tasks')}: ${feat.task_count}</li>
         <li>${$t('explore.mapped')}: ${fmt.format(mapped)}</li>
       `
     }
@@ -276,7 +276,7 @@
             />
           {:else}
             <p class="w-full bg-neutral-100 dark:bg-neutral-700 p-2 mt-3">
-              {$t('explore.noitems', { items: $t('tasks') })}
+              {$t('explore.noitems', { items: $t('explore.tasks') })}
             </p>
           {/if}
         {:else if target(zoom) === 'municipalities' && code?.length === 5}
@@ -286,7 +286,7 @@
           <div class="space-y-6 pt-4">
             <div class="!space-y-1">
               <p class="flex justify-between">
-                <span>{$t('explore.tasks')}:</span>
+                <span>{$t('explore.Tasks')}:</span>
                 <span>{project?.task_count}</span>
               </p>
               {#if project?.task_count}
