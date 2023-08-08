@@ -14,7 +14,9 @@
       <Avatar src={item.avatar} data-name={item.user}/>
       <p>
         {$t('task.' + item.action)}
-        {$t('task.' + item.text)}
+        {#if !item.action.startsWith('LOCKED_FOR_')}
+          {$t('task.' + item.text)}
+        {/if}
         {#if item.addresses != item.buildings}
           {item.buildings ? $t('explore.buildings') : $t('explore.addresses')}
         {/if}

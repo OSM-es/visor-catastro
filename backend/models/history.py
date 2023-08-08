@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+from pytz import UTC
 
 from sqlalchemy import column, func, or_, and_
 from sqlalchemy.orm import declarative_mixin
@@ -7,7 +8,7 @@ from sqlalchemy.orm import declarative_mixin
 from models import db, OsmUser, User
 import models
 
-TASK_LOCK_TIMEOUT = 86400
+TASK_LOCK_TIMEOUT = 7200
 
 
 class HistoryMixin:
@@ -55,12 +56,13 @@ class History(HistoryMixin, db.Model):
 
 class TaskHistory(TaskHistoryMixin, History):
     class Action(Enum):
-        LOCKED = 1
-        STATE_CHANGE = 2
-        COMMENT = 3
-        UNLOCKED = 4
-        AUTO_UNLOCKED = 5
-        EXTENDED = 6
+        LOCKED_FOR_MAPPING = 1
+        LOCKED_FOR_VALIDATION = 2
+        STATE_CHANGE = 3
+        COMMENT = 4
+        UNLOCKED = 5
+        AUTO_UNLOCKED = 6
+        EXTENDED = 7
 
         @staticmethod
         def from_status(status):
@@ -126,14 +128,15 @@ class TaskHistory(TaskHistoryMixin, History):
 
 class TaskLock(HistoryMixin, TaskHistoryMixin, db.Model):
     class Action(Enum):
-        UNLOCK = 0
-        MAPPING = 1
-        VALIDATION = 2
+        LOCKED_FOR_MAPPING = 1
+        LOCKED_FOR_VALIDATION = 2
 
     timeout = db.Column(db.Integer, nullable=False, default=TASK_LOCK_TIMEOUT)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, unique=True)
     user = db.relationship('User', back_populates='lock')
     task = db.relationship('Task', back_populates='lock', uselist=False)
+    history_id = db.Column(db.Integer, db.ForeignKey('task_history.id', use_alter=True))
+    history = db.relationship('TaskHistory')
 
     def asdict(self):
         return {
@@ -150,17 +153,24 @@ class TaskLock(HistoryMixin, TaskHistoryMixin, db.Model):
         timeout = func.make_interval(0, 0, 0, 0, 0, 0, TaskLock.timeout)
         expired = TaskLock.query.filter(datetime.now() - TaskLock.date > timeout)
         for lock in expired.all():
+            lock.update_lock()
+        
+    def update_lock(self):
+        if self.elapsed_time > self.timeout:
+            self.history.text = str(TASK_LOCK_TIMEOUT)
             h = TaskHistory(
                 user=OsmUser.system_bot(),
                 action=TaskHistory.Action.AUTO_UNLOCKED.value,
-                text=lock.text,
-                buildings=lock.buildings,
-                addresses=lock.addresses,
+                text=models.Task.Action(self.action).name,
+                buildings=self.buildings,
+                addresses=self.addresses,
             )
-            lock.task.history.append(h)
-            db.session.delete(lock)
-            db.session.commit()
+            self.task.history.append(h)
+            db.session.delete(self)
 
+    @property
+    def elapsed_time(self):
+        return int(datetime.now(tz=UTC) - self.date).total_seconds()
 
 class StreetHistory(History):
     class Action(Enum):

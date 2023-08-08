@@ -25,6 +25,7 @@ class Tasks(Resource):
             bb = f"LINESTRING({bounds[0]} {bounds[1]}, {bounds[2]} {bounds[3]})"
             q = q.filter(models.Task.geom.intersects(bb))
         models.TaskLock.update_locks()
+        models.db.session.commit()
         sql = q.statement
         df = geopandas.GeoDataFrame.from_postgis(sql=sql, con=models.db.get_engine())
         get_status = lambda v: models.Task.Status(v).name
@@ -79,15 +80,15 @@ class Task(Resource):
         data = request.json
         status = data.get('status')
         status = status and models.Task.Status[status]
-        lock = data.get('lock')
-        lock = lock and models.TaskLock.Action[lock]
+        action = data.get('action')
+        action = action and models.TaskHistory.Action[action]
         addresses = data.get('addresses') == 'true'
         buildings = data.get('buildings') == 'true'
         try:
-            if lock == models.TaskLock.Action.UNLOCK:
+            if action == models.TaskHistory.Action.UNLOCKED:
                 task.unlock(user)
-            elif lock:
-                task.set_lock(user, lock, buildings, addresses)
+            elif action:
+                task.set_lock(user, action, buildings, addresses)
             else:
                 task.change_status(user, status, buildings, addresses)
             models.db.session.commit()

@@ -252,7 +252,9 @@ class Task(db.Model):
         return f"{self.muncode} {self.localId} {self.type}"
 
     def asdict(self):
-        self.update_lock()
+        if self.lock:
+            self.lock.update_lock()
+            db.session.commit()
         lock = self.lock.asdict() if self.lock else None
         return {
             'id': self.id,
@@ -268,34 +270,28 @@ class Task(db.Model):
             'history': [h.asdict() for h in self.history]
         }
 
-    def update_lock(self):
-        if self.lock:
-            age = (datetime.now(tz=UTC) - self.lock.date).total_seconds()
-            if age > self.lock.timeout:
-                # TODO: Añadir AUTO_UNLOCKED a historial
-                db.session.delete(self.lock)
-                db.session.commit()
-    
     def set_lock(self, user, action, buildings, addresses):
         if self.lock or user.user.lock:
             raise PermissionError
         if not buildings and not addresses:
             raise ValueError("Se debe especificar al menos edificios o direcciones")
-        if action == TaskLock.Action.UNLOCK:
+        if action == TaskHistory.Action.UNLOCKED:
             return self.unlock()
+        h = TaskHistory(
+            user=user,
+            action=action.value,
+            text='',
+            buildings=buildings,
+            addresses=addresses,
+        )
         lock = TaskLock(
+            action=action.value,
             user=user.user,
             task=self,
             text=action.name,
             buildings=buildings,
-            addresses=addresses
-        )
-        h = TaskHistory(
-            user=user,
-            action=TaskHistory.Action.LOCKED.value,
-            text=action.name,
-            buildings=buildings,
             addresses=addresses,
+            history=h,
         )
         db.session.add(lock)
         self.history.append(h)
@@ -303,6 +299,7 @@ class Task(db.Model):
     def unlock(self, user):
         if not self.lock or self.lock.user != user.user:
             raise PermissionError
+        self.lock.history.text = self.lock.time_elapsed
         h = TaskHistory(
             user=user,
             action=TaskHistory.Action.UNLOCKED.value,

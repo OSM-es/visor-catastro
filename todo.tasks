@@ -16,6 +16,7 @@ Mapa:
     ☐ color municipio por progreso (azul no mapeado, ambar mapeando, rojo 100% mapeado, verde 100% validado), leyenda
 
 Edición tarea:
+    ☐ Mecanismo para mostrar el tiempo de bloqueo y extenderlo
     ☐ Descarga de archivo de tarea
         ☐ Sólo para editores.
         ☐ Preparar según sea sólo edificios o sólo direcciones.

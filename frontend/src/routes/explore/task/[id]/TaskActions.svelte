@@ -135,8 +135,8 @@
       <EditorButton {user} {task} action={$t('task.MAPPING')}>
         <Button
           type="submit"
-          name="lock"
-          value="MAPPING"
+          name="action"
+          value="LOCKED_FOR_MAPPING"
           class="mr-4 w-48"
           disabled={!buildings && !addresses}
         >
@@ -150,7 +150,12 @@
       </p>
       {#if !isMapper && !task.lock}
         <EditorButton {user} {task} action={$t('task.VALIDATION')}>
-          <Button type="submit" name="lock" value="VALIDATION" class="mr-4">
+          <Button
+            type="submit"
+            name="action"
+            value="LOCKED_FOR_VALIDATION"
+            class="mr-4"
+          >
             {$t('task.validateit')}
           </Button>
         </EditorButton>
@@ -162,7 +167,7 @@
     {/if}
     {#if title === 'addresses' || task.ad_status === task.bu_status || task.lock}
       {#if user && task.lock && task.isOwner}
-        <Button type="submit" name="lock" value="UNLOCK" color="alternative">
+        <Button type="submit" name="action" value="UNLOCKED" color="alternative">
           {task.lock.text === 'MAPPING' ? $t('task.stopmapping') : $t('task.stopvalidation')}
         </Button>
       {:else if !task.currentLock}
