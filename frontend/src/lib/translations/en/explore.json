@@ -49,6 +49,8 @@
     "select": "Select a {{item}} or",
     "formuns": "in for municipalities.",
     "fortasks": "in for tasks.",
+    "morestats": "More statistics",
+    "contribosmcha": "View changesets in OSMCha",
     "fortasksorprovs": "in for tasks or <a class=\"text-primary-600\" href=\"/explore\">explore</a> the remaining municipalities.",
     "remainingprovs": "<a class=\"text-primary-600\" href=\"/explore\">Explore</a> the remaining provinces.",
     "cadastreof": "Cadastre of"

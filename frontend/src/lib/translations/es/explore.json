@@ -49,6 +49,8 @@
     "select": "Selecciona una {{item}} o",
     "formuns": "para ver los municipios.",
     "fortasks": "para ver las tareas.",
+    "morestats": "Más estadísticas",
+    "contribosmcha": "Conjunto de cambios en OSMCha",
     "fortasksorprovs": "para ver las tareas o <a class=\"text-primary-600\" href=\"/explore\">explora</a> el resto de municipios.",
     "remainingprovs": "<a class=\"text-primary-600\" href=\"/explore\">Explora</a> el resto de provincias.",
     "cadastreof": "Catastro de"

@@ -9,6 +9,7 @@ export const PUBLIC_MAX_SW = env.PUBLIC_MAX_SW.split(',') || [20, -35]
 export const PUBLIC_MAX_NE = env.PUBLIC_MAX_NE.split(',') || [50, 20]
 export const TASK_THR = 15
 export const MUN_THR = 8
+export const PROJECT_COMMENT = '#Spanish_Cadastre_Buildings_Import'
 
 export const AREA_BORDER = '#3388ff'
 export const TASK_COLORS = {

@@ -69,6 +69,7 @@ class Municipality(db.Model):
     muncode = db.Column(db.String, index=True, unique=True)
     name = db.Column(db.String, nullable=False)
     src_date = db.Column(db.Date, nullable=False)
+    created = db.Column(db.DateTime(timezone=True), server_default=db.func.now())
     task_count = db.Column(db.Integer, nullable=True)
     geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
     update_id = db.Column(db.Integer, db.ForeignKey('municipality_update.id'), nullable=True)
@@ -78,6 +79,7 @@ class Municipality(db.Model):
         return {
             'muncode': self.muncode,
             'name': self.name,
+            'created': self.created.isoformat(),
             'lock': self.update_id is not None,
         }
 

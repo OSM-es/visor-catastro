@@ -1,5 +1,6 @@
 <script>
-  import { Progressbar, Spinner } from 'flowbite-svelte'
+  import { Button, Progressbar, Spinner } from 'flowbite-svelte'
+  import { ArrowTopRightOnSquare , ChartBar } from 'svelte-heros-v2'
   import { afterNavigate, goto } from '$app/navigation'
   import { GeoJSON } from 'svelte-leafletjs'
   import { locale, t } from '$lib/translations'
@@ -13,7 +14,13 @@
   import Map from '$lib/components/maps/Map.svelte'
   import Legend from '$lib/components/maps/Legend.svelte'
   import { exploreCode } from '$lib/stores.js'
-  import { AREA_BORDER, TASK_COLORS, TASK_LOCKED_COLOR, TASK_THR, MUN_THR } from '$lib/config'
+  import {
+    AREA_BORDER,
+    TASK_COLORS,
+    TASK_LOCKED_COLOR,
+    TASK_THR, MUN_THR,
+    PROJECT_COMMENT
+  } from '$lib/config'
 
   export let data
 
@@ -196,6 +203,23 @@
     return info
   }
 
+  function getChaUrl(project) {
+    const from = project.created
+    const bounds = getGeoJSON().getBounds().toBBoxString()
+    const code = project.muncode
+    const comment = `${PROJECT_COMMENT} ${code}`
+    const filters = {
+      in_bbox: [{ label: bounds, value: bounds }],
+      area_lt: [{ label: 2, value: 2 }],
+      date__gte: [{ label: from, value: from }],
+      comment: [{ label: comment, value: comment }],
+    }
+    const base = 'https://osmcha.org/'
+    const url = base +'?filters=' + encodeURIComponent(JSON.stringify(filters))
+    console.info(url)
+    return url
+  }
+
   $: geoJsonOptions = {
     style: (feature) => setStyle(feature, activeItem),
     onEachFeature: function(feature, layer) {
@@ -286,7 +310,16 @@
               <button class="text-primary-600" on:click={() => setZoom(TASK_THR)}>
                 {$t('explore.zoom')}
               </button>
-              {@html $t('explore.fortasksorprovs')}</p>
+              {@html $t('explore.fortasksorprovs')}
+            </p>
+            <p>
+              <Button href={`/explore/${code}/stats`} class="mr-4">
+                <ChartBar class="mr-2" size="20"/> {$t('explore.morestats')}
+              </Button>
+              <Button href={getChaUrl(project)} color="alternative" target="_blank" class="mt-2">
+                <ArrowTopRightOnSquare size="20" class="mr-2"/> {$t('explore.contribosmcha')}
+              </Button>
+            </p>
           </div>
         {:else}
           {#if target(zoom) === 'provinces' && code?.length === 2}
