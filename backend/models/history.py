@@ -194,7 +194,7 @@ class TaskLock(HistoryMixin, TaskHistoryMixin, db.Model):
             h = TaskHistory(
                 user=OsmUser.system_bot(),
                 action=TaskHistory.Action.AUTO_UNLOCKED.value,
-                text=models.TaskLock.Action(self.action).name,
+                text=models.TaskHistory.Action['LOCKED_FOR_' + self.text].name,
                 buildings=self.buildings,
                 addresses=self.addresses,
             )
