@@ -57,19 +57,21 @@
   <h2 class="text-2xl font-bold mb-4">{$t('stats.taskstatus')}</h2>
   <div class="flex flex-col md:flex-row gap-x-8 gap-y-4">
     {#await fetchData}
-      <CardPlaceholder class="w-full md:w-1/3 h-96" size="xl"/>
-      <CardPlaceholder class="w-full md:w-2/3 h-96" size="2xl"/>
+      <CardPlaceholder class="w-full h-96" size="2xl"/>
     {:then stats}
-      <Card class="w-full md:w-1/3 h-96" size="xl">
-        <Doughnut data={getData(stats)}/>
-      </Card>
-      <Card class="w-full md:w-2/3 min-h-96" size="xl">
-        {#if stats.splitted}
-          <h3 class="text-xl font-bold mb-4">{$t('explore.Buildings')} / {$t('explore.addresses')}</h3>
-          <StatsSection stats={stats.buildings} stats2={stats.addresses} ns={'explore'} gap={'gap-x-24'}/>
-          {:else}
-          <StatsSection stats={stats.buildings} ns={'explore'} gap={'gap-x-24'}/>
-        {/if}
+      <Card class="w-full" size="2xl">
+        <div class="flex flex-col md:flex-row gap-x-20 gap-y-8">
+          <div class="w-full md:w-1/3 h-96">
+            <Doughnut data={getData(stats)}/>
+          </div> 
+          <div class="w-full md:w-2/3">
+            {#if stats.splitted}
+              <h3 class="text-xl font-bold mb-4">{$t('explore.Buildings')} / {$t('explore.addresses')}</h3>
+              <StatsSection stats={stats.buildings} stats2={stats.addresses} ns={'explore'} gap={'gap-x-24'}/>
+            {:else}
+              <StatsSection stats={stats.buildings} ns={'explore'} gap={'gap-x-24'}/>
+            {/if}
+          </div>
       </Card>
     {/await}
   </div>

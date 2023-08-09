@@ -61,7 +61,16 @@ class TimeStats(Resource):
         time_to_finish_mapping = (total_tasks - mtasks) * average_mapping_time
         time_to_finish_validation = (total_tasks - vtasks) * average_validation_time
 
+        mapped_tasks_per_day = models.TaskHistory.get_progress_per_day(
+            code, models.Task.Status.MAPPED
+        )
+        validated_tasks_per_day = models.TaskHistory.get_progress_per_day(
+            code, models.Task.Status.VALIDATED
+        )
+
         return {
+            'mapped_tasks_per_day': mapped_tasks_per_day,
+            'validated_tasks_per_day': validated_tasks_per_day,
             'total_tasks': total_tasks,
             'tasks_to_map': total_tasks - mtasks,
             'tasks_to_validate': total_tasks - vtasks,

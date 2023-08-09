@@ -28,7 +28,6 @@ Edición tarea:
         ☐ Añadir comentarios en los cambios de estado MAPPED, VALIDATED e INVALIDATED
         ☐ Formulario añadir comentario.
             ☐ En la api, depurar códigos raros
-        ☐ Añadir AUTO_UNLOCKED a historial
         ☐ Poner enlaces como en gestor tareas
             Ver conjunto de cambios en OSMCha
             Visualizar con Overpass?
@@ -55,12 +54,6 @@ Tutorial #9:
     ☐ Página configuración de Josm et al
     ☐ Parte específica del visor
     ☐ Edición de tareas
-
-Estadísticas:
-    ☐ Página de estadísticas por municipio
-       ☐ Línea de tiempo
-       ☐ Estadísticas de tiempo 
-    ☐ ¿otros?
 
 Tasking manager:
     ☐ Detectar proyectos existentes en TM, impedir edición, redirigir a ellos.

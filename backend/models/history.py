@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from pytz import UTC
 
-from sqlalchemy import Integer, cast, column, func, or_, and_
+from sqlalchemy import Date, Integer, cast, column, func, or_, and_
 from sqlalchemy.orm import declarative_mixin
 
 from models import db, OsmUser, User
@@ -138,9 +138,26 @@ class TaskHistory(TaskHistoryMixin, History):
         ).filter(
             TaskHistory.action == action.value
         ).one()
-        print(muncode, total_mapping_time, total_mapping_tasks)
         return total_mapping_time or 0, total_mapping_tasks or 0
 
+    @staticmethod
+    def get_progress_per_day(muncode, status):
+        mun = models.Municipality.get_by_code(muncode)
+        total = 0
+        data = [[mun.created.date().isoformat(), 0]]
+        for day, count in TaskHistory.query.join(
+            models.Task
+        ).filter(
+            models.Task.muncode == muncode,
+            TaskHistory.text == status.name
+        ).with_entities(
+            cast(History.date, Date).label('day'), func.Count()
+        ).group_by(
+            'day'
+        ).all():
+            total += count
+            data.append([day.isoformat(), total])
+        return data
 
 class TaskLock(HistoryMixin, TaskHistoryMixin, db.Model):
     class Action(Enum):
