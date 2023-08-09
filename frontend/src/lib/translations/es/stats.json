@@ -14,5 +14,12 @@
     "experience4": "6 a 12 meses",
     "experience5": "Más de 1 año",
     "usersbylevel": "Usuarios por nivel",
-    "usersbyexperience": "Usuarios por experiencia en Visor Catastro"
+    "usersbyexperience": "Usuarios por experiencia en Visor Catastro",
+    "total_tasks": "Total de tareas",
+    "tasks_to_map": "Tareas a importar",
+    "tasks_to_validate": "Tareas a validar",
+    "average_mapping_time": "Tiempo medio de mapeo",
+    "average_validation_time": "Tiempo medio de validación",
+    "time_to_finish_mapping": "Tiempo para terminar de importar",
+    "time_to_finish_validation": "Tiempo para terminar de validar"
 }

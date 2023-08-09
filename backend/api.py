@@ -21,6 +21,7 @@ api.add_resource(resources.StreetLock, '/street/<string:mun_code>/<string:cat_na
 api.add_resource(resources.Stats, '/stats', '/stats/<string:code>')
 api.add_resource(resources.TasksStatus, '/stats/<string:code>/tasks')
 api.add_resource(resources.ContributorStats, '/stats/<string:code>/contributors')
+api.add_resource(resources.TimeStats, '/stats/<string:code>/timestats')
 api.add_resource(resources.Tasks, '/tasks')
 api.add_resource(resources.Task, '/task/<int:id>')
 api.add_resource(resources.User, '/user')

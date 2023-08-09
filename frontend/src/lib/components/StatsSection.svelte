@@ -18,9 +18,17 @@
     {#if !omit.includes(key)}
       <div class="text-center w-24">
         <p class="text-red-500 {size} font-black">
-          <FormattedNumber value={value}/>
+          {#if typeof(value) === 'number'}
+            <FormattedNumber value={value}/>
+          {:else}
+            {value}
+          {/if}
           {#if stats2}
-            / <FormattedNumber value={stats2[key]}/>
+            / {#if typeof(value) === 'number'}
+              <FormattedNumber value={stats2[key]}/>
+              {:else}
+              {value}
+            {/if}
           {/if}
         </p>
         <p>{$t(ns + '.' + key)}</p>

@@ -13,6 +13,7 @@ export async function load({ locals, fetch, params }) {
     streamed: {
       taskStatus: fetchData(params.code, 'tasks'),
       contributors: fetchData(params.code, 'contributors'),
+      timeStats: fetchData(params.code, 'timestats'),
     }
   }
 }

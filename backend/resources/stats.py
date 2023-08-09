@@ -43,3 +43,30 @@ class ContributorStats(Resource):
             'validators': models.TaskHistory.count_validators(code),
             'contributors': [u.import_user.asdict() for u in contributors],
         }
+
+class TimeStats(Resource):
+    def get(self, code):
+        total_tasks = models.Task.query_by_code(code).count()
+        mtime, mtasks = models.TaskHistory.get_time(
+            code, models.TaskHistory.Action['LOCKED_FOR_MAPPING']
+        )
+        average_mapping_time = 0
+        if mtasks > 0: average_mapping_time = mtime / mtasks
+        vtime, vtasks = models.TaskHistory.get_time(
+            code, models.TaskHistory.Action['LOCKED_FOR_VALIDATION']
+        )
+        average_validation_time = 0
+        if vtasks > 0: average_validation_time = vtime / vtasks
+
+        time_to_finish_mapping = (total_tasks - mtasks) * average_mapping_time
+        time_to_finish_validation = (total_tasks - vtasks) * average_validation_time
+
+        return {
+            'total_tasks': total_tasks,
+            'tasks_to_map': total_tasks - mtasks,
+            'tasks_to_validate': total_tasks - vtasks,
+            'average_mapping_time': average_mapping_time,
+            'average_validation_time': average_validation_time,
+            'time_to_finish_mapping': time_to_finish_mapping,
+            'time_to_finish_validation': time_to_finish_validation,
+        }

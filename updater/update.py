@@ -225,7 +225,8 @@ def process(mun_code):
         format = f"[{pname}] [%(levelname)s] %(message)s"
         catconfig.set_log_level(log, logging.INFO, format)
     freemem = psutil.virtual_memory().percent
-    log.info(f"CPU {psutil.cpu_percent()} memoria {freemem}")
+    usedmem = psutil.virtual_memory().used / 1024 / 1024
+    log.info(f"CPU: {psutil.cpu_percent()}% memoria libre: {freemem}% memoria usada: {usedmem:.2f} ")
     if freemem > config.min_freemem:
         log.info(f"Omitido proceso de {mun_code} por falta de memoria")
         return
@@ -251,7 +252,6 @@ def process(mun_code):
         ):
             print(traceback.format_exc())
         return None
-    log.info(f"CPU {psutil.cpu_percent()} memoria {freemem}")
     return status(mun_code)
 
 def get_date(mun_code):

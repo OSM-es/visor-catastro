@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from pytz import UTC
 
-from sqlalchemy import column, func, or_, and_
+from sqlalchemy import Integer, cast, column, func, or_, and_
 from sqlalchemy.orm import declarative_mixin
 
 from models import db, OsmUser, User
@@ -120,10 +120,26 @@ class TaskHistory(TaskHistoryMixin, History):
         ).filter_by(
             muncode = muncode
         ).filter(
-            TaskHistory.action == 2
+            TaskHistory.action == TaskHistory.Action.STATE_CHANGE.value
         ).with_entities(
             User
         ).distinct().all()
+
+    @staticmethod
+    def get_time(muncode, action):
+        total_mapping_time, total_mapping_tasks = TaskHistory.query.join(
+            models.Task
+        ).filter(
+            models.Task.muncode == muncode,
+            TaskHistory.text != '',
+        ).with_entities(
+            func.sum(cast(TaskHistory.text, Integer)),
+            func.count(TaskHistory.action),
+        ).filter(
+            TaskHistory.action == action.value
+        ).one()
+        print(muncode, total_mapping_time, total_mapping_tasks)
+        return total_mapping_time or 0, total_mapping_tasks or 0
 
 
 class TaskLock(HistoryMixin, TaskHistoryMixin, db.Model):
