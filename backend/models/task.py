@@ -276,7 +276,7 @@ class Task(db.Model):
         if not buildings and not addresses:
             raise ValueError("Se debe especificar al menos edificios o direcciones")
         if action == TaskHistory.Action.UNLOCKED:
-            return self.unlock()
+            return self.unlock(user)
         h = TaskHistory(
             user=user,
             action=action.value,
@@ -284,30 +284,33 @@ class Task(db.Model):
             buildings=buildings,
             addresses=addresses,
         )
+        self.history.append(h)
+        db.session.add(h)
+        db.session.commit()
         lock = TaskLock(
-            action=action.value,
             user=user.user,
             task=self,
-            text=action.name,
+            text=TaskLock.Action(action.value).name,
             buildings=buildings,
             addresses=addresses,
             history=h,
         )
         db.session.add(lock)
-        self.history.append(h)
+        lock.history = h
     
-    def unlock(self, user):
+    def unlock(self, user, history=None):
         if not self.lock or self.lock.user != user.user:
             raise PermissionError
-        self.lock.history.text = self.lock.time_elapsed
-        h = TaskHistory(
-            user=user,
-            action=TaskHistory.Action.UNLOCKED.value,
-            text=self.lock.text,
-            buildings=self.lock.buildings,
-            addresses=self.lock.addresses,
-        )
-        self.history.append(h)
+        self.lock.history.text = self.lock.elapsed_time
+        if not history:
+            history = TaskHistory(
+                user=user,
+                action=TaskHistory.Action.UNLOCKED.value,
+                text=self.lock.text,
+                buildings=self.lock.buildings,
+                addresses=self.lock.addresses,
+            )
+        self.history.append(history)
         db.session.delete(self.lock)
 
     def need_update(self):
@@ -340,8 +343,7 @@ class Task(db.Model):
             buildings=buildings,
             addresses=addresses,
         )
-        self.history.append(h)
-        if self.lock: db.session.delete(self.lock)
+        self.unlock(user, h)
     
     def validate_status(self, key, status):
         old = Task.Status(getattr(self, key))

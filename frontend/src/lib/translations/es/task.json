@@ -7,6 +7,8 @@
     "READY": "disponible",
     "MAPPING": "importar",
     "VALIDATION": "validar",
+    "LOCKED_FOR_MAPPING": "Bloqueada para importar",
+    "LOCKED_FOR_VALIDATION": "Bloqueada para validar",
     "MAPPED": "mapeada",
     "VALIDATED": "validada",
     "INVALIDATED": "se necesita más mapeo",

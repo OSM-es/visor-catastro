@@ -31,7 +31,7 @@
     <Avatar src="{user?.img?.href}" size="xl" rounded/>
     <div>
       <h1 class="text-2xl md:text-3xl font-bold mb-4">{user.display_name}</h1>
-      <p class="text-lg">{$t('settings.' + user.mapping_level)}</p>
+      <p class="text-lg">{$t('common.' + user.mapping_level)}</p>
     </div>
   </div>
   

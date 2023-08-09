@@ -128,8 +128,8 @@ class TaskHistory(TaskHistoryMixin, History):
 
 class TaskLock(HistoryMixin, TaskHistoryMixin, db.Model):
     class Action(Enum):
-        LOCKED_FOR_MAPPING = 1
-        LOCKED_FOR_VALIDATION = 2
+        MAPPING = 1
+        VALIDATION = 2
 
     timeout = db.Column(db.Integer, nullable=False, default=TASK_LOCK_TIMEOUT)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, unique=True)
@@ -161,7 +161,7 @@ class TaskLock(HistoryMixin, TaskHistoryMixin, db.Model):
             h = TaskHistory(
                 user=OsmUser.system_bot(),
                 action=TaskHistory.Action.AUTO_UNLOCKED.value,
-                text=models.Task.Action(self.action).name,
+                text=models.TaskLock.Action(self.action).name,
                 buildings=self.buildings,
                 addresses=self.addresses,
             )
@@ -170,7 +170,7 @@ class TaskLock(HistoryMixin, TaskHistoryMixin, db.Model):
 
     @property
     def elapsed_time(self):
-        return int(datetime.now(tz=UTC) - self.date).total_seconds()
+        return int((datetime.now(tz=UTC) - self.date).total_seconds())
 
 class StreetHistory(History):
     class Action(Enum):

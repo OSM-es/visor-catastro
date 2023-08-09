@@ -40,7 +40,7 @@
   }
 
   function isSplitted(task) {
-    const needMapping = ['MAPPING', 'INVALIDATED', 'NEED_UPDATE']
+    const needMapping = ['READY', 'INVALIDATED', 'NEED_UPDATE']
     if (task.bu_status !== task.ad_status) {
       return !needMapping.includes(task.bu_status) || !needMapping.includes(task.ad_status)
     }

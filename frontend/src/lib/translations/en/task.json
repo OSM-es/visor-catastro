@@ -6,6 +6,8 @@
     "AUTO_UNLOCKED": "Unlocked for",
     "MAPPING": "mapping",
     "VALIDATION": "validation",
+    "LOCKED_FOR_MAPPING": "Locked for mapping",
+    "LOCKED_FOR_VALIDATION": "Locked for validation",
     "READY": "availlable",
     "MAPPED": "mapped",
     "VALIDATED": "validated",
