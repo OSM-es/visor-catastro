@@ -1,5 +1,5 @@
 <script>
-  import { Button, Progressbar, Spinner } from 'flowbite-svelte'
+  import { Button, Spinner, Tooltip } from 'flowbite-svelte'
   import { ArrowTopRightOnSquare , ChartBar } from 'svelte-heros-v2'
   import { afterNavigate, goto } from '$app/navigation'
   import { GeoJSON } from 'svelte-leafletjs'
@@ -9,6 +9,7 @@
 
   import TaskList from './TaskList.svelte'
   import TaskStatus from './TaskStatus.svelte'
+  import Progressbar from '$lib/components/Progressbar.svelte'
   import ProjList from './ProjList.svelte'
   import StatsSection from '$lib/components/StatsSection.svelte'
   import Map from '$lib/components/maps/Map.svelte'
@@ -40,7 +41,7 @@
     'tasks' : 
     (zoom >= MUN_THR ? 'municipalities' : 'provinces')
   )
-  const fmt = new Intl.NumberFormat($locale, { maximumFractionDigits: 2, style: "percent" })
+  const fmt = new Intl.NumberFormat($locale, { maximumFractionDigits: 0, style: "percent" })
 
   $: code = $page?.params?.code
   $: tasks = filterTasks(geoJsonData, muncode, type, difficulty, ad_status, bu_status)
@@ -179,6 +180,14 @@
     }
   }
 
+  function getCompletion(project) {
+    return {
+      Tasks: project?.task_count || 0,
+      mappedtasks: project?.task_count ? project.mapped_count : 0,
+      validatedtasks: project?.task_count ? project.validated_count : 0,
+    }
+  }
+
   function featInfo(feat) {
     let info = ''
     if (feat.provcode) {
@@ -284,23 +293,18 @@
             <h3>{project?.name} ({project?.muncode})</h3>
           </div>
           <div class="space-y-6 pt-4">
-            <div class="!space-y-1">
-              <p class="flex justify-between">
-                <span>{$t('explore.Tasks')}:</span>
-                <span>{project?.task_count}</span>
-              </p>
-              {#if project?.task_count}
-                <p class="flex justify-between">
-                  <span>{$t('explore.mapped')}:</span>
-                  <span>{fmt.format(project.mapped_count / project?.task_count)}</span>
-                </p>
-                <Progressbar
-                  progress = {100 * project.mapped_count / project.task_count}
-                  size="h-4"
-                  color="gray"
-                />
-              {/if}
-            </div>
+            {#if project?.task_count}
+              <Progressbar
+                progress = {100 * project.mapped_count / project.task_count}
+                progress2 = {100 * project.validated_count / project.task_count}
+                size="h-4"
+              />
+              <Tooltip placement={'bottom'}>
+                <p>{$t('explore.mapped')}: {fmt.format(project.mapped_count / project.task_count)}</p>
+                <p>{$t('explore.validated')}: {fmt.format(project.validated_count / project.task_count)}</p>
+              </Tooltip>
+            {/if}
+            <StatsSection stats={getCompletion(project)} size={'text-4xl'} ns={'explore'}/>
             {#await statsPromise}
               <p class="mt-4">{$t('common.loading')} <Spinner size={4}/></p>
             {:then stats}

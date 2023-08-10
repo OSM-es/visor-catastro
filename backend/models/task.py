@@ -138,9 +138,10 @@ class Task(db.Model):
         return Task.query.filter(Task.muncode.startswith(prov_code))
 
     @staticmethod
-    def query_mapped(query):
-        mapped = [Task.Status.MAPPED.value, Task.Status.VALIDATED.value]
-        return query.filter(and_(Task.ad_status.in_(mapped), Task.bu_status.in_(mapped)))
+    def query_status(query, status):
+        return query.filter(
+            Task.ad_status == status.value, Task.bu_status == status.value
+        )
 
     @staticmethod
     def from_feature(feature):

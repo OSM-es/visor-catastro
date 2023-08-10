@@ -12,6 +12,11 @@ def convertDate(o):
     if isinstance(o, datetime.datetime):
         return o.strftime('%Y-%m-%d')
 
+def get_status(status):
+    return lambda v: models.Task.query_status(
+        models.Task.query_by_muncode(v), status
+    ).count()
+
 class Municipalities(Resource):
     @json_compress
     def get(self):
@@ -27,8 +32,8 @@ class Municipalities(Resource):
             q = q.filter(models.Municipality.geom.intersects(bb))
         sql = q.statement
         df = geopandas.GeoDataFrame.from_postgis(sql=sql, con=models.db.get_engine())
-        get_mapped = lambda v: models.Task.query_mapped(models.Task.query_by_muncode(v)).count()
-        df['mapped_count'] = df['muncode'].map(get_mapped)
+        df['validated_count'] = df['muncode'].map(get_status(models.Task.Status.VALIDATED))
+        df['mapped_count'] = df['muncode'].map(get_status(models.Task.Status.MAPPED)) + df['validated_count']
         data = df.to_json(default=convertDate).encode('utf-8')
         return data
 

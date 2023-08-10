@@ -9,7 +9,7 @@
   export let data = []
   export let items = []
   export const getTable = () => table
-  export let activeItem
+  export let activeItem = null
 
 
   const table = writable({

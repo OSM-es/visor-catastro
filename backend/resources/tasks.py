@@ -19,7 +19,6 @@ class Tasks(Resource):
     def get(self):
         code = request.args.get('code')
         bounds = request.args.get('bounds', '').split(",")
-        print(code, bounds)
         q = models.Task.query_by_code(code)
         if len(bounds) == 4:
             bb = f"LINESTRING({bounds[0]} {bounds[1]}, {bounds[2]} {bounds[3]})"

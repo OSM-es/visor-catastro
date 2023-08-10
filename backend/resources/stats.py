@@ -5,12 +5,16 @@ import models
 
 class Stats(Resource):
     def get(self, code=None):
-        return {
+        data = {
             'buildings': models.Task.count_buildings(code),
             'addresses': models.Task.count_addresses(code),
             'users': models.User.query.count(),
-            'mappers': models.Task.count_mappers(code),
         }
+        if code:
+            data['mappers'] = models.TaskHistory.count_mappers(code)
+        else:
+            data['onlinemappers'] = models.Task.count_mappers(code)
+        return data
 
 
 class TasksStatus(Resource):

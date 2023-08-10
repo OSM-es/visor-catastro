@@ -96,7 +96,7 @@ class TaskHistory(TaskHistoryMixin, History):
         ).filter_by(
             muncode = muncode
         ).filter(
-            and_(TaskHistory.action == 2, TaskHistory.text == _target)
+            TaskHistory.text == _target,
         ).distinct(
             User.id
         ).count()

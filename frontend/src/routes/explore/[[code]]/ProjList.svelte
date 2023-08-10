@@ -16,7 +16,7 @@
 
   const tdClass = 'px-2 py-0.5 whitespace-nowrap'
   const trClass = 'hover:bg-amber-400 cursor-pointer border-b last:border-b-0 odd:bg-white even:bg-gray-50 odd:dark:bg-gray-800 even:dark:bg-gray-700'
-  const fmt = new Intl.NumberFormat($locale, { maximumFractionDigits: 2, style: "percent" })
+  const fmt = new Intl.NumberFormat($locale, { maximumFractionDigits: 0, style: "percent" })
 
   const code = (item, target) => target === 'provinces' ? item.provcode : item.muncode
   const key = target => target === 'provinces' ? 'provcode' : 'muncode' 
@@ -51,7 +51,7 @@
         <SortTableHeadCell thClass="p-2" key={key(target)}>{$t('explore.code')}</SortTableHeadCell>
         <SortTableHeadCell thClass="p-2" key='name'>{$t('explore.name')}</SortTableHeadCell>
         <SortTableHeadCell thClass="p-2" key='task_count'>{$t('explore.Tasks')}</SortTableHeadCell>
-        <SortTableHeadCell thClass="p-2" key='mapped_count'>Mapeado</SortTableHeadCell>
+        <SortTableHeadCell thClass="p-2" key='mapped_count'>{$t('explore.mapped')}</SortTableHeadCell>
       </tr>
     </TableHead>
     <TableBody>

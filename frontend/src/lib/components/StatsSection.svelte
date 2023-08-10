@@ -31,7 +31,7 @@
             {/if}
           {/if}
         </p>
-        <p>{$t(ns + '.' + key)}</p>
+        <p>{$t(ns + '.' + key, { value })}</p>
       </div>
     {/if}
   {/each}

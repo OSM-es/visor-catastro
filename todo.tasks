@@ -10,9 +10,6 @@ Mapa:
     ☐ Cuadro de búsqueda de municipios y otras localidades ¿dónde lo ponemos?
     ☐ En chrome la lista de tareas sale con barras de desplazamiento no necesarias
     ☐ Añadir lista colaboradores con visualización en el mapa
-    ☐ Mostrar porcentaje validado en lista de municipios
-    ☐ explore/mun: Enlaces a más estadísticas y Changesets en OSMCha
-    ☐ explore/mun: barra de progreso con tres niveles para porcentaje validado/mapeado
     ☐ color municipio por progreso (azul no mapeado, ambar mapeando, rojo 100% mapeado, verde 100% validado), leyenda
 
 Edición tarea:
