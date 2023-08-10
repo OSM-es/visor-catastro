@@ -37,7 +37,7 @@
   <h1>
     {title}
     <span>
-      {#if collapsed}<ChevronDown size="14"/>{:else}<ChevronUp size="14"/>{/if}
+      {#if collapsed}<ChevronUp size="14"/>{:else}<ChevronDown size="14"/>{/if}
     </span>
   </h1>
   <div class:hidden={collapsed} class="content">

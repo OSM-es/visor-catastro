@@ -1,6 +1,7 @@
 {
     "legend": "Legend",
     "READY": "Availlable",
+    "MAPPING": "Mapping",
     "MAPPED": "Mapped",
     "VALIDATED": "Validated",
     "INVALIDATED": "Need more mapping",

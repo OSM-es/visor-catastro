@@ -1,5 +1,6 @@
 from glob import glob
 from pathlib import Path
+from enum import Enum
 import os
 import re
 import shutil
@@ -18,6 +19,12 @@ BACKUP = Config.BACKUP_PATH
 
 
 class Municipality(db.Model):
+
+    class Status(Enum):
+        READY = 0
+        MAPPING = 1
+        MAPPED = 2
+        VALIDATED = 3
 
     class Update(db.Model):
         __tablename__ = 'municipality_update'

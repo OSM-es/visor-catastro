@@ -20,6 +20,14 @@ export const TASK_COLORS = {
   NEED_UPDATE: '#FFD70099',
 }
 
+export const PROJ_COLORS = {
+  READY: '#99999933',
+  MAPPING: '#1E90FF44',
+  MAPPED: '#1E90FF99',
+  VALIDATED: '#00800099',
+}
+
+
 export const TASK_LOCKED_COLOR = '#80808099'
 
 // https://sashamaps.net/docs/resources/20-colors/

@@ -1,21 +1,9 @@
-import datetime
-
 from flask import request, abort
 from flask_restful import Resource
-import geopandas
 
 import models
-from resources.utils import json_compress
+from resources.utils import json_compress, get_proj_data
 
-
-def convertDate(o):
-    if isinstance(o, datetime.datetime):
-        return o.strftime('%Y-%m-%d')
-
-def get_status(status):
-    return lambda v: models.Task.query_status(
-        models.Task.query_by_muncode(v), status
-    ).count()
 
 class Municipalities(Resource):
     @json_compress
@@ -30,12 +18,7 @@ class Municipalities(Resource):
         if len(bounds) == 4:
             bb = f"LINESTRING({bounds[0]} {bounds[1]}, {bounds[2]} {bounds[3]})"
             q = q.filter(models.Municipality.geom.intersects(bb))
-        sql = q.statement
-        df = geopandas.GeoDataFrame.from_postgis(sql=sql, con=models.db.get_engine())
-        df['validated_count'] = df['muncode'].map(get_status(models.Task.Status.VALIDATED))
-        df['mapped_count'] = df['muncode'].map(get_status(models.Task.Status.MAPPED)) + df['validated_count']
-        data = df.to_json(default=convertDate).encode('utf-8')
-        return data
+        return get_proj_data(q)
 
 class Municipality(Resource):
     def get(self, code):

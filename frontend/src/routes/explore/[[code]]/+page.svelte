@@ -9,6 +9,7 @@
 
   import TaskList from './TaskList.svelte'
   import TaskStatus from './TaskStatus.svelte'
+  import ProjStatus from './ProjStatus.svelte'
   import Progressbar from '$lib/components/Progressbar.svelte'
   import ProjList from './ProjList.svelte'
   import StatsSection from '$lib/components/StatsSection.svelte'
@@ -20,6 +21,7 @@
     TASK_COLORS,
     TASK_LOCKED_COLOR,
     TASK_THR, MUN_THR,
+    PROJ_COLORS,
     PROJECT_COMMENT
   } from '$lib/config'
 
@@ -154,8 +156,8 @@
     } else {
       style = { 
         fillPattern: feature?.properties?.update_id ? pattern : null,
-        fillColor: 'blue',
-        fillOpacity: feature?.properties?.update_id ? 0.6 : 0.2,
+        fillColor: PROJ_COLORS[feature.properties.status],
+        fillOpacity: feature?.properties?.update_id ? 0.6 : 1,
       }
     }
     if (feature.properties.id === activeItem?.properties?.id) {
@@ -253,8 +255,8 @@
       on:moveend={handleMoveEnd}
     >
       <GeoJSON data={tasks} options={geoJsonOptions} bind:getGeoJSON/>
-      {#if zoom >= TASK_THR}
-        <Legend title={$t('explore.legend')}>
+      <Legend title={$t('explore.legend')}>
+        {#if zoom >= TASK_THR}
           <TaskStatus status="READY"/>
           <TaskStatus status="MAPPED"/>
           <TaskStatus status="INVALIDATED"/>
@@ -262,8 +264,13 @@
           <TaskStatus status="NEED_UPDATE"/>
           <TaskStatus status="MIXED"/>
           <TaskStatus status="LOCKED"/>
-        </Legend>
-      {/if}
+        {:else}
+          <ProjStatus status="READY"/>
+          <ProjStatus status="MAPPING"/>
+          <ProjStatus status="MAPPED" {zoom}/>
+          <ProjStatus status="VALIDATED" {zoom}/>
+        {/if}
+      </Legend>
     </Map>
   </div>
   <div class={rightBarClass}>

@@ -1,8 +1,9 @@
 {
     "legend": "Leyenda",
     "READY": "Disponible",
-    "MAPPED": "Mapeada",
-    "VALIDATED": "Validada",
+    "MAPPING": "Importando",
+    "MAPPED": "{{gender; male:Importado; default:Importada}}",
+    "VALIDATED": "{{gender; male:Validado; default:Validada}}",
     "INVALIDATED": "Necesita más mapeo",
     "NEED_UPDATE": "Necesita actualizar",
     "EASY": "Fácil",
