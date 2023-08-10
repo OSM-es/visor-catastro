@@ -203,9 +203,11 @@
       `
     } else {
       const mapped = feat.mapped_count / feat.task_count
+      const validated = feat.validated_count / feat.task_count
       info += `
-        <li>${$t('explore.Tasks')}: ${feat.task_count}</li>
+        <li>${$t('explore.Tasks', { value: feat.task_count })}: ${feat.task_count}</li>
         <li>${$t('explore.mapped')}: ${fmt.format(mapped)}</li>
+        <li>${$t('explore.validated')}: ${fmt.format(validated)}</li>
       `
     }
     info += '</ul>'

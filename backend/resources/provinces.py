@@ -6,6 +6,11 @@ import models
 from resources.utils import json_compress
 
 
+def get_status(status):
+    return lambda v: models.Task.query_status(
+        models.Task.query_by_code(v), status
+    ).count()
+
 class Provinces(Resource):
     @json_compress
     def get(self):
@@ -19,7 +24,7 @@ class Provinces(Resource):
             q = q.filter(models.Province.geom.intersects(bb))
         sql = q.statement
         df = geopandas.GeoDataFrame.from_postgis(sql=sql, con=models.db.get_engine())
-        get_mapped = lambda v: models.Task.query_mapped(models.Task.query_by_provcode(v)).count()
-        df['mapped_count'] = df['provcode'].map(get_mapped)
+        df['validated_count'] = df['provcode'].map(get_status(models.Task.Status.VALIDATED))
+        df['mapped_count'] = df['provcode'].map(get_status(models.Task.Status.MAPPED)) + df['validated_count']
         data = df.to_json().encode('utf-8')
         return data
