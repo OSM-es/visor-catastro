@@ -43,6 +43,7 @@
     "zoomtoedit": "Haz zoom para editar",
     "editinosm": "Editar en OSM",
     "editwithjosm": "Editar con JOSM",
+    "viewin": "Ver en {{target}}",
     "backto": "Regresar a la tarea",
     "josmerror": "JOSM no responde. ¿Está abierto y activado el control remoto?",
     "signin": "Regístrate para {{action}}",

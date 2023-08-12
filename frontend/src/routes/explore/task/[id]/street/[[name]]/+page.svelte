@@ -18,7 +18,18 @@
     TableBodyRow,
     TableHead
   } from 'flowbite-svelte'
-  import { ArrowLeft, ArrowRight, ArrowUturnDown, ArrowsPointingIn, Check, LockClosed, MagnifyingGlass, PencilSquare, XMark } from 'svelte-heros-v2'
+  import {
+    ArrowLeft,
+    ArrowRight,
+    ArrowUturnDown,
+    ArrowsPointingIn,
+    ArrowTopRightOnSquare,
+    Check,
+    LockClosed,
+    MagnifyingGlass,
+    PencilSquare,
+    XMark
+  } from 'svelte-heros-v2'
   import debounce from 'lodash/debounce'
 
   import { afterNavigate, beforeNavigate, goto, invalidateAll } from '$app/navigation'
@@ -118,6 +129,16 @@
     window.open(url, '_blank')
   }
 
+  function gotoMapillary() {
+    const url = `https://www.mapillary.com/app/?lat=${center[0]}&lng=${center[1]}&z=${zoom}`
+    window.open(url, '_blank')
+  }
+
+  function gotoKartaView() {
+    const url = `https://kartaview.org/map/@${center[0]},${center[1]},${zoom}z`
+    window.open(url, '_blank')
+  }
+
   async function _editInJosm() {
     alertMessage = await editInJosm(getConsLayer().getBounds())
     alertModal = alertMessage ? true : false
@@ -178,6 +199,19 @@
                 </ListgroupItem>
               </Listgroup>
             {/if}
+          </Popover>
+          <Button id="view" class="!px-2">
+            <ArrowTopRightOnSquare size=18/>
+          </Button>
+          <Popover triggeredBy="#view" placement="bottom-start" arrow={false} offset=2 class="flex flex-row" defaultClass="p-0">
+            <Listgroup class="divide-none w-48" active>
+              <ListgroupItem on:click={gotoMapillary}>
+                {$t('task.viewin', { target: 'Mapillary' })}
+              </ListgroupItem>
+              <ListgroupItem on:click={gotoKartaView}>
+                {$t('task.viewin', { target: 'KartaView' })}
+              </ListgroupItem>
+            </Listgroup>
           </Popover>
           <Button href="/explore/task/{$page.params?.id}" class="!px-2">
             <ResponsiveIcon title={$t('task.backto')}>
