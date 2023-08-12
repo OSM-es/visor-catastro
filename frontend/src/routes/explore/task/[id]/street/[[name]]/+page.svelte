@@ -25,6 +25,7 @@
   import { page } from '$app/stores'
 
   import { login } from '$lib/user'
+  import { editInJosm } from '$lib/utils.js'
   import ResponsiveIcon from '$lib/components/ResponsiveIcon.svelte'
   import Map from '$lib/components/maps/Map.svelte'
   import FotosFachada from '$lib/components/FotosFachada.svelte'
@@ -32,6 +33,7 @@
   import StreetsLayer from '$lib/components/maps/StreetsLayer.svelte'
   import SortTable from '$lib/components/tables/SortTable.svelte'
   import SortTableHeadCell from '$lib/components/tables/SortTableHeadCell.svelte'
+  import AlertModal from '$lib/components/AlertModal.svelte'
   import StreetEdit from './StreetEdit.svelte'
   
   export let data
@@ -46,6 +48,7 @@
 
   let map, getConsLayer, scrollImage, viewImage, center, zoom
   let filter, items = [], getTable, filterTask=true
+  let alertMessage = '', alertModal = false
   
   $: streets = filterStreets(data.streets.slice(), filter, $street.cat_name, filterTask)
   $: index = items.findIndex((st) => st.cat_name === $street.cat_name)
@@ -115,6 +118,11 @@
     window.open(url, '_blank')
   }
 
+  async function _editInJosm() {
+    alertMessage = await editInJosm(getConsLayer().getBounds())
+    alertModal = alertMessage ? true : false
+  }
+
   function gotoNextStreet(next) {
     const url = `/explore/task/${$page.params?.id}/street/${items[index + next]?.cat_name}`
     goto(url)
@@ -128,6 +136,7 @@
   }
 </script>
 
+<AlertModal {alertMessage} bind:open={alertModal}/>
 <div class="flex flex-col flex-grow">
   <div class="border-b border-neutral-200 dark:border-neutral-700">
     <div class="flex flex-row max-sm:flex-col px-4 pt-1 pb-0.5 space-x-6 bg-neutral-200 dark:bg-neutral-600 h-10 max-sm:h-20 items-center">
@@ -164,7 +173,9 @@
             {:else}
               <Listgroup class="divide-none w-36" active>
                 <ListgroupItem on:click={gotoOsm}>{$t('task.editinosm')}</ListgroupItem>
-                <ListgroupItem>{$t('task.editwithjosm')}</ListgroupItem>
+                <ListgroupItem on:click={_editInJosm}>
+                  {$t('task.editwithjosm')}
+                </ListgroupItem>
               </Listgroup>
             {/if}
           </Popover>

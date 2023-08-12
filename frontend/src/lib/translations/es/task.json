@@ -44,6 +44,7 @@
     "editinosm": "Editar en OSM",
     "editwithjosm": "Editar con JOSM",
     "backto": "Regresar a la tarea",
+    "josmerror": "JOSM no responde. ¿Está abierto y activado el control remoto?",
     "signin": "Regístrate para {{action}}",
     "type": "Tarea tipo <span class=\"font-bold\">{{type}}</span>",
     "diff": "dificultad <span class=\"font-bold {{taskColor}}\">{{diff}}</span>",

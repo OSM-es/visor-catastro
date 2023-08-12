@@ -44,6 +44,7 @@
     "editinosm": "Edit in OSM",
     "editwithjosm": "Edit with JOSM",
     "backto": "Back to task",
+    "josmerror": "JOSM is not responding. Is it open and the remote control enabled?",
     "signin": "Sign in for {{action}}",
     "type": "Task type <span class=\"font-bold\">{{type}}</span>",
     "diff": "<span class=\"font-bold {{taskColor}}\">{{diff}}</span> difficulty",
