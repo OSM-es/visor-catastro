@@ -54,7 +54,7 @@
     "validatedtext": "Tarea mapeada y <span class=\"text-success-500 font-bold\">validada</span>.",
     "invalidatedtext": "Tarea marcada como que <span class=\"text-danger-500\">necesita más mapeo</span>.",
     "updatetext": "Tarea importada que necesita <span class=\"text-danger-500\">actualizar</span>.",
-    "pendingstreets": "Falta revisar {{streets:eq; 1:{{streets}} nombre; default:{{streets}} nombres}} para poder importar direcciones.",
+    "pendingstreets": "{{streets:eq; 1:Queda {{streets}} nombre; default:Quedan {{streets}} nombres}} por revisar para poder importar direcciones:",
     "streetscompleted": "Revisión de <a href=\"{{url}}\">nombres de calle</a> <span class=\"text-success-500\">completa</span>",
     "mappedtext": "Tarea <span class=\"text-success-500 font-bold\"> mapeada</span>",
     "needvalidation": "otro usuario debe validarla."

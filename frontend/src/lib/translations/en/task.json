@@ -54,7 +54,7 @@
     "invalidatedtext": "Task marked as <span class=\"text-danger-500\">needing more mapping</span>.",
     "validatedtext": "Task mapped and <span class=\"text-success-500 font-bold\">validated</span>.",
     "updatetext": "Imported task that needs to be <span class=\"text-danger-500\">updated</span>.",
-    "pendingstreets": "{{streets:eq; 1:{{streets}} street name; default:{{streets}} street names}} need to be reviewed to import addresses.",
+    "pendingstreets": "{{streets:eq; 1:{{streets}} street name; default:{{streets}} street names}} need to be reviewed to import addresses:",
     "streetscompleted": "<a href=\"{{url}}\">Street names</a> review <span class=\"text-success-500\">completed</span>",
     "mappedtext": "Task <span class=\"text-success-500 font-bold\">mapped</span>",
     "needvalidation": "another user must validate it."

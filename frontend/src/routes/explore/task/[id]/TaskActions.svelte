@@ -105,20 +105,19 @@
     {/if}
       {#if task.streets?.length}
         {#if streetsToValidate.length}
-          <h5>{$t('task.streets')}</h5>
-          <Listgroup active items={streets} let:item class="not-prose">
+          <h5 class="font-semibold">
+            {$t('task.pendingstreets', { streets: streetsToValidate.length})}
+          </h5>
+          <Listgroup active items={streets} let:item class="not-prose mb-8">
             {item.cat_name}
             <Badge color={item.validated ? 'green' : 'red'}>
               {item.validated ? $t('task.confirmed') : $t('task.pending')}
             </Badge>
           </Listgroup>
-          <p class="text-danger-500">
-            {$t('task.pendingstreets', { streets: streetsToValidate.length})}
-          </p>
         {:else}
           <p>
             {@html $t('task.streetscompleted', { url: `/explore/task/${task.id}/street` })}
-        </p>
+          </p>
         {/if}
       {/if}
       {#if canSelectImport}
