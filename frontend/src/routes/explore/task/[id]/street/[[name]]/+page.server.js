@@ -1,7 +1,7 @@
 export const ssr = false
 
 
-export async function load({ locals, params, url }) {
+export async function load({ locals, params }) {
   let uri = `task/${params.id}/street/${params.name || ''}`
   const streets = await locals.api.get(uri)
 
@@ -13,6 +13,6 @@ export const actions = {
     const formData = await request.formData()
     const data = Object.fromEntries(formData)
     const uri = `street/${data.mun_code}/${data.cat_name}`
-    const result = await locals.api.put(uri, data, locals.user.token)
+    await locals.api.put(uri, data, locals.user.token)
   }
 }

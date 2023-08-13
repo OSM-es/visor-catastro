@@ -75,7 +75,7 @@
 
   onMount(() => {
     const m = map.getMap()
-    m.fitBounds(bounds)
+    m.fitBounds(bounds, { animate: false})
     m.setMaxBounds(bounds)
     m.setMinZoom(m.getZoom())
     m.fitBounds(getConsLayer().getBounds())
