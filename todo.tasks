@@ -1,9 +1,5 @@
-Edición Callejero:
-    ☐ Navegar a calles haciendo clic en el mapa.
-
 Mapa:
     ☐ Capas wms según zona
-    ☐ Guardar bounds del mapa. Osm recuerda el zoom de la última visita
     ☐ Cuadro de búsqueda de municipios y otras localidades ¿dónde lo ponemos?
     ☐ En chrome la lista de tareas sale con barras de desplazamiento no necesarias
     ☐ Añadir lista colaboradores con visualización en el mapa

@@ -15,7 +15,7 @@
   import StatsSection from '$lib/components/StatsSection.svelte'
   import Map from '$lib/components/maps/Map.svelte'
   import Legend from '$lib/components/maps/Legend.svelte'
-  import { exploreCode } from '$lib/stores.js'
+  import { exploreCode, explorePath } from '$lib/stores.js'
   import {
     AREA_BORDER,
     TASK_COLORS,
@@ -70,8 +70,17 @@
     map.getMap().setZoom(zoom)
   }
 
-  afterNavigate(async ({to}) => {
+  afterNavigate(async ({from, to}) => {
+    if (from?.route?.id !== '/explore/[[code]]') {
+      if ($explorePath && to?.url?.pathname && to.url.search === '') {
+        await goto($explorePath, { invalidateAll: true })
+        map.getMap().setView(data.center, data.zoom, { animate: false })
+      }
+    }
     if (to?.route?.id === '/explore/[[code]]') {
+      if (to.url.search !== '' ) {
+        explorePath.set(to.url.pathname + to.url.search)
+      }
       exploreCode.set(code)
       if (code && !to?.url?.searchParams?.get('map')) {
         setTimeout(() => {
