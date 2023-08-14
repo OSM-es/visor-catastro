@@ -4,7 +4,7 @@
   import { goto } from '$app/navigation'
   import { t } from '$lib/translations'
 
-  import { exploreCode } from '$lib/stores.js'
+  import { exploreCode, explorePath } from '$lib/stores.js'
   import FotosFachada from '$lib/components/FotosFachada.svelte'
   import Map from '$lib/components/maps/Map.svelte'
   import ConsLayer from '$lib/components/maps/ConsLayer.svelte'
@@ -21,7 +21,7 @@
 
   $: buildings = data.task.buildings
 
-  let map, center, zoom, initialCenter, initialZoom, getConsLayer, getUrl
+  let map, center, zoom, getConsLayer, getUrl
   let fixmes = data.task?.fixmes
   let selectedFixme = null
   let scrollImage, viewImage, imageCount
@@ -52,12 +52,11 @@
     goto(`${url}?map=${getUrl(-1)}`)
   }
 
-  afterNavigate(({from, to}) => {
-    if (to.route.id === '/explore/task/[id]') {
+  afterNavigate(({to}) => {
+    if (to?.route?.id === '/explore/task/[id]') {
       viewImage = to.url.searchParams.get('ref')
       map.getMap().fitBounds(getConsLayer().getBounds())
-      initialZoom = zoom
-      initialCenter = center
+      explorePath.set(to.url.pathname)
     }
   })
 </script>

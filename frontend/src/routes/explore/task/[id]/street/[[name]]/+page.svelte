@@ -33,6 +33,7 @@
   import debounce from 'lodash/debounce'
 
   import { afterNavigate, beforeNavigate, goto, invalidateAll } from '$app/navigation'
+  import { explorePath } from '$lib/stores.js'
   import { page } from '$app/stores'
 
   import { login } from '$lib/user'
@@ -82,10 +83,13 @@
     getTable().subscribe(focusEditor)
   })
 
-  afterNavigate(() => {
-    viewImage = $page.url.searchParams.get('ref')
-    focusEditor()
-    centerMap()
+  afterNavigate(({ to }) => {
+    if (to?.route?.id == '/explore/task/[id]/street/[[name]]') {
+      viewImage = $page.url.searchParams.get('ref')
+      focusEditor()
+      centerMap()
+      explorePath.set(to.url.pathname)
+    }
   })
 
   beforeNavigate(() => {

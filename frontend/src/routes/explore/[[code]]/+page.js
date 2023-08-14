@@ -1,14 +1,14 @@
 export async function load({ data, url }) {
   let center, zoom
-
   const view = url.searchParams.get('map')?.split('/')
-  const geojsonUrl = (target, code, bounds) => {
-    return `${data.api}/${target}?${code ? 'code=' + code : ''}${bounds ? '&bounds=' + bounds : ''}`
-  }
 
   if (view?.length === 3) {
     zoom = view[0]
     center = [view[1], view[2]]
+  }
+
+  const geojsonUrl = (target, code, bounds) => {
+    return `${data.api}/${target}?${code ? 'code=' + code : ''}${bounds ? '&bounds=' + bounds : ''}`
   }
 
   const geoJsonData = async (target, code, bounds) => {
