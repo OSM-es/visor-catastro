@@ -33,7 +33,6 @@ def getPhoto(ref):
     resp = False
     try:
         url = current_app.config.get('FOTO_FACHADA_URL') + ref
-        print(url)
         resp = requests.get(url, stream=True)
     except requests.RequestException:
         resp = False

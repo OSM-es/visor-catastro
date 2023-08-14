@@ -38,10 +38,10 @@
   const rightBarClass = 'md:max-w-md w-full flex-grow overflow-scroll px-4 '
     + 'border-l-2 border-neutral-300 dark:border-neutral-500 dark:bg-neutral-800'
 
-  const target = (zoom) => (
+  const target = () => (
     zoom >= TASK_THR ? 
     'tasks' : 
-    (zoom >= MUN_THR ? 'municipalities' : 'provinces')
+    (code?.length === 5 || zoom >= MUN_THR ? 'municipalities' : 'provinces')
   )
   const fmt = new Intl.NumberFormat($locale, { maximumFractionDigits: 0, style: "percent" })
 
@@ -50,12 +50,11 @@
   $: dataPromise = fetchData(map, center, zoom, code)
   $: statsPromise = fetchStats(code)
   
-  
   async function fetchData(map, center, zoom, code) {
     if (!map) return null
     center = center
     const bounds = map?.getMap().getBounds().toBBoxString()
-    geoJsonData = await data.streamed.geoJsonData(target(zoom), code, bounds)
+    geoJsonData = await data.streamed.geoJsonData(target(), code, bounds)
     if (code && geoJsonData.features.length) {
       project = geoJsonData.features[0].properties
     }
@@ -76,7 +75,7 @@
       exploreCode.set(code)
       if (code && !to?.url?.searchParams?.get('map')) {
         setTimeout(() => {
-          map.getMap().fitBounds(getGeoJSON().getBounds())
+          map.getMap().fitBounds(getGeoJSON().getBounds(), { animated: false })
         }, 1000)
       }
     }
@@ -99,7 +98,7 @@
   }
 
   function handleClick(event, feature) {
-    const t = target(zoom)
+    const t = target()
     if (event.originalEvent.detail === 1) {
       timer = setTimeout(() => {
         if (t === 'tasks') {
@@ -139,7 +138,7 @@
       pattern.addTo(map.getMap())
     }
 
-    if (target(zoom) === 'tasks') {
+    if (target() === 'tasks') {
       const options = {
         color: feature.properties.lock_id ? TASK_LOCKED_COLOR : TASK_COLORS[feature.properties.bu_status],
         spaceColor: feature.properties.lock_id ? TASK_LOCKED_COLOR : TASK_COLORS[feature.properties.ad_status],
@@ -229,7 +228,6 @@
     }
     const base = 'https://osmcha.org/'
     const url = base +'?filters=' + encodeURIComponent(JSON.stringify(filters))
-    console.info(url)
     return url
   }
 
@@ -278,7 +276,7 @@
       {#await dataPromise}
         <p class="mt-4">{$t('common.loading')} <Spinner size={4}/></p>
       {:then geoJsonData}
-        {#if target(zoom) === 'tasks'}
+        {#if target() === 'tasks'}
           {#if geoJsonData?.features?.length > 0}
             <TaskList
               tasks={tasks.features}
@@ -297,7 +295,7 @@
               {$t('explore.noitems', { items: $t('explore.tasks') })}
             </p>
           {/if}
-        {:else if target(zoom) === 'municipalities' && code?.length === 5}
+        {:else if target() === 'municipalities' && code?.length === 5}
           <div class="prose dark:prose-invert pt-3">
             <h3>{project?.name} ({project?.muncode})</h3>
           </div>
@@ -335,14 +333,14 @@
             </p>
           </div>
         {:else}
-          {#if target(zoom) === 'provinces' && code?.length === 2}
+          {#if target() === 'provinces' && code?.length === 2}
             <div class="prose dark:prose-invert pt-3">
               <h3>{project?.name} ({project?.provcode})</h3>
             </div>
           {/if}
           <ProjList
             data={geoJsonData?.features}
-            target={target(zoom)}
+            target={target()}
             bind:activeItem
             {map}
             on:mouseover={(event) => handleMouseover(event.detail.feature)}
