@@ -1,10 +1,12 @@
 import datetime
-
+import json
+import re
 import gzip
 from functools import wraps
 
 import geopandas
 from flask import Response
+from shapely import GeometryCollection
 
 import models
 
@@ -43,8 +45,13 @@ def get_status(f):
 def get_proj_data(query, proj='mun'):
     sql = query.statement
     df = geopandas.GeoDataFrame.from_postgis(sql=sql, con=models.db.get_engine())
+    geoms = []
+    df.geom.map(lambda v: geoms.append(v))
+    bb = GeometryCollection(geoms).bounds
+    bounds = [[bb[3], bb[2]], [bb[1], bb[0]]]
     df['validated_count'] = df[proj + 'code'].map(count_tasks(models.Task.Status.VALIDATED))
     df['mapped_count'] = df[proj + 'code'].map(count_tasks(models.Task.Status.MAPPED)) + df['validated_count']
     df['status'] = df.apply(get_status, axis=1)
-    data = df.to_json(default=convertDate).encode('utf-8')
-    return data
+    data = df.to_json(default=convertDate)
+    data = re.sub(r'\}$', f', "bounds": "{json.dumps(bounds)}"}}', data)
+    return data.encode('utf-8')

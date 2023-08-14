@@ -52,12 +52,19 @@
   
   async function fetchData(map, center, zoom, code) {
     if (!map) return null
-    center = center
+
     const bounds = map?.getMap().getBounds().toBBoxString()
     geoJsonData = await data.streamed.geoJsonData(target(), code, bounds)
+    
     if (code && geoJsonData.features.length) {
       project = geoJsonData.features[0].properties
     }
+
+    if (code && geoJsonData?.bounds && !$page?.url?.searchParams?.get('map')) {
+      const bounds = JSON.parse(geoJsonData.bounds)
+      map.getMap().fitBounds(bounds, { animated: false })
+    }
+
     return geoJsonData
   }
 
@@ -71,22 +78,21 @@
   }
 
   afterNavigate(async ({from, to}) => {
-    if (from?.route?.id !== '/explore/[[code]]') {
-      if ($explorePath && to?.url?.pathname && to.url.search === '') {
-        await goto($explorePath, { invalidateAll: true })
-        map.getMap().setView(data.center, data.zoom, { animate: false })
-      }
-    }
-    if (to?.route?.id === '/explore/[[code]]') {
-      if (to.url.search !== '' ) {
+    if (map && to?.route?.id === '/explore/[[code]]') {
+      if (to.url.search === '' ) {
+        if (from?.route?.id !== '/explore/[[code]]') {
+          if (!code && $explorePath && !to.url.searchParams?.get('map')) {
+            await goto($explorePath, { invalidateAll: true })
+            if (data.center && typeof(data.zoom) !== 'undefined' ) {
+              map.getMap().setView(data.center, data.zoom, { animate: false })
+            }
+          }
+        }
+        explorePath.set(`${to.url.pathname}?map=${getUrl()}`)
+      } else {
         explorePath.set(to.url.pathname + to.url.search)
       }
       exploreCode.set(code)
-      if (code && !to?.url?.searchParams?.get('map')) {
-        setTimeout(() => {
-          map.getMap().fitBounds(getGeoJSON().getBounds(), { animated: false })
-        }, 1000)
-      }
     }
   })
 
