@@ -1,7 +1,7 @@
 <script>
   import { Button, Spinner, Tooltip } from 'flowbite-svelte'
   import { ArrowTopRightOnSquare , ChartBar } from 'svelte-heros-v2'
-  import { afterNavigate, goto } from '$app/navigation'
+  import { afterNavigate, beforeNavigate, goto } from '$app/navigation'
   import { GeoJSON } from 'svelte-leafletjs'
   import { locale, t } from '$lib/translations'
   import { page } from '$app/stores'
@@ -87,6 +87,8 @@
               map.getMap().setView(data.center, data.zoom, { animate: false })
             }
           }
+        } else if (!code && $explorePath.startsWith('/explore?')) {
+          map.resetZoom()
         }
         explorePath.set(`${to.url.pathname}?map=${getUrl()}`)
       } else {

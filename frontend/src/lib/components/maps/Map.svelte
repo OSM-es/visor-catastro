@@ -4,7 +4,6 @@
   import { LeafletMap, ScaleControl, TileLayer } from 'svelte-leafletjs'
   import { PUBLIC_INITIAL_VIEW, PUBLIC_INITIAL_ZOOM, PUBLIC_MAX_SW, PUBLIC_MAX_NE } from '$lib/config'
   import { STREET_COLORS, STREET_COLORS_TEXT, DEFAULT_STREET_COLOR } from '$lib/config'
-  import Layout from '../../../routes/+layout.svelte';
   
   export let map
   export let center = PUBLIC_INITIAL_VIEW
@@ -50,7 +49,7 @@
       layerControl = L.control.layers(layers).addTo(map.getMap())
     }
   }
-   
+
   function handleMoveEnd() {
     const latlng = map.getMap().getCenter()
     center = [latlng.lat, latlng.lng]
@@ -94,6 +93,9 @@
 
   onMount(() => {
     map.getMap().invalidateSize()
+    map.resetZoom = () => {
+      map.getMap().setView(PUBLIC_INITIAL_VIEW, PUBLIC_INITIAL_ZOOM)
+    }
   })
 </script>
 
