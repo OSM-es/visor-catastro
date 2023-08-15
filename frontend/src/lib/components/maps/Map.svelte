@@ -2,13 +2,20 @@
   import 'leaflet/dist/leaflet.css'
   import { beforeUpdate, createEventDispatcher, onMount, setContext } from 'svelte'
   import { LeafletMap, ScaleControl, TileLayer } from 'svelte-leafletjs'
-  import { PUBLIC_INITIAL_VIEW, PUBLIC_INITIAL_ZOOM, PUBLIC_MAX_SW, PUBLIC_MAX_NE } from '$lib/config'
+  import {
+    PUBLIC_INITIAL_VIEW,
+    PUBLIC_INITIAL_ZOOM,
+    PUBLIC_INITIAL_SW,
+    PUBLIC_INITIAL_NE,
+    PUBLIC_MAX_SW,
+    PUBLIC_MAX_NE
+  } from '$lib/config'
   import { STREET_COLORS, STREET_COLORS_TEXT, DEFAULT_STREET_COLOR } from '$lib/config'
   
   export let map
   export let center = PUBLIC_INITIAL_VIEW
   export let zoom = PUBLIC_INITIAL_ZOOM
-  export let minZoom = 5
+  export let minZoom = 4
 
   let pnoaLayer, scneLayer, osmLayer, layerControl
 
@@ -19,8 +26,9 @@
     center,
     zoom,
     maxBounds: [PUBLIC_MAX_SW, PUBLIC_MAX_NE],
-    minZoom: 5,
+    minZoom,
     maxZoom: 22,
+    zoomSnap: 0.1,
   }
   const osmAttribution = `&copy; <a href="https://www.openstreetmap.org/copyright"`
   + ` target="_blank">OpenStreetMap</a>`
@@ -94,8 +102,9 @@
   onMount(() => {
     map.getMap().invalidateSize()
     map.resetZoom = () => {
-      map.getMap().setView(PUBLIC_INITIAL_VIEW, PUBLIC_INITIAL_ZOOM)
+      map.getMap().fitBounds([PUBLIC_INITIAL_SW, PUBLIC_INITIAL_NE])
     }
+    map.resetZoom()
   })
 </script>
 
