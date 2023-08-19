@@ -344,7 +344,7 @@ class Task(db.Model):
             buildings=buildings,
             addresses=addresses,
         )
-        self.unlock(user, h)
+        if check_lock: self.unlock(user, h)
     
     def validate_status(self, key, status):
         old = Task.Status(getattr(self, key))
