@@ -180,10 +180,10 @@ class Task(db.Model):
         new_task = Task.from_feature(feature)
         candidates = get_by_area(Task, new_task.geom, buffer=Task.BUFFER)
         if candidates:
+            id = new_task.localId
             for c in candidates:
                 if not c.update:
-                    c.update = Task.Update()
-            id = feature['properties']['localId']
+                    c.update = Task.Update(muncode=new_task.muncode, localId=id)
             old_task = next(
                 (c for c in candidates if c.localId == id and c.update_id is None),
                 candidates[0]
@@ -203,8 +203,11 @@ class Task(db.Model):
     @staticmethod
     def update_tasks(mun_code):
         for u in Task.Update.query.filter(Task.Update.muncode == mun_code):
-            if not u.muncode:
+            if not u.geom:
+                # TODO: merge history y fixmes
+                t = u.task
                 u.task.update = None
+                t.delete()
                 continue
             u.task.muncode = u.muncode
             u.task.localId = u.localId
@@ -324,8 +327,9 @@ class Task(db.Model):
         if not self.need_update():
             return
         user=OsmUser.system_bot()
-        addresses = self.ad_status != Task.Status.READY.value
-        buildings = self.bu_status != Task.Status.READY.value
+        # TODO: Asignar según el tipo de fixme
+        addresses = True
+        buildings = True
         if buildings or addresses:
             self.change_status(
                 user, Task.Status.NEED_UPDATE, buildings, addresses, check_lock=False
