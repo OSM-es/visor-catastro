@@ -60,13 +60,15 @@ class Task(db.Model):
         task = db.relationship('Task', back_populates='update', uselist=False)
         geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
 
-        @staticmethod
-        def from_feature(feature):
+        def from_feature(self, feature):
             u = Task.Update(**feature['properties'])
             if u.type == 'R&uacute;stica': u.type = 'Rústica'
             geom = feature['geometry']
-            u.geom = from_shape(geom)
-            return u
+            self.muncode = u.muncode
+            self.localId = u.localId
+            self.zone = u.zone
+            self.type = u.type
+            self.geom = from_shape(geom)
 
         @staticmethod
         def get_path(mun_code, filename):
@@ -179,14 +181,15 @@ class Task(db.Model):
         candidates = get_by_area(Task, new_task.geom, buffer=Task.BUFFER)
         if candidates:
             for c in candidates:
-                c.update = Task.Update()
-            u = Task.Update.from_feature(feature)
+                if not c.update:
+                    c.update = Task.Update()
+            id = feature['properties']['localId']
             old_task = next(
-                (c for c in candidates if c.localId == u.localId and c.update_id is None),
+                (c for c in candidates if c.localId == id and c.update_id is None),
                 candidates[0]
             )
             task = old_task
-            task.update = u
+            task.update.from_feature(feature)
         else:
             db.session.add(new_task)
             task = new_task
