@@ -29,6 +29,14 @@
   $: isMapper = user && [mapper?.osm_id, mapper?.import_id].includes(user.id)
   $: needMapping = ['READY', 'INVALIDATED', 'NEED_UPDATE'].includes(status)
 
+  function isSplitted(task) {
+    const needMapping = ['READY', 'INVALIDATED', 'NEED_UPDATE']
+    if (task.bu_status !== task.ad_status) {
+      return !needMapping.includes(task.bu_status) || !needMapping.includes(task.ad_status)
+    }
+    return false
+  }
+
   function updateStatus() {
     return async ({ result, update }) => {
       await update({ reset: false })
@@ -44,7 +52,7 @@
 
 {#if target}
   <form use:enhance={updateStatus} method="POST" action="?/task">
-    {#if task.bu_status !== task.ad_status}
+    {#if isSplitted(task)}
       <h4 class="capitalize">{title === 'buildings' ? $t('explore.buildings') : $t('explore.addresses')}</h4>
     {/if}
 
@@ -164,7 +172,7 @@
         {@html $t('task.validatedtext')}
       </p>
     {/if}
-    {#if title === 'addresses' || task.ad_status === task.bu_status || task.lock}
+    {#if title === 'addresses' || !isSplitted(task) || task.lock}
       {#if user && task.lock && task.isOwner}
         <Button type="submit" name="action" value="UNLOCKED" color="alternative">
           {task.lock.text === 'MAPPING' ? $t('task.stopmapping') : $t('task.stopvalidation')}
