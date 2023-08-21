@@ -60,6 +60,13 @@ class Task(db.Model):
         task = db.relationship('Task', back_populates='update', uselist=False)
         geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
 
+        @staticmethod
+        def get_path(mun_code, filename):
+            return Municipality.Update.get_path(mun_code) + '/tasks/' + filename
+
+        def path(self):
+            return Task.Update.get_path(self.muncode, self.localId + '.osm.gz')
+
         def from_feature(self, feature):
             u = Task.Update(**feature['properties'])
             if u.type == 'R&uacute;stica': u.type = 'Rústica'
@@ -69,13 +76,33 @@ class Task(db.Model):
             self.zone = u.zone
             self.type = u.type
             self.geom = from_shape(geom)
+        
+        def do_update(self):
+            self.task.muncode = self.muncode
+            self.task.localId = self.localId
+            self.task.zone = self.zone
+            self.task.type = self.type
+            self.task.geom = self.geom
+            self.task.set_need_update()
+            self.task.update = None
+            db.session.delete(self)
 
-        @staticmethod
-        def get_path(mun_code, filename):
-            return Municipality.Update.get_path(mun_code) + '/tasks/' + filename
-
-        def path(self):
-            return Task.Update.get_path(self.muncode, self.localId + '.osm.gz')
+        def merge(self):
+            t = self.task
+            task = Task.get_by_ref(self.muncode, self.localId)
+            while(t.history):
+                task.history.append(t.history.pop())
+            h = TaskHistory(
+                user=OsmUser.system_bot(),
+                action=TaskHistory.Action.AGGREGATED.value,
+                text=t.id,
+                buildings=True,
+                addresses=True,
+            )
+            task.history.append(h)
+            self.task.update = None
+            t.delete()
+            db.session.delete(self)
 
     MODERATE_THRESHOLD = 10
     CHALLENGING_THRESHOLD = 20
@@ -204,19 +231,9 @@ class Task(db.Model):
     def update_tasks(mun_code):
         for u in Task.Update.query.filter(Task.Update.muncode == mun_code):
             if not u.geom:
-                # TODO: merge history y fixmes
-                t = u.task
-                u.task.update = None
-                t.delete()
+                u.merge()
                 continue
-            u.task.muncode = u.muncode
-            u.task.localId = u.localId
-            u.task.zone = u.zone
-            u.task.type = u.type
-            u.task.geom = u.geom
-            u.task.set_need_update()
-            u.task.update = None
-        Task.Update.query.filter(Task.Update.muncode == mun_code).delete()
+            u.do_update()
 
     @staticmethod
     def get_path(mun_code, filename):
@@ -347,7 +364,10 @@ class Task(db.Model):
             buildings=buildings,
             addresses=addresses,
         )
-        if check_lock: self.unlock(user, h)
+        if check_lock:
+            self.unlock(user, h)
+        else:
+            self.history.append(h)
     
     def validate_status(self, key, status):
         old = Task.Status(getattr(self, key))

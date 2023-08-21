@@ -14,7 +14,9 @@
       <Avatar src={item.avatar} data-name={item.user}/>
       <p>
         {$t('task.' + item.action)}
-        {#if !item.action.startsWith('LOCKED_FOR_')}
+        {#if ['AGGREGATED', 'SEGREGATED'].includes(item.action)}
+          #{item.text}
+        {:else if !item.action.startsWith('LOCKED_FOR_')}
           {$t('task.' + item.text)}
         {/if}
         {#if item.addresses != item.buildings}

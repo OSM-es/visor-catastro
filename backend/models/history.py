@@ -63,6 +63,7 @@ class TaskHistory(TaskHistoryMixin, History):
         UNLOCKED = 5
         AUTO_UNLOCKED = 6
         EXTENDED = 7
+        AGGREGATED = 8
 
         @staticmethod
         def from_status(status):
