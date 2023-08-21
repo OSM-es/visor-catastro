@@ -327,9 +327,8 @@ class Task(db.Model):
         if not self.need_update():
             return
         user=OsmUser.system_bot()
-        # TODO: Asignar según el tipo de fixme
-        addresses = True
-        buildings = True
+        addresses = any([f.addresses for f in self.fixmes])
+        buildings = any([f.buildings for f in self.fixmes])
         if buildings or addresses:
             self.change_status(
                 user, Task.Status.NEED_UPDATE, buildings, addresses, check_lock=False
@@ -356,7 +355,7 @@ class Task(db.Model):
     def validate_status(self, key, status):
         old = Task.Status(getattr(self, key))
         if (
-            status == Task.Status.NEED_UPDATE and old != Task.Status.READY
+            status == Task.Status.NEED_UPDATE
             or status == Task.Status.MAPPED and old in (
                 Task.Status.READY,
                 Task.Status.INVALIDATED,
@@ -390,6 +389,12 @@ class Task(db.Model):
             self.ad_status == Task.Status.READY.value
             and self.bu_status == Task.Status.READY.value
         )
+
+    def ad_ready(self):
+        return self.ad_status == Task.Status.READY.value
+
+    def bu_ready(self):
+        return self.bu_status == Task.Status.READY.value
 
     def delete(self):
         for h in self.history:
