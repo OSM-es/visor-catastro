@@ -104,7 +104,6 @@
     map.resetZoom = () => {
       map.getMap().fitBounds([PUBLIC_INITIAL_SW, PUBLIC_INITIAL_NE])
     }
-    map.resetZoom()
   })
 </script>
 
