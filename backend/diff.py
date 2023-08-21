@@ -95,17 +95,15 @@ class Diff():
                 feat = self.df2.loc[i2]
                 buildings = feat1.buildings
                 addresses = feat1.addresses
-                geom_diff = not feat.geometry.simplify(0.000000001).equals(
-                    feat1.geometry.simplify(0.000000001)
-                )
+                geom_diff = not feat.geometry.equals_exact(feat1.geometry, 0.0000001)
                 tags_diff = Diff.clean_tags(feat.tags) != Diff.clean_tags(feat1.tags)
                 if geom_diff:
                     if tags_diff:
                         fixme = Fixme.Type.UPDATE_FULL.value
                     else:
-                        fixme = Fixme.Type.UPDATE_TAGS.value
+                        fixme = Fixme.Type.UPDATE_GEOM.value
                 elif tags_diff:
-                    fixme = Fixme.Type.UPDATE_GEOM.value
+                    fixme = Fixme.Type.UPDATE_TAGS.value
             if fixme:
                 self.fixmes.append(self.new_fixme(feat, fixme, buildings, addresses))
 
