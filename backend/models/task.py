@@ -327,12 +327,9 @@ class Task(db.Model):
         if not self.need_update():
             return
         user=OsmUser.system_bot()
-        addresses = any([f.addresses for f in self.fixmes])
-        buildings = any([f.buildings for f in self.fixmes])
-        if buildings or addresses:
-            self.change_status(
-                user, Task.Status.NEED_UPDATE, buildings, addresses, check_lock=False
-            )
+        self.change_status(
+            user, Task.Status.NEED_UPDATE, True, True, check_lock=False
+        )
 
     def change_status(self, user, status, buildings, addresses, check_lock=True):
         if check_lock and (not self.lock or self.lock.user != user.user):
@@ -389,12 +386,6 @@ class Task(db.Model):
             self.ad_status == Task.Status.READY.value
             and self.bu_status == Task.Status.READY.value
         )
-
-    def ad_ready(self):
-        return self.ad_status == Task.Status.READY.value
-
-    def bu_ready(self):
-        return self.bu_status == Task.Status.READY.value
 
     def delete(self):
         for h in self.history:

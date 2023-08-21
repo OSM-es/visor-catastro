@@ -50,8 +50,6 @@ class Fixme(db.Model):
     src_date = db.Column(db.Date, nullable=False)
     text = db.Column(db.String)
     validated = db.Column(db.Boolean)
-    addresses = db.Column(db.Boolean)
-    buildings = db.Column(db.Boolean)
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=True)
     task = db.relationship('Task', back_populates='fixmes')
     geom = db.Column(Geometry("POINT", srid=4326))

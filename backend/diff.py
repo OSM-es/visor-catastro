@@ -37,7 +37,7 @@ class Diff():
 
     @staticmethod
     def dataframe():
-        return gpd.GeoDataFrame(columns=['tags', 'geometry', 'buildings', 'addresses'])
+        return gpd.GeoDataFrame(columns=['tags', 'geometry'])
 
     @staticmethod
     def shapes_to_dataframe(df, data):
@@ -46,11 +46,11 @@ class Diff():
             Diff.add_row(df, feat)
 
     @staticmethod
-    def add_row(df, feature, buildings=False, addresses=False):
+    def add_row(df, feature):
         geom = feature['shape']
         tags = feature['properties'].get('tags')
         if tags:
-            df.loc[len(df)] = [tags, geom, buildings, addresses]
+            df.loc[len(df)] = [tags, geom]
 
     @staticmethod
     def clean_tags(tags):
@@ -80,21 +80,15 @@ class Diff():
         for i1, i2 in matches:
             fixme = None
             feat = None
-            buildings = False
-            addresses = False
             if i1 is None:
                 feat = self.df2.loc[i2]
                 fixme = Fixme.Type.UPDATE_ADD.value
             elif i2 is None:
                 feat = self.df1.loc[i1]
-                buildings = feat.buildings
-                addresses = feat.addresses
                 fixme = Fixme.Type.UPDATE_DEL.value
             else:
                 feat1 = self.df1.loc[i1]
                 feat = self.df2.loc[i2]
-                buildings = feat1.buildings
-                addresses = feat1.addresses
                 geom_diff = not feat.geometry.equals_exact(feat1.geometry, 0.0000001)
                 tags_diff = Diff.clean_tags(feat.tags) != Diff.clean_tags(feat1.tags)
                 if geom_diff:
@@ -105,7 +99,7 @@ class Diff():
                 elif tags_diff:
                     fixme = Fixme.Type.UPDATE_TAGS.value
             if fixme:
-                self.fixmes.append(self.new_fixme(feat, fixme, buildings, addresses))
+                self.fixmes.append(self.new_fixme(feat, fixme))
 
     def get_fixmes(self):
         nx = gpd.GeoSeries(self.df1.geometry).sindex
@@ -126,15 +120,13 @@ class Diff():
                 matches.append((i, None))
         self._update_matches(matches)
 
-    def new_fixme(self, feat, type, buildings, addresses):
+    def new_fixme(self, feat, type):
         tags = Diff.clean_tags(feat.tags)
         msg = feat.geometry.geom_type + str(tags)
         return {
             'type': type,
             'geom': feat.geometry.point_on_surface(),
             'text': msg,
-            'buildings': buildings,
-            'addresses': addresses,
         }
     
 
