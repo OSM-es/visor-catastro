@@ -185,6 +185,7 @@ def load_tasks(mun_code, tasks, src_date):
         fn = Task.Update.get_path(mun_code, localid + '.osm.gz')
         data = Diff.get_shapes(fn)
         calc_difficulty(task, data)
+        # TODO: habría que retirar los fixmes viejos
         load_ca2o_fixmes(task, data, src_date)
         if not candidates:
             continue
@@ -200,7 +201,6 @@ def load_tasks(mun_code, tasks, src_date):
                     shape = feat['shape']
                     if task_shape.intersects(shape):
                         demolished.pop(shape, None)
-                        # TODO: añadir si debe revisar direcciones, edificios o ambos
                         Diff.add_row(diff.df1, feat)
                     else:
                         demolished[shape] = localid
@@ -210,11 +210,14 @@ def load_tasks(mun_code, tasks, src_date):
             load_update_fixmes(task, diff, src_date)
     if fixmes:
         log.info(f"Registrados {fixmes} anotaciones de actualización en {mun_code}")
+    need_update = set()
     for shape, localid in demolished.items():
         t = Task.get_by_ref(mun_code, localid)
         geom = from_shape(shape.point_on_surface())
         f = Fixme(type=Fixme.Type.UPDATE_DEL_CHECK.value, geom=geom, src_date=src_date)
         t.fixmes.append(f)
+        need_update.add(t)
+    for t in need_update:
         t.set_need_update()
 
 def load_ca2o_fixmes(task, data, src_date):
