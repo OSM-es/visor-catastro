@@ -5,6 +5,7 @@
     "UNLOCKED": "Unlocked for",
     "AUTO_UNLOCKED": "Unlocked for",
     "AGGREGATED": "Aggregated with task",
+    "SEGREGATED": "Segregated from task",
     "MAPPING": "mapping",
     "VALIDATION": "validation",
     "LOCKED_FOR_MAPPING": "Locked for mapping",

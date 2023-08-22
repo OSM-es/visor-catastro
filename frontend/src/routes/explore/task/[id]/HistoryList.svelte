@@ -14,8 +14,12 @@
       <Avatar src={item.avatar} data-name={item.user}/>
       <p>
         {$t('task.' + item.action)}
-        {#if ['AGGREGATED', 'SEGREGATED'].includes(item.action)}
+        {#if item.action === 'AGGREGATED'}
           #{item.text}
+        {:else if item.action === 'SEGREGATED'}
+          <a href={`/explore/task/${item.text}`}>
+            #{item.text}
+          </a>
         {:else if !item.action.startsWith('LOCKED_FOR_')}
           {$t('task.' + item.text)}
         {/if}

@@ -90,23 +90,14 @@ class Task(db.Model):
         def merge(self):
             t = self.task
             task = Task.get_by_ref(self.muncode, self.localId)
-            while(t.history):
-                task.history.append(t.history.pop())
-            h = TaskHistory(
-                user=OsmUser.system_bot(),
-                action=TaskHistory.Action.AGGREGATED.value,
-                text=t.id,
-                buildings=True,
-                addresses=True,
-            )
-            task.history.append(h)
+            task.merge(t, TaskHistory.Action.AGGREGATED.value)
             self.task.update = None
             t.delete()
             db.session.delete(self)
 
     MODERATE_THRESHOLD = 10
     CHALLENGING_THRESHOLD = 20
-    BUFFER = 0.00005  # Márgen de desplazamiento por correcciones de precisión
+    BUFFER = 0.00001  # Márgen de desplazamiento por correcciones de precisión
 
     id = db.Column(db.Integer, primary_key=True)
     # Código de Catastro del municipio. Coincide en ocasiones con el código postal o código INE, pero no siempre.
@@ -204,22 +195,33 @@ class Task(db.Model):
 
     @staticmethod
     def get_match(feature):
+        id = feature['properties']['localId']
         new_task = Task.from_feature(feature)
-        candidates = get_by_area(Task, new_task.geom, buffer=Task.BUFFER)
+        candidates = get_by_area(Task, new_task.geom, percentaje=0.85, buffer=Task.BUFFER)
         if candidates:
             id = new_task.localId
-            for c in candidates:
-                if not c.update:
-                    c.update = Task.Update(muncode=new_task.muncode, localId=id)
             old_task = next(
                 (c for c in candidates if c.localId == id and c.update_id is None),
                 candidates[0]
             )
-            task = old_task
-            task.update.from_feature(feature)
+            if old_task.update_id:
+                task = new_task
+                task.localId = None
+                task.ad_status = old_task.ad_status
+                task.bu_status = old_task.bu_status
+                task.update = Task.Update()
+                task.update.from_feature(feature)
+                db.session.add(task)
+                task.merge(old_task, TaskHistory.Action.SEGREGATED.value)
+            else:
+                task = old_task
+                for c in candidates:
+                    if not c.update:
+                        c.update = Task.Update(muncode=new_task.muncode, localId=id)
+                task.update.from_feature(feature)
         else:
-            db.session.add(new_task)
             task = new_task
+            db.session.add(task)
         return task, candidates
 
     @staticmethod
@@ -413,6 +415,18 @@ class Task(db.Model):
         db.session.delete(self)
         h = History(action=History.Action.DEL_TASK.value)
         db.session.add(h)
+
+    def merge(self, task, action):
+        while(task.history):
+            self.history.append(task.history.pop())
+        h = TaskHistory(
+            user=OsmUser.system_bot(),
+            action=action,
+            text=task.id,
+            buildings=True,
+            addresses=True,
+        )
+        self.history.append(h)
 
     @property
     def ad_mapper(self):

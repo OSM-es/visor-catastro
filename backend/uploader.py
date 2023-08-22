@@ -77,13 +77,6 @@ def upload(mun_code):
     zoning = Municipality.Update.get_path(mun_code, 'zoning.geojson')
     tasks = merge_tasks(zoning)
     load_tasks(mun_code, tasks.values(), src_date)
-    for t in Task.get_by_shape(mun_shape):
-        if not t.both_ready() and not t.update:
-            geom = from_shape(to_shape(t.geom).point_on_surface())
-            f = Fixme(type=Fixme.Type.UPDATE_ORPHAN.value, geom=geom, src_date=src_date)
-            t.fixmes.append(f)
-            t.set_need_update()
-            log.info(f"Tarea huérfana {str(t)}")
     log.info(f"Registradas {len(tasks)} tareas en {mun_code} {mun_name}")
     old_mun = mun.update.muncode if mun.update else None
     upload_streets(mun_code, old_mun)
@@ -178,6 +171,7 @@ def load_tasks(mun_code, tasks, src_date):
     """Registra las tareas."""
     log = current_app.logger
     demolished = {}
+    visited = set()
     fixmes = 0
     for feature in tasks:
         localid = feature['properties']['localId']
@@ -199,26 +193,25 @@ def load_tasks(mun_code, tasks, src_date):
             else:
                 for feat in Diff.get_shapes(fn):
                     shape = feat['shape']
-                    if task_shape.intersects(shape):
+                    if task_shape.contains(shape):
                         demolished.pop(shape, None)
                         Diff.add_row(diff.df1, feat)
-                    else:
-                        demolished[shape] = localid
+                        visited.add(shape)
+                    elif shape not in visited:
+                        demolished[shape] = task
         if len(diff.df1.index):
             diff.get_fixmes()
             fixmes += len(diff.fixmes)
             load_update_fixmes(task, diff, src_date)
     if fixmes:
         log.info(f"Registrados {fixmes} anotaciones de actualización en {mun_code}")
-    need_update = set()
-    for shape, localid in demolished.items():
-        t = Task.get_by_ref(mun_code, localid)
+    for shape, task in demolished.items():
+        shape = to_shape(task.geom)
         geom = from_shape(shape.point_on_surface())
         f = Fixme(type=Fixme.Type.UPDATE_DEL_CHECK.value, geom=geom, src_date=src_date)
-        t.fixmes.append(f)
-        need_update.add(t)
-    for t in need_update:
-        t.set_need_update()
+        task.fixmes.append(f)
+    for task in set(demolished.values()):
+        task.set_need_update()
 
 def load_ca2o_fixmes(task, data, src_date):
     """Carga fixmes de conversión en bd."""
