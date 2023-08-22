@@ -230,10 +230,10 @@ class Task(db.Model):
     @staticmethod
     def update_tasks(mun_code):
         for u in Task.Update.query.filter(Task.Update.muncode == mun_code):
-            if not u.geom:
-                u.merge()
-                continue
-            u.do_update()
+            if u.geom:
+                u.do_update()
+        for u in Task.Update.query.filter(Task.Update.muncode == mun_code):
+            u.merge()
 
     @staticmethod
     def get_path(mun_code, filename):

@@ -256,6 +256,7 @@ def process(mun_code):
 
 def get_date(mun_code):
     "Devuelve la fecha de la fuente de datos."
+    #return '2022-09-23'
     reader = catatom.Reader(mun_code)
     reader.download('address')
     (md_path, __, zip_path, __) = reader.get_layer_paths('address')
