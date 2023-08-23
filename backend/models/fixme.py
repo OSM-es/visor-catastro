@@ -69,3 +69,8 @@ class Fixme(db.Model):
 
     def is_update(self):
         return Fixme.Type(self.type).is_update()
+
+    @staticmethod
+    def query_ca2o_fixmes(task):
+        ca2o_fixmes = [t.value for t in Fixme.Type if t.name.startswith('CA2O_')]
+        return Fixme.query.filter(Fixme.task == task, Fixme.type.in_(ca2o_fixmes))

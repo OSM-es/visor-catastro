@@ -195,7 +195,6 @@ def load_tasks(mun_code, tasks, src_date):
         fn = Task.Update.get_path(mun_code, localid + '.osm.gz')
         data = Diff.get_shapes(fn)
         calc_difficulty(task, data)
-        # TODO: habría que retirar los fixmes viejos
         load_ca2o_fixmes(task, data, src_date)
         if not candidates:
             continue
@@ -231,6 +230,7 @@ def load_tasks(mun_code, tasks, src_date):
 
 def load_ca2o_fixmes(task, data, src_date):
     """Carga fixmes de conversión en bd."""
+    fixmes = []
     for f in data:
         if 'fixme' not in f['properties'].get('tags'):
             continue
@@ -238,8 +238,9 @@ def load_ca2o_fixmes(task, data, src_date):
         msg = f['properties']['tags']['fixme']
         type = Fixme.Type.from_ca2o(msg)
         text = msg.split(':')[1].strip() if type == Fixme.Type.CA2O_GEOS else None
-        fixme = Fixme(geom=geom, type=type.value, text=text, src_date=src_date)
-        task.fixmes.append(fixme)
+        if Fixme.query.filter(Fixme.geom.same(geom), Fixme.type == type.value).count() == 0:
+            fixmes.append(Fixme(geom=geom, type=type.value, text=text, src_date=src_date))
+    task.fixmes.extend(fixmes)
 
 def load_update_fixmes(task, diff, src_date):
     """Carga fixmes de actualización en bd."""
