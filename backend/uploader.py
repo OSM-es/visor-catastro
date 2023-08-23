@@ -4,19 +4,21 @@ Microservicio de carga de actualización a la base de datos.
 Registra los municipios creados en /data/update y sus tareas.
 Transfiere a /data/dist.
 """
+import csv
 import datetime
 import json
 import os
 
-import csv
 import geojson
 import osm2geojson
+import click
 from flask import Blueprint, abort, current_app
 from shapely.geometry import shape
 from shapely import GeometryCollection, simplify
 from geoalchemy2.shape import from_shape, to_shape
 
 import overpass
+import tm
 from models import db, Municipality, Province, Street, Task, Fixme
 from diff import Diff
 
@@ -26,6 +28,20 @@ uploader = Blueprint('uploader', __name__, url_prefix='/')
 @uploader.route("/")
 def status():
     return "ok"
+
+@uploader.cli.command('tmtasks')
+@click.argument('id', required=False)
+def tmtasks(id=None):
+    if id:
+        project = tm.get_project(id)
+        if project['cadastre']:
+            tm.get_tasks(project)
+        if 'pending_tasks' in project:
+            print('pendiente', project['name'])
+        else:
+            print(project)
+    else:
+        tm.get_projects()
 
 @uploader.route("/municipality/", methods=["PUT"])
 def end_upload():
