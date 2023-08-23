@@ -33,13 +33,7 @@ def status():
 @click.argument('id', required=False)
 def tmtasks(id=None):
     if id:
-        project = tm.get_project(id)
-        if project['cadastre']:
-            tm.get_tasks(project)
-        if 'pending_tasks' in project:
-            print('pendiente', project['name'])
-        else:
-            print(project)
+        tm.get_project(id)
     else:
         tm.get_projects()
 

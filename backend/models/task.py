@@ -7,6 +7,7 @@ from geoalchemy2.shape import from_shape
 from sqlalchemy import and_, func
 
 from models import db, History, Municipality, TaskHistory, TaskLock, OsmUser
+from models.tm import task_tmtask
 from models.utils import get_by_area
 
 
@@ -132,8 +133,11 @@ class Task(db.Model):
     history = db.relationship('TaskHistory', back_populates='task')
     # Anotaciones para correcciones por el editor
     fixmes = db.relationship('Fixme', back_populates='task')
+    # Almacén temporal para actualizar
     update_id = db.Column(db.Integer, db.ForeignKey('task_update.id'), nullable=True)
     update = db.relationship(Update, back_populates='task', uselist=False)
+    # Enlaces a tasking manager
+    tmtasks = db.relationship('TMTask', secondary=task_tmtask)
     geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
     __table_args__ = (Index('codes_index', 'localid', 'muncode'), )
 

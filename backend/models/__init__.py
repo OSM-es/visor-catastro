@@ -7,5 +7,6 @@ from models.municipality import Municipality
 from models.user import OsmUser, User
 from models.history import History, TaskHistory, TaskLock, StreetHistory, StreetLock
 from models.street import Street
+from models.tm import TMTask, TMProject
 from models.task import Task
 from models.province import Province
