@@ -18,11 +18,12 @@ class TMTask(db.Model):
     __tablename__ = 'tmtask'
 
     id = db.Column(db.Integer, primary_key=True)
-    project_id = db.Column(db.Integer, db.ForeignKey('tmproject.id'), nullable=True)
     muncode = db.Column(db.String)
     status = db.Column(db.String)
     filename = db.Column(db.String)
     geom = db.Column(Geometry("MultiPolygon", srid=4326))
+    project_id = db.Column(db.Integer, db.ForeignKey('tmproject.id'), nullable=True)
+    project = db.relationship('TMProject')
 
     def get_path(self):
         fp = MIGRATE + self.muncode
@@ -36,8 +37,9 @@ class TMProject(db.Model):
 
     class Status(Enum):
         DOWNLOADING = 0  # Pendiente de descarga.
-        PUBLISHED = 1  # Disponible para migrar.
-        MIGRATED = 2  # Migrado.
+        DOWNLOADED = 1  # Descarga realizada.
+        PUBLISHED = 2  # Disponible para migrar.
+        MIGRATED = 3  # Migrado.
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)

@@ -1,6 +1,7 @@
 import re
 import requests
 import gzip
+from collections import defaultdict
 from flask import current_app
 from pathlib import Path
 from shapely import Polygon, MultiPolygon
@@ -83,10 +84,17 @@ def get_project(id):
                 project.buildings = True
                 project.addresses = True
             project.created = data['created'].split('T')[0]
-            pending_tasks = data['tasks']['features']
-            tmtasks = get_tasks(project, pending_tasks)
-            if tmtasks: link_tasks(tmtasks)
             db.session.add(project)
+            db.session.commit()
+            if project.status == TMProject.Status.DOWNLOADING.value:
+                tmtasks = get_tasks(project, data['tasks']['features'])
+                if tmtasks:
+                    project.status = TMProject.Status.DOWNLOADED.value
+                    db.session.commit()
+            else:
+                tmtasks = list(TMTask.query.filter(TMTask.project_id == project.id).all())
+            if tmtasks:
+                link_tasks(tmtasks)
     return project
 
 def get_tasks(project, pending_tasks):
@@ -97,6 +105,7 @@ def get_tasks(project, pending_tasks):
         id = feat['properties']['taskId']
         tmtask = TMTask.query.get(id)
         if not tmtask: tmtask = TMTask(id=id)
+        tmtask.project = project
         tmtask.status = feat['properties']['taskStatus']
         shp = shape(feat['geometry']).buffer(0)
         if isinstance(shp, Polygon): shp = MultiPolygon([shp])
@@ -106,7 +115,11 @@ def get_tasks(project, pending_tasks):
             url = get_url(data)
             tmtask.muncode, tmtask.filename = url.split('/')[-2:]
             path = Path(tmtask.get_path())
-            if not path.exists():
+            if path.exists():
+                tmtasks.append(tmtask)
+                db.session.add(tmtask)
+                task_count += 1
+            else:
                 path.parent.mkdir(parents=True, exist_ok=True)
                 resp = requests.get(url)
                 if resp.ok:
@@ -118,7 +131,6 @@ def get_tasks(project, pending_tasks):
                         else:
                             with path.open('wb') as fo:
                                 fo.write(data)
-                            tmtask.project = project
                             tmtasks.append(tmtask)
                             db.session.add(tmtask)
                             task_count += 1
@@ -132,9 +144,13 @@ def get_tasks(project, pending_tasks):
     return tmtasks
 
 def link_tasks(tmtasks):
+    links = defaultdict(list)
     for tmtask in tmtasks:
-        tasks = get_by_area(Task, tmtask.geom)
-        print(tmtask.id, len(tasks))
+        tasks = get_by_area(Task, tmtask.geom, percentaje=0.01)
+        for t in tasks:
+            links[t].append(tmtask)
+        for k, v in links.items():
+            print(k.localId, len(v), {t.status for t in v})
 
 def get_projects():
     url = TM_API + 'projects/?action=any'
