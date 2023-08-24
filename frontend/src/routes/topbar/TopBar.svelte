@@ -77,7 +77,7 @@
         <Map class="w-5 m-1"/>
       </ResponsiveIcon>
     </NavLi>
-    <NavLi href="/about" active={activeUrl.startsWith('/aboout')} class={_liClass}>
+    <NavLi href="/about" active={activeUrl.startsWith('/about')} class={_liClass}>
       <ResponsiveIcon title={$t('common.about')} max={'md:max-lg'} min={'max-sm:hidden lg'}>
         <InformationCircle class="w-5 m-1"/>
       </ResponsiveIcon>

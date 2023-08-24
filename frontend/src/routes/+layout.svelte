@@ -8,8 +8,6 @@
   
   export let data
 
-  $: headerClass = $page.url.pathname.startsWith('/explore') ? 'h-screen' : 'min-h-screen'
-
   let timer = null
 
   const navigationIsDelayed = derived(navigating, (newValue, set) => {
@@ -21,7 +19,7 @@
   })
 </script>
 
-<div class="{headerClass} flex flex-col dark:bg-neutral-900 dark:text-neutral-100">
+<div class="min-h-screen flex flex-col dark:bg-neutral-900 dark:text-neutral-100">
   <header
     class="sticky top-0 z-40 w-full drop-shadow-md"
   >
