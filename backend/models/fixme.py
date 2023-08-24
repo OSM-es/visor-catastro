@@ -24,8 +24,7 @@ class Fixme(db.Model):
         UPDATE_TAGS = 7  # Han cambiado las etiquetas
         UPDATE_GEOM = 8  # Ha cambiado la geometría
         UPDATE_FULL = 9  # Cambian tanto etiquetas como geometría
-        UPDATE_ORPHAN = 10  # Tarea eliminada
-        UPDATE_DEL_CHECK = 11  # Comprobar si hay que eliminar
+        UPDATE_DEL_CHECK = 10  # Comprobar si hay que eliminar
 
         @staticmethod
         def from_ca2o(msg):

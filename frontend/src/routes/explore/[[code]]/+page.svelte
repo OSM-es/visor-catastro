@@ -62,7 +62,6 @@
 
     if (code && geoJsonData?.bounds && !$page?.url?.searchParams?.get('map')) {
       const bounds = JSON.parse(geoJsonData.bounds)
-      console.info(bounds)
       map.getMap().fitBounds(bounds, { animated: false })
     }
 

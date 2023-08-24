@@ -47,6 +47,10 @@ class Config:
     UPDATE_PATH = '/data/update/'
     DIST_PATH = '/data/dist/'
     BACKUP_PATH = '/data/backup/'
+    MIGRATE_PATH = '/data/migrate/'
+
+    # Gestor de tareas
+    TM_API = 'https://tareas.openstreetmap.es/api/v2/'
 
     # OSM3S
     OSM3S_URLS = [

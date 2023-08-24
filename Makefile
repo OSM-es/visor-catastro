@@ -11,6 +11,7 @@ install:  ## Crea las carpetas de datos
 	@mkdir -p "$(CATASTRO_DATA)/update" && \
 	 mkdir -p "$(CATASTRO_DATA)/dist" && \
 	 mkdir -p "$(CATASTRO_DATA)/backup" && \
+	 mkdir -p "$(CATASTRO_DATA)/migrate" && \
 	 chown -R 1000:1000 "$(CATASTRO_DATA)/update"
 	@$(shell [ ! -f .env.development.local ] && cp env.development.local.tpl .env.development.local)
 	@$(shell [ ! -f .env.production.local ] && cp  env.production.local.tpl .env.production.local)

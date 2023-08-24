@@ -60,8 +60,8 @@ def get_by_area(model, geom, percentaje=0.9, buffer=0):
     candidates = []
     for c in model.query.filter(model.geom.intersects(geom)).all():
         s = to_shape(c.geom).buffer(0)
-        if s.area:
-            area = shape.intersection(s).area / s.area
+        if min(s.area, shape.area):
+            area = shape.intersection(s).area / min(s.area, shape.area)
             if area > percentaje:
                 candidates.append({'area': area, 'feat': c})
     candidates.sort(key=lambda c: c['area'], reverse=True)

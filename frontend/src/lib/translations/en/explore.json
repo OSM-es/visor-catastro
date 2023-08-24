@@ -33,7 +33,7 @@
     "code": "Code",
     "name": "Name",
     "tasks": "tasks",
-    "Tasks": "{{value:gt; 1:Tasks; default:Task}}",
+    "Tasks": "{{value; 1:Task; default:Tasks}}",
     "mapped": "Mapped",
     "validated": "Validated",
     "mappedtasks": "Mapped",

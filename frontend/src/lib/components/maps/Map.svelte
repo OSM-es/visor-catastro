@@ -28,7 +28,6 @@
     maxBounds: [PUBLIC_MAX_SW, PUBLIC_MAX_NE],
     minZoom,
     maxZoom: 22,
-    zoomSnap: 0.1,
   }
   const osmAttribution = `&copy; <a href="https://www.openstreetmap.org/copyright"`
   + ` target="_blank">OpenStreetMap</a>`

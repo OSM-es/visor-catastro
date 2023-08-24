@@ -1,15 +1,18 @@
 import re
 import requests
-from collections import defaultdict
+import gzip
+from flask import current_app
 from pathlib import Path
+from shapely import Polygon, MultiPolygon
 from shapely.geometry import shape
-from geoalchemy2.shape import from_shape
+from geoalchemy2.shape import from_shape, to_shape
 
+from config import Config
 from diff import Diff
-from models import Municipality, Task
+from models import db, Task, TMTask, TMProject
 from models.utils import get_by_area
 
-BASE = 'https://tareas.openstreetmap.es/api/v2/'
+TM_API = Config.TM_API
 
 
 def fetch(url):
@@ -65,78 +68,110 @@ def is_addresses(data):
     return check(data, 'direcciones', 'addresses', 'shortDescription')
 
 def get_project(id):
-    url = BASE + 'projects/' + str(id)
+    log = current_app.logger
+    project = TMProject.query.get(id)
+    if not project: project = TMProject(id=id)
+    url = TM_API + 'projects/' + str(id)
     data = fetch(url)
-    project = {}
     if data:
-        project['id'] = str(id)
-        project['name'] = getinfo(data, 'name')
-        project['cadastre'] = is_cadastre(data)
-        if project['cadastre']:
-            project['status'] = 'PUBLISHED'
-            project['buildings'] = is_buildings(data)
-            project['addrseses'] = is_addresses(data)
-            if not project['buildings'] and not project['addrseses']:
-                project['buildings'] = True
-                project['addrseses'] = True
-            project['created'] = data['created'].split('T')[0]
-            project['pending_tasks'] = data['tasks']['features']
+        project.name = getinfo(data, 'name')
+        if is_cadastre(data):
+            log.info(f"Comprueba proyecto TM#{id} {project.name}")
+            project.buildings = is_buildings(data)
+            project.addresses = is_addresses(data)
+            if not project.buildings and not project.addresses:
+                project.buildings = True
+                project.addresses = True
+            project.created = data['created'].split('T')[0]
+            db.session.add(project)
+            db.session.commit()
+            if project.status == TMProject.Status.DOWNLOADING.value:
+                tmtasks = get_tasks(project, data['tasks']['features'])
+                if tmtasks:
+                    project.status = TMProject.Status.DOWNLOADED.value
+                    db.session.commit()
+            else:
+                tmtasks = list(TMTask.query.filter(TMTask.project_id == project.id).all())
+            if tmtasks:
+                tasks = link_tasks(tmtasks)
+                update_tasks_statuses(project, tasks)
     return project
 
-def get_tasks(project):
-    tmtasks = {}
-    for feat in project['pending_tasks']:
+def get_tasks(project, pending_tasks):
+    log = current_app.logger
+    tmtasks = []
+    task_count = 0
+    for feat in pending_tasks:
         id = feat['properties']['taskId']
-        status = feat['properties']['taskStatus']
+        tmtask = TMTask.query.get(id)
+        if not tmtask: tmtask = TMTask(id=id)
+        tmtask.project = project
+        tmtask.status = feat['properties']['taskStatus']
         shp = shape(feat['geometry']).buffer(0)
-        data = fetch(f"{BASE}projects/{project['id']}/tasks/{id}")
+        if isinstance(shp, Polygon): shp = MultiPolygon([shp])
+        tmtask.geom = from_shape(shp)
+        data = fetch(f"{TM_API}projects/{project.id}/tasks/{id}")
         if data:
             url = get_url(data)
-            muncode, filename = url.split('/')[-2:]
-            path = Path(Task.Update.get_path(muncode, filename))
-            if not path.exists():
+            tmtask.muncode, tmtask.filename = url.split('/')[-2:]
+            path = Path(tmtask.get_path())
+            if path.exists():
+                tmtasks.append(tmtask)
+                db.session.add(tmtask)
+                task_count += 1
+            else:
                 path.parent.mkdir(parents=True, exist_ok=True)
                 resp = requests.get(url)
                 if resp.ok:
-                    file = fetch(url)
-                    if file:
-                        with path.open('wb') as fo:
-                            fo.write(file)
-                elif resp.status_code != 404:
-                    continue
-                tmtasks[id] = {
-                    'status': status,
-                    'muncode': muncode,
-                    'filename': filename,
-                    'shape': shp,
-                }
-                print(id, status, muncode, filename, resp.status_code)
-    #     continue
-    #     if status == Task.Status.READY.name:
-    #         # candidates = get_by_area(Municipality, geom, percentaje=0.6, buffer=Task.BUFFER)
-    #         candidates = get_by_area(Task, geom, percentaje=0.9, buffer=Task.BUFFER)
-    #         for c in candidates:
-    #             tasks[c.id].append(tid)
-    #             tmtasks[tid] = status
-    #             print(tid, status, len(candidates))
-    #     print()
-    # for k, v in tasks.items():
-    #     print(k, v, [tmtasks[t] for t in v])
-    if len(tmtasks) == len(project['pending_tasks']):
-        del project['pending_tasks']
+                    data = fetch(url)
+                    if data:
+                        if b'<node ' not in gzip.decompress(data):
+                            log.info(f"Tarea TM#{project.id}-{id} {tmtask.filename} vacía")
+                            task_count += 1
+                        else:
+                            with path.open('wb') as fo:
+                                fo.write(data)
+                            tmtasks.append(tmtask)
+                            db.session.add(tmtask)
+                            task_count += 1
+                            log.info(f"Descarga tarea TM#{project.id}-{id} {tmtask.filename}")
+                if resp.status_code == 404:
+                    task_count += 1
+                    log.info(f"Tarea TM#{project.id}-{id} {tmtask.filename} no encontrada")
+    if task_count != len(pending_tasks):
+        log.info(f"TM#{project.id} Faltan {len(pending_tasks) - task_count} tareas por descargar")
+        return []
+    return tmtasks
+
+def link_tasks(tmtasks):
+    tasks = set()
+    for tmtask in tmtasks:
+        for task in get_by_area(Task, tmtask.geom, percentaje=0.01):
+            task.tmtasks.append(tmtask)
+            tasks.add(task)
+    return tasks
+    
+def update_tasks_statuses(project, tasks):
+    for task in tasks:
+        statuset = {t.status for t in task.tmtasks}
+        status = list(statuset)[0]
+        if len(statuset) > 1:
+            if Task.Status.READY.name in statuset or Task.Status.INVALIDATED.name in statuset:
+                status = Task.Status.INVALIDATED.name
+            else:
+                status = Task.Status.MAPPED.name
+        status = Task.Status[status].value
+        if project.buildings:
+            task.bu_status = status
+        if project.addresses:
+            task.ad_status = status
+    db.session.commit()
 
 def get_projects():
-    url = BASE + 'projects/?action=any'
+    url = TM_API + 'projects/?action=any'
     data = fetch(url)
     if data:
         for feat in data['mapResults']['features']:
             id = feat['properties']['projectId']
-            # busca en bd, si no lo encuentra lo crea con resultado de get_project
             project = get_project(id)
-            if project['cadastre']:
-                get_tasks(project)
-            if 'pending_tasks' in project:
-                print('pendiente', project['name'])
-            else:
-                print(project)
     # projectStatuses=ARCHIVED
