@@ -43,6 +43,9 @@ class Config:
     OSM_CLIENT_SECRET = os.getenv('OSM_CLIENT_SECRET', '')
     OSM_URL = os.getenv('OSM_URL', 'https://www.openstreetmap.org')
 
+    #OSMAPI
+    OSM_API = os.getenv('OSM_URL', 'https://www.openstreetmap.org/api/0.6/')
+
     # Datos catatom
     UPDATE_PATH = '/data/update/'
     DIST_PATH = '/data/dist/'

@@ -7,12 +7,15 @@ from shapely import Polygon, MultiPolygon
 from shapely.geometry import shape
 from geoalchemy2.shape import from_shape, to_shape
 
+from auth import passTutorial
 from config import Config
 from diff import Diff
-from models import db, Task, TMTask, TMProject
+from models import db, Task, TMTask, TMProject, OsmUser, User
 from models.utils import get_by_area
 
 TM_API = Config.TM_API
+OSM_API = Config.OSM_API
+OSM_URL = Config.OSM_URL
 
 
 def fetch(url):
@@ -22,6 +25,10 @@ def fetch(url):
         if resp.ok:
             if resp.headers.get('Content-Type') == 'application/octet-stream':
                 data = resp.content
+            elif resp.headers.get('Content-Type') == 'text/html; charset=utf-8':
+                data = resp.text
+            elif resp.headers.get('Content-Type') == 'application/xml; charset=utf-8':
+                data = resp.text
             else:
                 data = resp.json()
     except requests.RequestException as e:
@@ -85,6 +92,7 @@ def get_project(id):
             project.created = data['created'].split('T')[0]
             db.session.add(project)
             db.session.commit()
+            get_project_users(project)
             if project.status == TMProject.Status.DOWNLOADING.value:
                 tmtasks = get_tasks(project, data['tasks']['features'])
                 if tmtasks:
@@ -96,6 +104,62 @@ def get_project(id):
                 tasks = link_tasks(tmtasks)
                 update_tasks_statuses(project, tasks)
     return project
+
+def get_project_users(project):
+    log = current_app.logger
+    url = f'{TM_API}projects/{project.id}/contributions'
+    data = fetch(url)
+    users_count = 0
+    new_users = 0
+    if data:
+        contributions = data['userContributions']
+        for tmuser in contributions:
+            username = tmuser['username']
+            id = get_user_id(username)
+            if id:
+                osm_user = OsmUser.query.get(id)
+                if not osm_user:
+                    osm_user = OsmUser(id=id, display_name=username, img=tmuser['pictureUrl'])
+                    db.session.add(osm_user)
+                    new_users += 1
+                    if osm_user.isStated():
+                        user = User(
+                            mapping_level=User.MappingLevel[tmuser['mappingLevel']].value,
+                            date_registered=tmuser['dateRegistered'],
+                        )
+                        user.import_user = osm_user
+                        passTutorial(user)
+                        db.session.add(user)
+                    db.session.commit()
+                users_count +=1
+        if users_count == len(contributions):
+            if new_users:
+                log.info(f"TM#{project.id} Migrados {users_count} usuarios")
+        else:
+            log.info(f"TM#{project.id} Falta comprobar {len(contributions) - users_count} usuarios")
+            return -1
+    return users_count
+
+
+def get_user_id(username):
+    cid = get_changeset_id(username)
+    if cid:
+        url = f'{OSM_API}changeset/{cid}'
+        data = fetch(url)
+        if data:
+            m = re.search(r' uid="(\d+)"', data)
+        if m:
+            return m.group(1)
+    return None
+
+def get_changeset_id(username):
+    url = f'{OSM_URL}/user/{username}/history?list=1'
+    data = fetch(url)
+    if data:
+        m = re.search(r'changeset/(\d+)', data)
+        if m:
+            return m.group(1)
+    return None
 
 def get_tasks(project, pending_tasks):
     log = current_app.logger
