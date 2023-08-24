@@ -137,7 +137,7 @@ class Task(db.Model):
     update_id = db.Column(db.Integer, db.ForeignKey('task_update.id'), nullable=True)
     update = db.relationship(Update, back_populates='task', uselist=False)
     # Enlaces a tasking manager
-    tmtasks = db.relationship('TMTask', secondary=task_tmtask)
+    tmtasks = db.relationship('TMTask', secondary=task_tmtask, backref='tasks')
     geom = db.Column(Geometry("GEOMETRYCOLLECTION", srid=4326))
     __table_args__ = (Index('codes_index', 'localid', 'muncode'), )
 

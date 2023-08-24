@@ -10,7 +10,7 @@ from geoalchemy2.shape import from_shape, to_shape
 from auth import passTutorial
 from config import Config
 from diff import Diff
-from models import db, Task, TMTask, TMProject, OsmUser, User
+from models import db, Task, TaskHistory, TMTask, TMProject, OsmUser, User
 from models.utils import get_by_area
 
 TM_API = Config.TM_API
@@ -98,11 +98,11 @@ def get_project(id):
                 if tmtasks:
                     project.status = TMProject.Status.DOWNLOADED.value
                     db.session.commit()
+                link_tasks(tmtasks)
             else:
-                tmtasks = list(TMTask.query.filter(TMTask.project_id == project.id).all())
-            if tmtasks:
-                tasks = link_tasks(tmtasks)
-                update_tasks_statuses(project, tasks)
+                tmtasks = list(TMTask.query.filter_by(project_id = project.id).all())
+            update_tasks_statuses(project)
+            update_tasks_history(project, tmtasks)
     return project
 
 def get_project_users(project):
@@ -208,16 +208,16 @@ def get_tasks(project, pending_tasks):
     return tmtasks
 
 def link_tasks(tmtasks):
-    tasks = set()
     for tmtask in tmtasks:
         for task in get_by_area(Task, tmtask.geom, percentaje=0.01):
             task.tmtasks.append(tmtask)
-            tasks.add(task)
-    return tasks
     
-def update_tasks_statuses(project, tasks):
-    for task in tasks:
-        statuset = {t.status for t in task.tmtasks}
+def update_tasks_statuses(project):
+    tasks = Task.query.join(Task.tmtasks).filter_by(project_id=207).distinct()
+    for task in tasks.all():
+        statuset = {t.status for t in task.tmtasks if not t.status.startswith('LOCKED_FOR_')}
+        if not statuset:
+            continue
         status = list(statuset)[0]
         if len(statuset) > 1:
             if Task.Status.READY.name in statuset or Task.Status.INVALIDATED.name in statuset:
@@ -231,11 +231,44 @@ def update_tasks_statuses(project, tasks):
             task.ad_status = status
     db.session.commit()
 
+def update_tasks_history(project, tmtasks):
+    for tmtask in tmtasks:
+        data = fetch(f"{TM_API}projects/{project.id}/tasks/{tmtask.id}")
+        taskHistory = data['taskHistory'] if data else []
+        for history in taskHistory:
+            user = OsmUser.query.filter_by(display_name = history['actionBy']).one_or_none()
+            if not user:
+                continue
+            date = history['actionDate']
+            action = history['action']
+            text = history['actionText']
+            if 'LOCKED_FOR_' in action:
+                if text:
+                    text = str(int(sum(x * float(t) for x, t in zip([3600, 60, 1], text.split(":")))))
+                if action.startswith('AUTO_UNLOCKED_FOR_'):
+                    action = action[7:]
+            elif action.startswith('EXTENDED_FOR_'):
+                action = 'EXTENDED'
+            for task in tmtask.tasks:
+                if TaskHistory.query.filter_by(
+                    date = date, user = user, task = task
+                ).count() == 0:
+                    h = TaskHistory(
+                        date=date,
+                        user=user,
+                        action=TaskHistory.Action[action].value,
+                        text=text,
+                        buildings=project.buildings,
+                        addresses=project.addresses,
+                    )
+                    task.history.append(h)
+    db.session.commit()
+
 def get_projects():
     url = TM_API + 'projects/?action=any'
     data = fetch(url)
     if data:
         for feat in data['mapResults']['features']:
             id = feat['properties']['projectId']
-            project = get_project(id)
+            get_project(id)
     # projectStatuses=ARCHIVED
