@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from pytz import UTC
 
-from sqlalchemy import Date, Integer, cast, column, func, or_, and_
+from sqlalchemy import Date, Integer, cast, column, func, or_
 from sqlalchemy.orm import declarative_mixin
 
 from models import db, OsmUser, User
@@ -88,28 +88,23 @@ class TaskHistory(TaskHistoryMixin, History):
         }
 
     @staticmethod
-    def _count_contributors(muncode, _target='MAPPED'):
+    def _count_contributors(muncode, _target):
         return TaskHistory.query.join(
-            OsmUser
-        ).join(
-            User, or_(User.osm_id == OsmUser.id, User.import_id == OsmUser.id)
-        ).join(
-            models.Task
-        ).filter_by(
-            muncode = muncode
+            TaskHistory.task
         ).filter(
+            models.Task.muncode == muncode,
             TaskHistory.text == _target,
         ).distinct(
-            User.id
+            TaskHistory.user_id
         ).count()
 
     @staticmethod
     def count_mappers(muncode):
-        return TaskHistory._count_contributors(muncode, 'MAPPED')
+        return TaskHistory._count_contributors(muncode, models.Task.Status.MAPPED.name)
 
     @staticmethod
     def count_validators(muncode):
-        return TaskHistory._count_contributors(muncode, 'VALIDATED')
+        return TaskHistory._count_contributors(muncode, models.Task.Status.VALIDATED.name)
 
     @staticmethod
     def get_contributors(muncode):
@@ -119,10 +114,9 @@ class TaskHistory(TaskHistoryMixin, History):
             User, or_(User.osm_id == OsmUser.id, User.import_id == OsmUser.id)
         ).join(
             models.Task
-        ).filter_by(
-            muncode = muncode
         ).filter(
-            TaskHistory.action == TaskHistory.Action.STATE_CHANGE.value
+            models.Task.muncode == muncode,
+            TaskHistory.action == TaskHistory.Action.STATE_CHANGE.value,
         ).with_entities(
             User
         ).distinct().all()
