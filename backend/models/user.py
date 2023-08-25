@@ -7,9 +7,17 @@ from models.utils import JSONEncodedDict, MutableDict
 
 
 class OsmUser(db.Model):
+
+    class MappingLevel(Enum):
+        BEGINNER = 1
+        INTERMEDIATE = 2
+        ADVANCED = 3
+
     id = db.Column(db.Integer, primary_key=True)
     display_name = db.Column(db.String, nullable=False)
     img = db.Column(db.String)
+    mapping_level = db.Column(db.Integer, default=MappingLevel.BEGINNER.value)
+    date_registered = db.Column(db.DateTime(timezone=True))
     user = db.relationship(
         'User',
         primaryjoin='or_(OsmUser.id==User.osm_id, OsmUser.id==User.import_id)',
@@ -26,8 +34,20 @@ class OsmUser(db.Model):
             'id': self.id,
             'display_name': self.display_name,
             'img': self.img,
+            'mapping_level': OsmUser.MappingLevel(self.mapping_level).name,
+            'date_registered': self.date_registered.isoformat(),
             'user': self.user.asdict() if self.user else None,
         }
+
+    def update_mapping_level(self, changeset_count):
+        intermediate_level = current_app.config["MAPPER_LEVEL_INTERMEDIATE"]
+        advanced_level = current_app.config["MAPPER_LEVEL_ADVANCED"]
+        mapping_level = OsmUser.MappingLevel.BEGINNER.value
+        if changeset_count > advanced_level:
+            mapping_level = OsmUser.MappingLevel.ADVANCED.value
+        elif intermediate_level < changeset_count < advanced_level:
+            mapping_level = OsmUser.MappingLevel.INTERMEDIATE.value
+        self.mapping_level = max(self.mapping_level or OsmUser.MappingLevel.BEGINNER.value, mapping_level)
 
     @staticmethod
     def system_bot():
@@ -49,11 +69,6 @@ class User(db.Model):
         MAPPER = 0
         ADMIN = 1
 
-    class MappingLevel(Enum):
-        BEGINNER = 1
-        INTERMEDIATE = 2
-        ADVANCED = 3
-
     id = db.Column(db.Integer, primary_key=True)
     locale = db.Column(db.String)
     role = db.Column(db.Integer, default=Role.READ_ONLY.value)
@@ -61,7 +76,6 @@ class User(db.Model):
         MutableDict.as_mutable(JSONEncodedDict),
         default={'passed': [], 'next': 'login'},
     )
-    mapping_level = db.Column(db.Integer, default=MappingLevel.BEGINNER.value)
     email = db.Column(db.String, nullable=True)
     date_registered = db.Column(
         db.DateTime(timezone=True),
@@ -89,18 +103,7 @@ class User(db.Model):
             'email': self.email,
             'locale': self.locale,
             'role': User.Role(self.role).name,
-            'mapping_level': User.MappingLevel(self.mapping_level).name,
             'date_registered': self.date_registered.isoformat(),
             'osm_id': self.osm_id,
             'import_id': self.import_id,
         }
-
-    def update_mapping_level(self, changeset_count):
-        intermediate_level = current_app.config["MAPPER_LEVEL_INTERMEDIATE"]
-        advanced_level = current_app.config["MAPPER_LEVEL_ADVANCED"]
-        mapping_level = User.MappingLevel.BEGINNER.value
-        if changeset_count > advanced_level:
-            mapping_level = User.MappingLevel.ADVANCED.value
-        elif intermediate_level < changeset_count < advanced_level:
-            mapping_level = User.MappingLevel.INTERMEDIATE.value
-        self.mapping_level = max(self.mapping_level or User.MappingLevel.BEGINNER.value, mapping_level)

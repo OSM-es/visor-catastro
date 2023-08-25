@@ -97,6 +97,7 @@ def authorize():
 
     id = data['user']['id']
     display_name=data['user']['display_name']
+    account_created = data['user']['account_created']
     img = data['user'].get('img', {}).get('href')
     osm_user = OsmUser.query.get(id)
     relogin = 'user' in session and session['user'].get('relogin', False)
@@ -108,7 +109,9 @@ def authorize():
     else:
         user = User()
     if not osm_user:
-        osm_user = OsmUser(id=id, display_name=display_name, img=img)
+        osm_user = OsmUser(
+            id=id, display_name=display_name, img=img, date_registered=account_created
+        )
     if osm_user.isStated():
         user.import_user = osm_user
         passTutorial(user)
@@ -118,7 +121,7 @@ def authorize():
         elif user.osm_user:
             user.import_user = osm_user
         passTutorial(user)
-    user.update_mapping_level(data['user']['changesets']['count'])
+    osm_user.update_mapping_level(data['user']['changesets']['count'])
     if user.osm_user or user.import_user:
         db.session.add(user)
     db.session.add(osm_user)
@@ -137,6 +140,7 @@ def authorize():
         osm_user.user.import_user and
         osm_user.user.import_user.isStated()
     )
+    data['user']['mapping_level'] = OsmUser.MappingLevel(osm_user.mapping_level).name
     session['user'] = data['user']
     session.modified = True
     session.permanent = True

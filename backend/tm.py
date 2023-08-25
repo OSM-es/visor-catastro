@@ -121,14 +121,17 @@ def get_project_users(project):
             if id:
                 osm_user = OsmUser.query.get(id)
                 if not osm_user:
-                    osm_user = OsmUser(id=id, display_name=username, img=tmuser['pictureUrl'])
+                    osm_user = OsmUser(
+                        id=id,
+                        display_name=username,
+                        img=tmuser['pictureUrl'],
+                        mapping_level=OsmUser.MappingLevel[tmuser['mappingLevel']].value,
+                        date_registered=tmuser['dateRegistered'],
+                    )
                     db.session.add(osm_user)
                     new_users += 1
                     if osm_user.isStated():
-                        user = User(
-                            mapping_level=User.MappingLevel[tmuser['mappingLevel']].value,
-                            date_registered=tmuser['dateRegistered'],
-                        )
+                        user = User()
                         user.import_user = osm_user
                         passTutorial(user)
                         db.session.add(user)

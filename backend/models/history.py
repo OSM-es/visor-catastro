@@ -111,14 +111,12 @@ class TaskHistory(TaskHistoryMixin, History):
         return TaskHistory.query.join(
             OsmUser
         ).join(
-            User, or_(User.osm_id == OsmUser.id, User.import_id == OsmUser.id)
-        ).join(
             models.Task
         ).filter(
             models.Task.muncode == muncode,
             TaskHistory.action == TaskHistory.Action.STATE_CHANGE.value,
         ).with_entities(
-            User
+            OsmUser
         ).distinct().all()
 
     @staticmethod

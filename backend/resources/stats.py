@@ -46,7 +46,7 @@ class ContributorStats(Resource):
         return {
             'mappers': models.TaskHistory.count_mappers(code),
             'validators': models.TaskHistory.count_validators(code),
-            'contributors': [u.import_user.asdict() for u in contributors],
+            'contributors': [u.asdict() for u in contributors],
         }
 
 class TimeStats(Resource):

@@ -6,24 +6,26 @@
   import StatsSection from '$lib/components/StatsSection.svelte'
 
   export let fetchData
-
+  
   function getPastMonths(months) {
     let today = new Date()
     return today.setMonth(today.getMonth() - months)
   }
 
   function getExperience(date) {
+    const d = new Date(date)
     const months = [[0, 1], [1, 3], [3, 6], [6, 12]]
-    return months.findIndex((m) => {
+    const i = months.findIndex((m) => {
       return new Date(date) > getPastMonths(m[1]) && new Date(date) <= getPastMonths(m[0])
     })
+    return i < 0 ? months.length: i
   }
 
   function getUsersByExperience(contributors) {
     const labels = [1, 2, 3, 4, 5].map(k => $t('stats.experience' + k))
     const data = [0, 0, 0, 0, 0]
     contributors.reduce((data, user) => {
-      data[getExperience(user.user.date_registered)] += 1
+      data[getExperience(user.date_registered)] += 1
       return data
     }, data)
     return {  labels, datasets: [{ data }] }
@@ -32,7 +34,7 @@
   function getUsersByLevel(contributors) {
     const stats = { BEGINNER: 0, INTERMEDIATE: 0, ADVANCED: 0}
     contributors.reduce((stats, user) => {
-      stats[user.user.mapping_level] += 1
+      stats[user.mapping_level] += 1
       return stats
     }, stats)
     return {
