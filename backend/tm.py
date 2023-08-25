@@ -10,7 +10,7 @@ from geoalchemy2.shape import from_shape, to_shape
 from auth import passTutorial
 from config import Config
 from diff import Diff
-from models import db, Task, TaskHistory, TMTask, TMProject, OsmUser, User
+from models import db, Task, TaskHistory, TMTask, TMProject, OsmUser, User, Municipality
 from models.utils import get_by_area
 
 TM_API = Config.TM_API
@@ -83,7 +83,7 @@ def get_project(id):
     if data:
         project.name = getinfo(data, 'name')
         if is_cadastre(data):
-            log.info(f"Comprueba proyecto TM#{id} {project.name}")
+            log.info(f"Comprobando proyecto TM#{id} {project.name}")
             project.buildings = is_buildings(data)
             project.addresses = is_addresses(data)
             if not project.buildings and not project.addresses:
@@ -96,13 +96,15 @@ def get_project(id):
             if project.status == TMProject.Status.DOWNLOADING.value:
                 tmtasks = get_tasks(project, data['tasks']['features'])
                 if tmtasks:
+                    link_tasks(tmtasks)
+                    get_creation_date(project)
                     project.status = TMProject.Status.DOWNLOADED.value
                     db.session.commit()
-                link_tasks(tmtasks)
             else:
                 tmtasks = list(TMTask.query.filter_by(project_id = project.id).all())
             update_tasks_statuses(project)
             update_tasks_history(project, tmtasks)
+            db.session.commit()
     return project
 
 def get_project_users(project):
@@ -211,9 +213,18 @@ def link_tasks(tmtasks):
     for tmtask in tmtasks:
         for task in get_by_area(Task, tmtask.geom, percentaje=0.01):
             task.tmtasks.append(tmtask)
-    
+
+def get_creation_date(project):
+    q = Task.query.join(Task.tmtasks).filter_by(
+        project_id=project.id
+    ).with_entities(Task.muncode).distinct()
+    for muncode in q.all():
+        mun = Municipality.get_by_code(muncode[0])
+        if project.created < mun.created.date():
+            mun.created = project.created
+
 def update_tasks_statuses(project):
-    tasks = Task.query.join(Task.tmtasks).filter_by(project_id=207).distinct()
+    tasks = Task.query.join(Task.tmtasks).filter_by(project_id=project.id).distinct()
     for task in tasks.all():
         statuset = {t.status for t in task.tmtasks if not t.status.startswith('LOCKED_FOR_')}
         if not statuset:
@@ -229,13 +240,17 @@ def update_tasks_statuses(project):
             task.bu_status = status
         if project.addresses:
             task.ad_status = status
-    db.session.commit()
+
+def hmstoms(text):
+    return sum(x * float(t) for x, t in zip([3600, 60, 1], text.split(":")))
 
 def update_tasks_history(project, tmtasks):
+    log = current_app.logger
+    taskset = set()
     for tmtask in tmtasks:
         data = fetch(f"{TM_API}projects/{project.id}/tasks/{tmtask.id}")
         taskHistory = data['taskHistory'] if data else []
-        for history in taskHistory:
+        for history in reversed(taskHistory):
             user = OsmUser.query.filter_by(display_name = history['actionBy']).one_or_none()
             if not user:
                 continue
@@ -244,15 +259,17 @@ def update_tasks_history(project, tmtasks):
             text = history['actionText']
             if 'LOCKED_FOR_' in action:
                 if text:
-                    text = str(int(sum(x * float(t) for x, t in zip([3600, 60, 1], text.split(":")))))
+                    text = str(int(hmstoms(text)))
                 if action.startswith('AUTO_UNLOCKED_FOR_'):
                     action = action[7:]
             elif action.startswith('EXTENDED_FOR_'):
                 action = 'EXTENDED'
+            print(date)
             for task in tmtask.tasks:
                 if TaskHistory.query.filter_by(
                     date = date, user = user, task = task
                 ).count() == 0:
+                    taskset.add(task.id)
                     h = TaskHistory(
                         date=date,
                         user=user,
@@ -262,7 +279,8 @@ def update_tasks_history(project, tmtasks):
                         addresses=project.addresses,
                     )
                     task.history.append(h)
-    db.session.commit()
+    if taskset:
+        log.info(f"TM#{project.id} Actualizado el estado de {len(taskset)} tareas")
 
 def get_projects():
     url = TM_API + 'projects/?action=any'

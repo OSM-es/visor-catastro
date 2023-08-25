@@ -154,6 +154,8 @@ class TaskHistory(TaskHistoryMixin, History):
             TaskHistory.text == status.name
         ).with_entities(
             cast(History.date, Date).label('day'), func.Count()
+        ).order_by(
+            'day'
         ).group_by(
             'day'
         ).all():
