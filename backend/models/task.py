@@ -297,7 +297,8 @@ class Task(db.Model):
             'lock': lock,
             'ad_mapper': self.ad_mapper.user.asdict() if self.ad_mapper else None,
             'bu_mapper': self.bu_mapper.user.asdict() if self.bu_mapper else None,
-            'history': [h.asdict() for h in self.history]
+            'history': [h.asdict() for h in self.history],
+            'tmtasks': [t.asdict() for t in self.tmtasks],
         }
 
     def set_lock(self, user, action, buildings, addresses):

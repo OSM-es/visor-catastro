@@ -172,7 +172,7 @@ def get_tasks(project, pending_tasks):
     task_count = 0
     for feat in pending_tasks:
         id = feat['properties']['taskId']
-        tmtask = TMTask.query.get(id)
+        tmtask = TMTask.query.get([project.id, id])
         if not tmtask: tmtask = TMTask(id=id)
         tmtask.project = project
         tmtask.status = feat['properties']['taskStatus']

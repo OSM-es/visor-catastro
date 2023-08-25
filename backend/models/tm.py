@@ -10,19 +10,27 @@ MIGRATE = Config.MIGRATE_PATH
 task_tmtask = db.Table(
     'task_tmtask',
     db.Column('task_id', db.Integer, db.ForeignKey('task.id')),
-    db.Column('tmtask_id', db.Integer, db.ForeignKey('tmtask.id')),
+    db.Column('tmproject_id', db.Integer),
+    db.Column('tmtask_id', db.Integer),
+    db.ForeignKeyConstraint(
+        ['tmproject_id', 'tmtask_id'],
+        ['tmtask.project_id', 'tmtask.id'],
+        name='tmtasks_fkey'
+    )
 )
 
 
 class TMTask(db.Model):
     __tablename__ = 'tmtask'
 
+    project_id = db.Column(
+        db.Integer, db.ForeignKey('tmproject.id'), primary_key=True
+    )
     id = db.Column(db.Integer, primary_key=True)
     muncode = db.Column(db.String)
     status = db.Column(db.String)
     filename = db.Column(db.String)
     geom = db.Column(Geometry("MultiPolygon", srid=4326))
-    project_id = db.Column(db.Integer, db.ForeignKey('tmproject.id'), nullable=True)
     project = db.relationship('TMProject')
 
     def get_path(self):
@@ -30,6 +38,13 @@ class TMTask(db.Model):
         if self.filename:
             fp = fp + '/' + self.filename
         return fp
+    
+    def asdict(self):
+        return {
+            'project_id': self.project_id,
+            'id': self.id,
+            'status': self.status,
+        }
 
 
 class TMProject(db.Model):

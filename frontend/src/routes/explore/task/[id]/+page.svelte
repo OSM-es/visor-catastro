@@ -18,6 +18,7 @@
   import HistoryList from './HistoryList.svelte'
   
   export let data
+  console.info(data.task)
 
   $: buildings = data.task.buildings
 

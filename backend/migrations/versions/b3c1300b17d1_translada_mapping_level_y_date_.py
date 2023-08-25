@@ -1,8 +1,8 @@
 """Translada mapping_level y date_registered de User a OsmUser
 
-Revision ID: d7d3fba7bd0f
-Revises: db82abdb14ab
-Create Date: 2023-08-25 12:46:18.581596
+Revision ID: b3c1300b17d1
+Revises: 03e2378f09f1
+Create Date: 2023-08-25 22:42:48.222869
 
 """
 from alembic import op
@@ -11,8 +11,8 @@ import geoalchemy2
 
 
 # revision identifiers, used by Alembic.
-revision = 'd7d3fba7bd0f'
-down_revision = 'db82abdb14ab'
+revision = 'b3c1300b17d1'
+down_revision = '03e2378f09f1'
 branch_labels = None
 depends_on = None
 
