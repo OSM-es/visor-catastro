@@ -264,12 +264,13 @@ def update_tasks_history(project, tmtasks):
                     action = action[7:]
             elif action.startswith('EXTENDED_FOR_'):
                 action = 'EXTENDED'
-            print(date)
-            for task in tmtask.tasks:
+            for i, task in enumerate(tmtask.tasks):
                 if TaskHistory.query.filter_by(
                     date = date, user = user, task = task
                 ).count() == 0:
                     taskset.add(task.id)
+                    if i > 1 and 'LOCKED_FOR_' in action:
+                        text = ''
                     h = TaskHistory(
                         date=date,
                         user=user,
