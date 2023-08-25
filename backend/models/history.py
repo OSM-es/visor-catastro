@@ -129,18 +129,16 @@ class TaskHistory(TaskHistoryMixin, History):
 
     @staticmethod
     def get_time(muncode, action):
-        total_mapping_time, total_mapping_tasks = TaskHistory.query.join(
-            models.Task
+        total_mapping_time = TaskHistory.query.join(
+            TaskHistory.task
         ).filter(
             models.Task.muncode == muncode,
+            TaskHistory.action == action.value,
             TaskHistory.text != '',
         ).with_entities(
-            func.sum(cast(TaskHistory.text, Integer)),
-            func.count(TaskHistory.action),
-        ).filter(
-            TaskHistory.action == action.value
-        ).one()
-        return total_mapping_time or 0, total_mapping_tasks or 0
+            func.sum(cast(TaskHistory.text, Integer))
+        ).scalar()
+        return total_mapping_time or 0
 
     @staticmethod
     def get_progress_per_day(muncode, status):

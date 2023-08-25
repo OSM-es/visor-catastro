@@ -1,6 +1,7 @@
 from flask_restful import Resource
 
 import models
+from resources.utils import count_tasks
 
 
 class Stats(Resource):
@@ -51,13 +52,15 @@ class ContributorStats(Resource):
 class TimeStats(Resource):
     def get(self, code):
         total_tasks = models.Task.query_by_code(code).count()
-        mtime, mtasks = models.TaskHistory.get_time(
-            code, models.TaskHistory.Action['LOCKED_FOR_MAPPING']
+        mtime = models.TaskHistory.get_time(
+            code, models.TaskHistory.Action.LOCKED_FOR_MAPPING
         )
+        vtasks = count_tasks(models.Task.Status.VALIDATED)(code)
+        mtasks = count_tasks(models.Task.Status.MAPPED)(code) + vtasks
         average_mapping_time = 0
         if mtasks > 0: average_mapping_time = mtime / mtasks
-        vtime, vtasks = models.TaskHistory.get_time(
-            code, models.TaskHistory.Action['LOCKED_FOR_VALIDATION']
+        vtime = models.TaskHistory.get_time(
+            code, models.TaskHistory.Action.LOCKED_FOR_VALIDATION
         )
         average_validation_time = 0
         if vtasks > 0: average_validation_time = vtime / vtasks
