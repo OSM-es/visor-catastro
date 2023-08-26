@@ -15,6 +15,8 @@
     "VALIDATED": "validated",
     "INVALIDATED": "need more mapping",
     "NEED_UPDATE": "need update",
+    "task": "Task",
+    "project": "Proyect",
     "mapbuildings": "Import buildings",
     "mapaddresses": "Import addresses",
     "mapall": "Import all",

@@ -18,7 +18,6 @@
   import HistoryList from './HistoryList.svelte'
   
   export let data
-  console.info(data.task)
 
   $: buildings = data.task.buildings
 
@@ -111,7 +110,25 @@
           {@html $t('task.type', { type: $t('explore.' + data.task.type) })},
           {@html $t('task.diff', { diff: $t('explore.' + data.task.difficulty), taskColor })}
         </p>
-        {#if data.task.municipality.lock }
+        {#if data.task.tmtasks.length}
+          <p>
+            Pertenece al Gestor de Tareas OSM-es
+          </p>
+          <ul>  
+            {#each data.task.tmtasks as tmtask}
+            <li>
+                <a href="https://tareas.openstreetmap.es/projects/{data.task.tmtasks[0].project_id}" target="_blank">
+                  {$t('task.project')} #{data.task.tmtasks[0].project_id}
+                </a>
+                <a href="https://tareas.openstreetmap.es/projects/{tmtask.project_id}/tasks?search={tmtask.id}" target="_blank">
+                  {$t('task.task')} #{tmtask.id}
+                </a>
+                {$t('explore.' + tmtask.status)}
+              </li>
+            {/each}
+          </ul>
+          <Button on:click={exit} color="alternative">{$t('task.selectanother')}</Button>
+        {:else if data.task.municipality.lock }
           <p class="text-danger-500 font-bold">{$t('task.updatelock')}</p>
           <Button on:click={exit} color="alternative">{$t('common.back')}</Button>
         {:else}

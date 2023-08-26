@@ -15,6 +15,8 @@
     "VALIDATED": "validada",
     "INVALIDATED": "se necesita más mapeo",
     "NEED_UPDATE": "necesita actualizar",
+    "task": "Tarea",
+    "project": "Proyecto",
     "mapbuildings": "Importar edificios",
     "mapaddresses": "Importar direcciones",
     "mapall": "Importar todo",
