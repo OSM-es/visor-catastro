@@ -29,7 +29,7 @@ uploader = Blueprint('uploader', __name__, url_prefix='/')
 def status():
     return "ok"
 
-@uploader.cli.command('tmtasks')
+@uploader.cli.command('tm')
 @click.argument('id', required=False)
 def tmtasks(id=None):
     if id:
