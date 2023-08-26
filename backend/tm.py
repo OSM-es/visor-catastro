@@ -102,8 +102,9 @@ def get_project(id):
             db.session.commit()
     else:
         tmtasks = list(TMTask.query.filter_by(project_id = project.id).all())
-    update_tasks_statuses(project)
-    update_tasks_history(project, tmtasks)
+    if tmtasks:
+        update_tasks_statuses(project)
+        update_tasks_history(project, tmtasks)
     db.session.commit()
 
 def get_project_users(project):
@@ -181,6 +182,9 @@ def get_tasks(project, pending_tasks):
         data = fetch(f"{TM_API}projects/{project.id}/tasks/{id}")
         if data:
             url = get_url(data)
+            if not url:
+                log.info(f"TM#{project.id} no tiene tareas")
+                return []
             tmtask.muncode, tmtask.filename = url.split('/')[-2:]
             path = Path(tmtask.get_path())
             if path.exists():
