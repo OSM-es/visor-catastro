@@ -80,32 +80,31 @@ def get_project(id):
     if not project: project = TMProject(id=id)
     url = TM_API + 'projects/' + str(id)
     data = fetch(url)
-    if data:
-        project.name = getinfo(data, 'name')
-        if is_cadastre(data):
-            log.info(f"Comprobando proyecto TM#{id} {project.name}")
-            project.buildings = is_buildings(data)
-            project.addresses = is_addresses(data)
-            if not project.buildings and not project.addresses:
-                project.buildings = True
-                project.addresses = True
-            project.created = data['created'].split('T')[0]
-            db.session.add(project)
+    if not data or not is_cadastre(data):
+        return
+    project.name = getinfo(data, 'name')
+    log.info(f"Comprobando proyecto TM#{id} {project.name}")
+    project.buildings = is_buildings(data)
+    project.addresses = is_addresses(data)
+    if not project.buildings and not project.addresses:
+        project.buildings = True
+        project.addresses = True
+    project.created = data['created'].split('T')[0]
+    db.session.add(project)
+    db.session.commit()
+    get_project_users(project)
+    if project.status == TMProject.Status.DOWNLOADING.value:
+        tmtasks = get_tasks(project, data['tasks']['features'])
+        if tmtasks:
+            link_tasks(tmtasks)
+            get_creation_date(project)
+            project.status = TMProject.Status.DOWNLOADED.value
             db.session.commit()
-            get_project_users(project)
-            if project.status == TMProject.Status.DOWNLOADING.value:
-                tmtasks = get_tasks(project, data['tasks']['features'])
-                if tmtasks:
-                    link_tasks(tmtasks)
-                    get_creation_date(project)
-                    project.status = TMProject.Status.DOWNLOADED.value
-                    db.session.commit()
-            else:
-                tmtasks = list(TMTask.query.filter_by(project_id = project.id).all())
-            update_tasks_statuses(project)
-            update_tasks_history(project, tmtasks)
-            db.session.commit()
-    return project
+    else:
+        tmtasks = list(TMTask.query.filter_by(project_id = project.id).all())
+    update_tasks_statuses(project)
+    update_tasks_history(project, tmtasks)
+    db.session.commit()
 
 def get_project_users(project):
     log = current_app.logger

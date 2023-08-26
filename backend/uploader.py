@@ -57,6 +57,8 @@ def end_upload():
     Province.count_tasks()
     db.session.commit()
     Municipality.Update.clean()
+    if current_app.config.get('ENV') == 'production':
+        tmtasks()
     return {}
 
 @uploader.route("/municipality/<mun_code>", methods=["PUT"])
