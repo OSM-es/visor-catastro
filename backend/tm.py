@@ -56,8 +56,13 @@ def is_cadastre(data):
     return get_url_mask(data) is not None
 
 def get_url(data):
-    m = re.search(r'http[^ ]+catastro[^ ]+\.osm\.gz', data['perTaskInstructions'])
+    m = re.search(r'http[^ =]+\.osm\.gz', data['perTaskInstructions'])
     if m: return m[0]
+    return ""
+
+def get_muncode(url):
+    m = re.search(r'/([0-9]{5})/', url)
+    if m: return m[1]
     return ""
 
 def get_url_mask(data):
@@ -65,7 +70,7 @@ def get_url_mask(data):
     if url: return url
     for info in data['projectInfoLocales']:
         url = get_url(info)
-        if url: return url
+        if url: return 'catastro' in url or 'cartobase' in url
     return None
 
 def is_buildings(data):
@@ -185,7 +190,8 @@ def get_tasks(project, pending_tasks):
             if not url:
                 log.info(f"TM#{project.id} no tiene tareas")
                 return []
-            tmtask.muncode, tmtask.filename = url.split('/')[-2:]
+            tmtask.muncode = get_muncode(url)
+            tmtask.filename = url.split('/')[-1]
             path = Path(tmtask.get_path())
             if path.exists():
                 tmtasks.append(tmtask)
