@@ -55,14 +55,14 @@
       </tr>
     </TableHead>
     <TableBody>
-      {#each items as item, i}
+      {#each items as item}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <!-- svelte-ignore a11y-mouse-events-have-key-events -->
         <tr
           on:click={() => goto('/explore/' + code(item, target))}
           on:mouseover={() => activeItem = data.find(t => code(t.properties, target) === item.muncode)}
           on:mouseout={() => activeItem = null}
-          class={trClass + (String(i) === active?.id ? ' !bg-amber-400' : '')}
+          class={trClass + (item.id === active?.properties.id ? ' !bg-amber-400' : '')}
         >
           <TableBodyCell {tdClass}>{code(item, target)}</TableBodyCell>
           <TableBodyCell {tdClass}>{item.name}</TableBodyCell>

@@ -81,30 +81,30 @@
       </tr>
     </TableHead>
   {:else}
-  <TableHead defaultRow={false} theadClass="sticky top-0 bg-neutral-100 dark:bg-neutral-700">
-    <tr class="text-xs uppercase"> 
-      <SortTableHeadCell thClass="p-2" key='type'>{$t('explore.type')}</SortTableHeadCell>
-      <SortTableHeadCell thClass="p-2" key='difficulty'>{$t('explore.diff')}</SortTableHeadCell>
-      <SortTableHeadCell thClass="p-2" key='bu_status'>{$t('explore.bu_status')}</SortTableHeadCell>
-      <SortTableHeadCell thClass="p-2" key='ad_status'>{$t('explore.ad_status')}</SortTableHeadCell>
-  </tr>
-    <tr>
-      <FilterTableHeadCell key='type' bind:value={type} items={taskTypes}></FilterTableHeadCell>
-      <FilterTableHeadCell key='difficulty' bind:value={difficulty} items={taskDificulties}></FilterTableHeadCell>
-      <FilterTableHeadCell key='status' bind:value={bu_status} items={taskStatuses}></FilterTableHeadCell>
-      <FilterTableHeadCell key='status' bind:value={ad_status} items={taskStatuses}></FilterTableHeadCell>
-    </tr>
-  </TableHead>
-{/if}
+    <TableHead defaultRow={false} theadClass="sticky top-0 bg-neutral-100 dark:bg-neutral-700">
+      <tr class="text-xs uppercase"> 
+        <SortTableHeadCell thClass="p-2" key='type'>{$t('explore.type')}</SortTableHeadCell>
+        <SortTableHeadCell thClass="p-2" key='difficulty'>{$t('explore.diff')}</SortTableHeadCell>
+        <SortTableHeadCell thClass="p-2" key='bu_status'>{$t('explore.bu_status')}</SortTableHeadCell>
+        <SortTableHeadCell thClass="p-2" key='ad_status'>{$t('explore.ad_status')}</SortTableHeadCell>
+      </tr>
+      <tr>
+        <FilterTableHeadCell key='type' bind:value={type} items={taskTypes}></FilterTableHeadCell>
+        <FilterTableHeadCell key='difficulty' bind:value={difficulty} items={taskDificulties}></FilterTableHeadCell>
+        <FilterTableHeadCell key='status' bind:value={bu_status} items={taskStatuses}></FilterTableHeadCell>
+        <FilterTableHeadCell key='status' bind:value={ad_status} items={taskStatuses}></FilterTableHeadCell>
+      </tr>
+    </TableHead>
+  {/if}
   <TableBody>
-    {#each items as task, i}
+    {#each items as task}
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       <!-- svelte-ignore a11y-mouse-events-have-key-events -->
       <tr
         on:click={() => goto('/explore/task/' + task.id)}
         on:mouseover={() => activeItem = tasks.find(t => t.properties.id === task.id)}
         on:mouseout={() => activeItem = null}
-        class={trClass + (String(i) === active?.id ? ' !bg-amber-400' : '')}
+        class={trClass + (task.id === active?.properties.id ? ' !bg-amber-400' : '')}
       >
         {#if munCount > 1 || muncode}
           <TableBodyCell {tdClass}>{task.muncode}</TableBodyCell>
