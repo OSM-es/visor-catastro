@@ -58,12 +58,18 @@ class TimeStats(Resource):
         vtasks = count_tasks(models.Task.Status.VALIDATED)(code)
         mtasks = count_tasks(models.Task.Status.MAPPED)(code) + vtasks
         average_mapping_time = 0
-        if mtasks > 0: average_mapping_time = mtime / mtasks
+        mt = models.TaskHistory.get_timed_tasks_count(
+            code, models.TaskHistory.Action.LOCKED_FOR_MAPPING
+        )
+        if mt > 0: average_mapping_time = mtime / mt
         vtime = models.TaskHistory.get_time(
             code, models.TaskHistory.Action.LOCKED_FOR_VALIDATION
         )
         average_validation_time = 0
-        if vtasks > 0: average_validation_time = vtime / vtasks
+        vt = models.TaskHistory.get_timed_tasks_count(
+            code, models.TaskHistory.Action.LOCKED_FOR_VALIDATION
+        )
+        if vt > 0: average_validation_time = vtime / vt
 
         time_to_finish_mapping = (total_tasks - mtasks) * average_mapping_time
         time_to_finish_validation = (total_tasks - vtasks) * average_validation_time

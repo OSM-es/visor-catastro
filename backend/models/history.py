@@ -133,6 +133,18 @@ class TaskHistory(TaskHistoryMixin, History):
         return total_mapping_time or 0
 
     @staticmethod
+    def get_timed_tasks_count(muncode, action):
+        return TaskHistory.query.join(
+            TaskHistory.task
+        ).filter(
+            models.Task.muncode == muncode,
+            TaskHistory.action == action.value,
+            TaskHistory.text != '',
+        ).distinct(
+            models.Task.id
+        ).count()
+
+    @staticmethod
     def get_progress_per_day(muncode, status):
         mun = models.Municipality.get_by_code(muncode)
         total = 0
