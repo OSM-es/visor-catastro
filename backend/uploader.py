@@ -31,11 +31,19 @@ def status():
 
 @uploader.cli.command('tm')
 @click.argument('id', required=False)
+@uploader.route("/tm/", methods=["PUT"])
 def tmtasks(id=None):
     if id:
         tm.get_project(id)
     else:
         tm.get_projects()
+
+
+@uploader.cli.command('migrate')
+@click.argument('id')
+def migrate(id):
+    tm.migrate(id)
+
 
 @uploader.route("/municipality/", methods=["PUT"])
 def end_upload():
@@ -57,8 +65,8 @@ def end_upload():
     Province.count_tasks()
     db.session.commit()
     Municipality.Update.clean()
-    if current_app.config.get('ENV') == 'production':
-        tmtasks()
+    if not current_app.config.get('DEBUG'):
+        tm.get_projects()
     return {}
 
 @uploader.route("/municipality/<mun_code>", methods=["PUT"])
@@ -204,7 +212,7 @@ def load_tasks(mun_code, tasks, src_date):
             else:
                 for feat in Diff.get_shapes(fn):
                     shape = feat['shape']
-                    if task_shape.contains(shape):
+                    if task_shape.intersects(shape) and task_shape.contains(shape):
                         demolished.pop(shape, None)
                         Diff.add_row(diff.df1, feat)
                         visited.add(shape)

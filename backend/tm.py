@@ -10,7 +10,7 @@ from geoalchemy2.shape import from_shape, to_shape
 from auth import passTutorial
 from config import Config
 from diff import Diff
-from models import db, Task, TaskHistory, TMTask, TMProject, OsmUser, User, Municipality
+from models import db, Task, TaskHistory, TMTask, TMProject, OsmUser, User, Municipality, Fixme
 from models.utils import get_by_area
 
 TM_API = Config.TM_API
@@ -78,6 +78,10 @@ def is_buildings(data):
 
 def is_addresses(data):
     return check(data, 'direcciones', 'addresses', 'shortDescription')
+
+def migrate(id):
+    project = TMProject.query.get(id)
+    migrate_tasks(project)
 
 def get_project(id):
     log = current_app.logger
@@ -199,9 +203,13 @@ def get_tasks(project, pending_tasks):
                 task_count += 1
             else:
                 path.parent.mkdir(parents=True, exist_ok=True)
-                resp = requests.get(url)
+                try:
+                    resp = requests.get(url)
+                except requests.RequestException as e:
+                    print(str(e))
+                    continue
                 if resp.ok:
-                    data = fetch(url)
+                    data = resp.content
                     if data:
                         if b'<node ' not in gzip.decompress(data):
                             log.info(f"Tarea TM#{project.id}-{id} {tmtask.filename} vacía")
@@ -302,4 +310,51 @@ def get_projects():
         for feat in data['mapResults']['features']:
             id = feat['properties']['projectId']
             get_project(id)
-    # projectStatuses=ARCHIVED
+    check_archived()
+    current_app.logger.info("Finaliza actualización TM")
+
+def check_archived():
+    url = TM_API + 'projects/?projectStatuses=ARCHIVED'
+    data = fetch(url)
+    archived = [feat['properties']['projectId'] for feat in data['mapResults']['features']]
+    for project in TMProject.query.filter_by(status=TMProject.Status.PUBLISHED.value).all():
+        if project.id in archived:
+            migrate_tasks(project)
+
+def migrate_tasks(project):
+    fixmes = 0
+    tmtasks = set()
+    for task in Task.query.join(Task.tmtasks).filter_by(project_id = project.id).all():
+        if task.both_ready():
+            continue
+        data = Diff.get_shapes(task.path())
+        diff = Diff()
+        Diff.shapes_to_dataframe(diff.df2, data)
+        task_shape = to_shape(task.geom).buffer(0.00005)
+        for tmtask in task.tmtasks:
+            tmtasks.add(tmtask)
+            for feat in Diff.get_shapes(tmtask.get_path()):
+                tm_shape = feat['shape']
+                if feat['properties']['type'] != 'node': 
+                    if tm_shape.is_empty: continue
+                    tm_shape = tm_shape.buffer(0.0000001)
+                if task_shape.intersects(tm_shape) and task_shape.contains(tm_shape):
+                    Diff.add_row(diff.df1, feat)
+        if len(diff.df1.index):
+            diff.get_fixmes()
+            fixmes += len(diff.df1.index)
+            load_migrate_fixmes(project, task, diff)
+            task.set_need_update()
+    while tmtasks:
+        t = tmtasks.pop()
+        db.session.delete(t)
+    project.status = TMProject.Status.MIGRATED.value
+    db.session.commit()
+    current_app.logger.info(f"Migración de TM #{project.id} {project.name} con {fixmes} anotaciones de actualización")
+
+def load_migrate_fixmes(project, task, diff):
+    for f in diff.fixmes:
+        f['geom'] = from_shape(f['geom'])
+        fixme = Fixme(**f)
+        fixme.src_date = project.created
+        task.fixmes.append(fixme)

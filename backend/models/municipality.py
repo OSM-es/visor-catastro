@@ -144,6 +144,7 @@ class Municipality(db.Model):
 
     def equal(self, shape):
         mun_shape = to_shape(self.geom)
+        if not shape.intersects(mun_shape): return False
         intersect = shape.intersection(mun_shape).area
         return (
             intersect / mun_shape.area > 0.9

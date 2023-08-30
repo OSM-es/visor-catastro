@@ -50,6 +50,7 @@ class Config:
         self.read_int('MAX_RETRIES', 10)
         self.read_int('RETRAY_DELAY', 3)
         self.read_int('MIN_FREEMEM', 80)
+        self.read_value('FLASK_DEBUG', 'true')
         # Estas no se corresponden a provincias
         self.read_list('PROV_SUBOFFICES', '51, 52, 53, 54')
 
@@ -110,8 +111,11 @@ def daily_check():
             time.sleep(config.retray_delay)
             retries += 1
     if not need_update:
+        if config.flask_debug != 'true':
+            url = config.uploader_url + 'tm/'
+            requests.put(url)
         print("No es necesario actualizar")
-    if not provincias and municipios:
+    elif not provincias and municipios:
         check_mun_diff(municipios)
         upload_provs(config.include_provs.copy())
         src_date = update(list(municipios.keys()))

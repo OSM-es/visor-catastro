@@ -43,7 +43,6 @@ services:
     env_file:
     - .env.${COMPOSE_PROFILES:-development}.local
     environment:
-      - FLASK_ENV=${COMPOSE_PROFILES:-development}
       - FLASK_APP=app:create_uploader()
       - FLASK_RUN_HOST=0.0.0.0
       - FLASK_RUN_PORT=5001

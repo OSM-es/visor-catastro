@@ -46,6 +46,8 @@ Tutorial #9:
 
 Tasking manager:
     ☐ Migración final de proyectos
+    ☐ Migración de callejeros
+    ☐ No actualizar tareas si tiene tareas TM
 
 Gestor de notificaciones #3:
     ☐ Implementar correo-e

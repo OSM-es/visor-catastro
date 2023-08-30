@@ -47,7 +47,7 @@ class Diff():
 
     @staticmethod
     def add_row(df, feature):
-        geom = feature['shape']
+        geom = feature['shape'].buffer(0)
         tags = feature['properties'].get('tags')
         if tags:
             df.loc[len(df)] = [tags, geom]
@@ -67,9 +67,10 @@ class Diff():
         match = None
         match_factor = 9E9
         for i, c in enumerate(candidates):
+            f = match_factor
             if geom.geom_type == 'Point' and c.geom_type == 'Point':
                 f = geom.distance(c)
-            else:
+            elif c.intersects(geom):
                 f = max(geom.area, c.area) - c.intersection(geom).area
             if f < match_factor:
                 match = i
